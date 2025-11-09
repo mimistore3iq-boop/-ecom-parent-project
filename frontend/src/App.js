@@ -91,6 +91,7 @@ function App() {
             <Route path="/product/:id" element={<ProductDetail user={user} />} />
             <Route path="/offers" element={<SpecialOffers user={user} />} />
             <Route path="/categories" element={<Categories user={user} />} />
+            <Route path="/categories/:id" element={<Categories user={user} />} />
             <Route
               path="/login"
               element={

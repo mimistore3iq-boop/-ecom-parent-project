@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { api, endpoints } from '../api';
 import { formatCurrency } from '../utils/currency';
 import Footer from '../components/Footer';
@@ -11,12 +11,17 @@ const Categories = ({ user }) => {
   const [loading, setLoading] = useState(true);
   const [cart, setCart] = useState([]);
   const navigate = useNavigate();
+  const { id: categoryIdParam } = useParams();
 
   useEffect(() => {
     console.log('Component mounted, fetching initial data');
     fetchCategories();
     loadCart();
-  }, []);
+    // If category ID is in URL, set it
+    if (categoryIdParam) {
+      setSelectedCategory(parseInt(categoryIdParam));
+    }
+  }, [categoryIdParam]);
   
   // Add a manual refresh button in the UI
   const ManualRefreshButton = () => (
