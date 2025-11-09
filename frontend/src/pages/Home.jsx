@@ -7,7 +7,6 @@ import Cart from '../components/CartNew';
 import Checkout from '../components/CheckoutNew';
 import TopBar from '../components/TopBar';
 import BannerSlider from '../components/BannerSlider';
-import CategorySlider from '../components/CategorySlider';
 import CategoryProductsSection from '../components/CategoryProductsSection';
 import { formatCurrency } from '../utils/currency';
 
@@ -389,32 +388,6 @@ const Home = ({ user, setUser }) => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
         <BannerSlider />
       </div>
-
-      {/* Banner Section */}
-      <div className="relative w-full h-64 overflow-hidden rounded-xl mx-4 mt-6 shadow-xl bg-gradient-to-r from-indigo-500 to-purple-600 flex items-center justify-center">
-        <div className="absolute inset-0 bg-black/20"></div>
-        <div className="relative z-10 text-center p-6 text-white">
-          <h2 className="text-3xl md:text-4xl font-bold mb-3">مرحباً في MIMI STORE</h2>
-          <p className="text-lg md:text-xl mb-4 max-w-2xl mx-auto">أفضل منتجات الإلكترونيات والهواتف الذكية في العراق</p>
-          <div className="flex flex-wrap justify-center gap-4 mt-6">
-            <Link to="/categories" className="bg-white text-indigo-600 px-6 py-2.5 rounded-lg font-medium hover:bg-indigo-50 transition-colors shadow-lg">
-              تصفح الفئات
-            </Link>
-            <Link to="/offers" className="bg-transparent border-2 border-white text-white px-6 py-2.5 rounded-lg font-medium hover:bg-white/10 transition-colors">
-              عروض خاصة
-            </Link>
-          </div>
-        </div>
-      </div>
-
-
-
-      {/* Categories Slider */}
-      <CategorySlider 
-        categories={categories}
-        selectedCategory={selectedCategory}
-        onCategorySelect={setSelectedCategory}
-      />
 
       {/* Products by Category Sections */}
       <div className="bg-gradient-to-b from-white to-gray-50">

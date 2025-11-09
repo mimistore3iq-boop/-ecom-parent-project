@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { formatCurrency } from '../utils/currency';
 
@@ -10,8 +10,6 @@ const CategoryProductsSection = ({
 }) => {
   const containerRef = useRef(null);
   const [currentPage, setCurrentPage] = useState(0);
-  const [touchStart, setTouchStart] = useState(0);
-  const [touchEnd, setTouchEnd] = useState(0);
 
   const ITEMS_PER_PAGE = 2;
   
@@ -20,30 +18,6 @@ const CategoryProductsSection = ({
     currentPage * ITEMS_PER_PAGE,
     (currentPage + 1) * ITEMS_PER_PAGE
   );
-
-  const handleTouchStart = (e) => {
-    setTouchStart(e.targetTouches[0].clientX);
-  };
-
-  const handleTouchEnd = (e) => {
-    setTouchEnd(e.changedTouches[0].clientX);
-    handleSwipe();
-  };
-
-  const handleSwipe = () => {
-    const swipeThreshold = 50;
-    const diff = touchStart - touchEnd;
-
-    if (Math.abs(diff) > swipeThreshold) {
-      if (diff > 0) {
-        // سحب من اليمين إلى اليسار = الصفحة التالية
-        goToNextPage();
-      } else {
-        // سحب من اليسار إلى اليمين = الصفحة السابقة
-        goToPreviousPage();
-      }
-    }
-  };
 
   const goToNextPage = () => {
     setCurrentPage((prev) => (prev + 1) % pages);
@@ -91,12 +65,7 @@ const CategoryProductsSection = ({
         </div>
 
         {/* Products Grid Container */}
-        <div
-          ref={containerRef}
-          onTouchStart={handleTouchStart}
-          onTouchEnd={handleTouchEnd}
-          className="touch-pan-y"
-        >
+        <div ref={containerRef}>
           {/* Products Grid (2 Columns) */}
           <div className="grid grid-cols-2 gap-3 md:gap-6 transition-opacity duration-500">
             {currentPageProducts.map((product) => (
@@ -105,11 +74,11 @@ const CategoryProductsSection = ({
                 className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 hover:scale-105 group cursor-pointer"
               >
                 {/* Product Image */}
-                <div className="relative h-32 sm:h-40 md:h-64 bg-gray-100 overflow-hidden">
+                <div className="relative h-48 sm:h-56 md:h-80 bg-gray-100 overflow-hidden">
                   <img
                     src={product.image || product.main_image_url}
                     alt={product.name}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                    className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-300"
                     onClick={() => onViewDetails(product)}
                   />
 
