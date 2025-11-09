@@ -29,10 +29,11 @@ const CategoryProductsSection = ({
   const scroll = (direction) => {
     if (sliderRef.current) {
       const scrollAmount = 320;
+      // For RTL (Arabic), scrolling right means positive direction
       const newScrollLeft =
-        direction === 'left'
-          ? sliderRef.current.scrollLeft - scrollAmount
-          : sliderRef.current.scrollLeft + scrollAmount;
+        direction === 'right'
+          ? sliderRef.current.scrollLeft + scrollAmount
+          : sliderRef.current.scrollLeft - scrollAmount;
 
       sliderRef.current.scrollTo({
         left: newScrollLeft,
