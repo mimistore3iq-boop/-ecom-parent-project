@@ -8,40 +8,55 @@ const CategoryProductsSection = ({
   onAddToCart,
   onViewDetails 
 }) => {
-  const sliderRef = useRef(null);
-  const [canScrollLeft, setCanScrollLeft] = useState(false);
-  const [canScrollRight, setCanScrollRight] = useState(true);
+  const containerRef = useRef(null);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [touchStart, setTouchStart] = useState(0);
+  const [touchEnd, setTouchEnd] = useState(0);
 
-  useEffect(() => {
-    updateScrollButtons();
-    window.addEventListener('resize', updateScrollButtons);
-    return () => window.removeEventListener('resize', updateScrollButtons);
-  }, [products]);
+  const ITEMS_PER_ROW = 2;
+  const ROWS_PER_PAGE = 2;
+  const ITEMS_PER_PAGE = ITEMS_PER_ROW * ROWS_PER_PAGE;
+  
+  const pages = Math.ceil(products.length / ITEMS_PER_PAGE);
+  const currentPageProducts = products.slice(
+    currentPage * ITEMS_PER_PAGE,
+    (currentPage + 1) * ITEMS_PER_PAGE
+  );
 
-  const updateScrollButtons = () => {
-    if (sliderRef.current) {
-      const { scrollLeft, scrollWidth, clientWidth } = sliderRef.current;
-      setCanScrollLeft(scrollLeft > 0);
-      setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 10);
+  const handleTouchStart = (e) => {
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchEnd = (e) => {
+    setTouchEnd(e.changedTouches[0].clientX);
+    handleSwipe();
+  };
+
+  const handleSwipe = () => {
+    const swipeThreshold = 50;
+    const diff = touchStart - touchEnd;
+
+    if (Math.abs(diff) > swipeThreshold) {
+      if (diff > 0) {
+        // سحب من اليمين إلى اليسار = الصفحة التالية
+        goToNextPage();
+      } else {
+        // سحب من اليسار إلى اليمين = الصفحة السابقة
+        goToPreviousPage();
+      }
     }
   };
 
-  const scroll = (direction) => {
-    if (sliderRef.current) {
-      const scrollAmount = 320;
-      // For RTL (Arabic), scrolling right means positive direction
-      const newScrollLeft =
-        direction === 'right'
-          ? sliderRef.current.scrollLeft + scrollAmount
-          : sliderRef.current.scrollLeft - scrollAmount;
+  const goToNextPage = () => {
+    setCurrentPage((prev) => (prev + 1) % pages);
+  };
 
-      sliderRef.current.scrollTo({
-        left: newScrollLeft,
-        behavior: 'smooth',
-      });
+  const goToPreviousPage = () => {
+    setCurrentPage((prev) => (prev - 1 + pages) % pages);
+  };
 
-      setTimeout(updateScrollButtons, 300);
-    }
+  const goToPage = (page) => {
+    setCurrentPage(page);
   };
 
   if (products.length === 0) {
@@ -77,47 +92,22 @@ const CategoryProductsSection = ({
           </Link>
         </div>
 
-        {/* Products Slider */}
-        <div className="relative group">
-          {/* Left Arrow */}
-          {canScrollLeft && (
-            <button
-              onClick={() => scroll('left')}
-              className="absolute -left-4 top-1/2 -translate-y-1/2 z-20 p-2 bg-white rounded-full shadow-lg hover:shadow-xl transition-all hover:scale-110 opacity-0 group-hover:opacity-100"
-            >
-              <svg
-                className="h-5 w-5 text-gray-600"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M15 19l-7-7 7-7"
-                />
-              </svg>
-            </button>
-          )}
-
-          {/* Products Container */}
-          <div
-            ref={sliderRef}
-            className="flex gap-4 overflow-x-auto scrollbar-hide pb-2"
-            style={{
-              scrollBehavior: 'smooth',
-              scrollbarWidth: 'none',
-              msOverflowStyle: 'none',
-            }}
-          >
-            {products.map((product) => (
+        {/* Products Grid Container */}
+        <div
+          ref={containerRef}
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
+          className="touch-pan-y"
+        >
+          {/* Products Grid (2x2) */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 transition-opacity duration-500">
+            {currentPageProducts.map((product) => (
               <div
                 key={product.id}
-                className="flex-shrink-0 w-64 md:w-72 bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 hover:scale-105 group cursor-pointer"
+                className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 hover:scale-105 group cursor-pointer"
               >
                 {/* Product Image */}
-                <div className="relative h-64 md:h-72 bg-gray-100 overflow-hidden">
+                <div className="relative h-48 md:h-64 bg-gray-100 overflow-hidden">
                   <img
                     src={product.image || product.main_image_url}
                     alt={product.name}
@@ -162,7 +152,7 @@ const CategoryProductsSection = ({
                 <div className="p-3 md:p-4 bg-gradient-to-b from-white to-gray-50 border-t border-gray-100">
                   {/* Product Name */}
                   <div className="flex justify-between items-start mb-2">
-                    <h4 className="font-bold text-sm md:text-base text-gray-800 line-clamp-3 flex-1 pr-2">
+                    <h4 className="font-bold text-sm md:text-base text-gray-800 line-clamp-2 flex-1 pr-2">
                       {product.name}
                     </h4>
                     {product.brand && (
@@ -220,35 +210,25 @@ const CategoryProductsSection = ({
             ))}
           </div>
 
-          {/* Right Arrow */}
-          {canScrollRight && (
-            <button
-              onClick={() => scroll('right')}
-              className="absolute -right-4 top-1/2 -translate-y-1/2 z-20 p-2 bg-white rounded-full shadow-lg hover:shadow-xl transition-all hover:scale-110 opacity-0 group-hover:opacity-100"
-            >
-              <svg
-                className="h-5 w-5 text-gray-600"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 5l7 7-7 7"
+          {/* Pagination Dots */}
+          {pages > 1 && (
+            <div className="flex justify-center items-center gap-2 mt-8">
+              {Array.from({ length: pages }).map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => goToPage(index)}
+                  className={`h-2.5 rounded-full transition-all duration-300 ${
+                    index === currentPage
+                      ? 'bg-indigo-600 w-8'
+                      : 'bg-gray-300 w-2.5 hover:bg-gray-400'
+                  }`}
+                  aria-label={`Go to page ${index + 1}`}
                 />
-              </svg>
-            </button>
+              ))}
+            </div>
           )}
         </div>
       </div>
-
-      <style jsx>{`
-        .scrollbar-hide::-webkit-scrollbar {
-          display: none;
-        }
-      `}</style>
     </section>
   );
 };
