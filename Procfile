@@ -1,1 +1,0 @@
-web: gunicorn backend.ecom_project.wsgi:application

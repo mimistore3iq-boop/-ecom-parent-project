@@ -391,7 +391,7 @@ const Home = ({ user, setUser }) => {
       </div>
 
       {/* Category Slider */}
-      <CategorySlider categories={categories} onSelectCategory={setSelectedCategory} />
+      <CategorySlider categories={categories} selectedCategory={selectedCategory} onCategorySelect={setSelectedCategory} />
 
       {/* Products by Category Sections */}
       <div className="bg-gradient-to-b from-white to-gray-50">

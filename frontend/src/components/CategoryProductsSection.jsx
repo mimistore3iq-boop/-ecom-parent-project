@@ -107,11 +107,18 @@ const CategoryProductsSection = ({
                     onClick={() => onViewDetails(product)}
                   />
 
-                  {/* Stock Indicator - Show Number Only */}
+                  {/* Discount Badge - Top Left */}
+                  {product.discount_percentage > 0 && (
+                    <div className="absolute top-2 sm:top-3 left-2 sm:left-3 bg-gradient-to-br from-red-500 to-red-600 text-white w-9 h-9 sm:w-11 sm:h-11 rounded-full text-xs sm:text-sm font-bold shadow-lg flex items-center justify-center hover:shadow-xl transition-shadow">
+                      <span>{product.discount_percentage}%</span>
+                    </div>
+                  )}
+
+                  {/* Stock Indicator - Top Right */}
                   {product.stock > 0 && product.stock <= 5 && (
-                    <div className="absolute bottom-2 right-2 sm:bottom-3 sm:right-3 bg-orange-500 text-white px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-xs sm:text-sm font-bold shadow-lg flex items-center gap-1.5 hover:bg-orange-600 transition-colors">
+                    <div className="absolute top-2 sm:top-3 right-2 sm:right-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-xs sm:text-sm font-bold shadow-lg flex items-center gap-1 hover:shadow-xl transition-shadow">
                       <svg
-                        className="h-4 w-4 sm:h-5 sm:w-5"
+                        className="h-3.5 w-3.5 sm:h-4 sm:w-4"
                         fill="currentColor"
                         viewBox="0 0 24 24"
                       >
