@@ -7,6 +7,8 @@ import Cart from '../components/CartNew';
 import Checkout from '../components/CheckoutNew';
 import TopBar from '../components/TopBar';
 import BannerSlider from '../components/BannerSlider';
+import CategorySlider from '../components/CategorySlider';
+import CategoryProductsSection from '../components/CategoryProductsSection';
 import { formatCurrency } from '../utils/currency';
 
 const Home = ({ user, setUser }) => {
@@ -214,6 +216,18 @@ const Home = ({ user, setUser }) => {
     return matchesCategory && matchesSearch && matchesHomepage;
   });
 
+  // Helper function to get products for a specific category
+  const getProductsForCategory = (categoryId) => {
+    return products.filter(product => {
+      const matchesCategory = product.category === categoryId;
+      const isActive = product.is_active !== false;
+      const matchesSearch = searchTerm === '' ||
+        (product.name && product.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (product.description && product.description.toLowerCase().includes(searchTerm.toLowerCase()));
+      return matchesCategory && isActive && matchesSearch;
+    });
+  };
+
   const getCartItemCount = () => {
     return cart.reduce((total, item) => total + item.quantity, 0);
   };
@@ -395,75 +409,38 @@ const Home = ({ user, setUser }) => {
 
 
 
-      {/* Categories Filter */}
-      <section className="py-8 bg-white border-b border-gray-100 mt-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-wrap justify-center gap-3 md:gap-4">
-            <button
-              onClick={() => setSelectedCategory('')}
-              className={`px-5 py-2.5 rounded-full font-medium transition-all ${selectedCategory === '' ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'} flex items-center`}
-            >
-              <svg className="h-4 w-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-              <span className="mr-2">جميع المنتجات</span>
-            </button>
-            {categories.map(category => (
-              <button
-                key={category.id}
-                onClick={() => setSelectedCategory(category.id)}
-                className={`px-5 py-2.5 rounded-full font-medium transition-all ${selectedCategory === category.id ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'} flex items-center`}
-              >
-                <svg className="h-4 w-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-                <span className="mr-2">{category.name}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* Categories Slider */}
+      <CategorySlider 
+        categories={categories}
+        selectedCategory={selectedCategory}
+        onCategorySelect={setSelectedCategory}
+      />
 
-      {/* Products Grid */}
-      <section className="py-12 bg-gradient-to-b from-white to-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h3 className="text-3xl md:text-4xl font-bold mb-4 text-gray-800 inline-block relative">
-              منتجاتنا
-              <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-16 h-1 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full"></div>
-            </h3>
-            <p className="text-gray-600 max-w-2xl mx-auto">اكتشف أحدث المنتجات الإلكترونية بأفضل الأسعار وجودة في العراق</p>
-          </div>
+      {/* Products by Category Sections */}
+      <div className="bg-gradient-to-b from-white to-gray-50">
+        {selectedCategory ? (
+          // If a specific category is selected, show grid view with filter
+          <section className="py-12">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="text-center mb-12">
+                <h3 className="text-3xl md:text-4xl font-bold mb-4 text-gray-800 inline-block relative">
+                  {categories.find(c => c.id === selectedCategory)?.name || 'منتجاتنا'}
+                  <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-16 h-1 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full"></div>
+                </h3>
+              </div>
 
-          {filteredProducts.length === 0 ? (
-            <div className="text-center py-16 fade-in">
-              <div className="inline-block p-6 rounded-full bg-gray-100 mb-6">
-                <svg className="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-                </svg>
-              </div>
-              <h3 className="text-2xl font-bold text-gray-700 mb-3">لا توجد منتجات</h3>
-              <p className="text-gray-600 max-w-md mx-auto mb-6">لم يتم العثور على منتجات تطابق بحثك. جرب تعديل كلمات البحث أو تصفح جميع الأقسام.</p>
-              <div className="flex flex-wrap justify-center gap-4">
-                <button 
-                  onClick={() => {
-                    setSelectedCategory('');
-                    setSearchTerm('');
-                  }} 
-                  className="btn-primary"
-                >
-                  عرض جميع المنتجات
-                </button>
-                <button 
-                  onClick={() => setSearchTerm('')} 
-                  className="btn-secondary"
-                >
-                  إعادة البحث
-                </button>
-              </div>
-            </div>
-          ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-8">
+              {filteredProducts.length === 0 ? (
+                <div className="text-center py-16 fade-in">
+                  <div className="inline-block p-6 rounded-full bg-gray-100 mb-6">
+                    <svg className="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                    </svg>
+                  </div>
+                  <h3 className="text-2xl font-bold text-gray-700 mb-3">لا توجد منتجات</h3>
+                  <p className="text-gray-600 max-w-md mx-auto mb-6">لم يتم العثور على منتجات في هذا القسم</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-8">
               {filteredProducts.map((product, index) => (
                 <div 
                   key={product.id} 
@@ -594,10 +571,38 @@ const Home = ({ user, setUser }) => {
                   </div>
                 </div>
               ))}
+                </div>
+              )}
             </div>
-          )}
-        </div>
-      </section>
+          </section>
+        ) : (
+          // If no category selected, show carousel view of all categories with their products
+          <>
+            <section className="py-8">
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="text-center mb-8">
+                  <h3 className="text-3xl md:text-4xl font-bold mb-4 text-gray-800">منتجاتنا</h3>
+                  <p className="text-gray-600">اكتشف أحدث المنتجات الإلكترونية بأفضل الأسعار وجودة في العراق</p>
+                </div>
+              </div>
+            </section>
+            
+            {/* Category Product Sliders */}
+            {categories.map(category => {
+              const categoryProducts = getProductsForCategory(category.id);
+              return (
+                <CategoryProductsSection
+                  key={category.id}
+                  category={category}
+                  products={categoryProducts}
+                  onAddToCart={addToCart}
+                  onViewDetails={(product) => navigate(`/product/${product.id}`)}
+                />
+              );
+            })}
+          </>
+        )}
+      </div>
 
       {/* Footer */}
       <footer className="bg-gray-800 text-white py-12">

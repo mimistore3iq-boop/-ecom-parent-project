@@ -98,18 +98,19 @@ def product_detail(request, pk):
 @permission_classes([AllowAny])
 def category_list(request):
     """
-    قائمة جميع الفئات مرتبة حسب display_order
+    قائمة الفئات الرئيسية (الأب فقط) مع فئاتها الفرعية مرتبة حسب display_order
     """
-    # Return all categories ordered by display_order
-    categories = Category.objects.all().order_by('display_order', 'name')
-    print(f"Found {categories.count()} total categories")
+    # Return only parent categories (where parent is None), ordered by display_order
+    categories = Category.objects.filter(parent__isnull=True).order_by('display_order', 'name')
+    print(f"Found {categories.count()} parent categories")
     
     # Log categories for debugging
     for category in categories:
-        print(f"Category: {category.name}, ID: {category.id}, Active: {category.is_active}, Display Order: {category.display_order}")
+        children_count = category.children.count()
+        print(f"Category: {category.name}, ID: {category.id}, Active: {category.is_active}, Display Order: {category.display_order}, Children: {children_count}")
         
     serializer = CategorySerializer(categories, many=True)
-    print(f"Returning {len(serializer.data)} categories")
+    print(f"Returning {len(serializer.data)} categories with their subcategories")
     return Response(serializer.data)
 
 @api_view(['GET'])

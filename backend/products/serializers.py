@@ -7,9 +7,17 @@ import logging
 logger = logging.getLogger(__name__)
 
 class CategorySerializer(serializers.ModelSerializer):
+    children = serializers.SerializerMethodField()
+    
     class Meta:
         model = Category
         fields = '__all__'
+    
+    def get_children(self, obj):
+        """Get subcategories for this category"""
+        if obj.children.exists():
+            return CategorySerializer(obj.children.all(), many=True).data
+        return []
 
 class ProductListSerializer(serializers.ModelSerializer):
     """A simplified serializer for product lists"""
