@@ -12,6 +12,8 @@ const CategoryProductsSection = ({
   const [currentPage, setCurrentPage] = useState(0);
   const [touchStart, setTouchStart] = useState(0);
   const [touchEnd, setTouchEnd] = useState(0);
+  const [mouseStart, setMouseStart] = useState(0);
+  const [isMouseDown, setIsMouseDown] = useState(false);
 
   const ITEMS_PER_PAGE = 2;
   
@@ -38,22 +40,51 @@ const CategoryProductsSection = ({
   };
 
   const handleTouchEnd = (e) => {
-    setTouchEnd(e.changedTouches[0].clientX);
-    handleSwipe();
-  };
-
-  const handleSwipe = () => {
-    if (!touchStart || !touchEnd) return;
-    const distance = touchStart - touchEnd;
+    const endX = e.changedTouches[0].clientX;
+    
+    if (!touchStart || !endX) return;
+    
+    const distance = touchStart - endX;
     const isLeftSwipe = distance > 50;
     const isRightSwipe = distance < -50;
 
     if (isLeftSwipe) {
       goToNextPage();
-    }
-    if (isRightSwipe) {
+    } else if (isRightSwipe) {
       goToPreviousPage();
     }
+    
+    // Reset values
+    setTouchStart(0);
+    setTouchEnd(0);
+  };
+
+  // Mouse drag support
+  const handleMouseDown = (e) => {
+    setMouseStart(e.clientX);
+    setIsMouseDown(true);
+  };
+
+  const handleMouseMove = (e) => {
+    if (!isMouseDown) return;
+  };
+
+  const handleMouseUp = (e) => {
+    if (!isMouseDown || !mouseStart) return;
+    
+    const distance = mouseStart - e.clientX;
+    const isLeftDrag = distance > 50;
+    const isRightDrag = distance < -50;
+
+    if (isLeftDrag) {
+      goToNextPage();
+    } else if (isRightDrag) {
+      goToPreviousPage();
+    }
+    
+    // Reset values
+    setIsMouseDown(false);
+    setMouseStart(0);
   };
 
   if (products.length === 0) {
@@ -90,9 +121,18 @@ const CategoryProductsSection = ({
         </div>
 
         {/* Products Grid Container */}
-        <div ref={containerRef} onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
+        <div 
+          ref={containerRef} 
+          onTouchStart={handleTouchStart} 
+          onTouchEnd={handleTouchEnd}
+          onMouseDown={handleMouseDown}
+          onMouseUp={handleMouseUp}
+          onMouseMove={handleMouseMove}
+          onMouseLeave={handleMouseUp}
+          className="select-none"
+        >
           {/* Products Grid (2 Columns) */}
-          <div className="grid grid-cols-2 gap-3 md:gap-6 transition-opacity duration-500">
+          <div className={`grid grid-cols-2 gap-3 md:gap-6 transition-opacity duration-500 ${isMouseDown ? 'cursor-grabbing' : 'cursor-grab'}`}>
             {currentPageProducts.map((product) => (
               <div
                 key={product.id}
