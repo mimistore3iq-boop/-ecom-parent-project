@@ -8,12 +8,10 @@ const CategoryProductsSection = ({
   onAddToCart,
   onViewDetails 
 }) => {
-  const containerRef = useRef(null);
+  const gridRef = useRef(null);
   const [currentPage, setCurrentPage] = useState(0);
-  const [touchStart, setTouchStart] = useState(0);
-  const [touchEnd, setTouchEnd] = useState(0);
-  const [mouseStart, setMouseStart] = useState(0);
-  const [isMouseDown, setIsMouseDown] = useState(false);
+  const [touchStart, setTouchStart] = useState(null);
+  const [dragStart, setDragStart] = useState(null);
 
   const ITEMS_PER_PAGE = 2;
   
@@ -24,67 +22,66 @@ const CategoryProductsSection = ({
   );
 
   const goToNextPage = () => {
-    setCurrentPage((prev) => (prev + 1) % pages);
+    if (currentPage < pages - 1) {
+      setCurrentPage((prev) => prev + 1);
+    }
   };
 
   const goToPreviousPage = () => {
-    setCurrentPage((prev) => (prev - 1 + pages) % pages);
+    if (currentPage > 0) {
+      setCurrentPage((prev) => prev - 1);
+    }
   };
 
   const goToPage = (page) => {
     setCurrentPage(page);
   };
 
+  // Handle Touch Start
   const handleTouchStart = (e) => {
-    setTouchStart(e.targetTouches[0].clientX);
+    setTouchStart(e.touches[0].clientX);
   };
 
+  // Handle Touch End
   const handleTouchEnd = (e) => {
-    const endX = e.changedTouches[0].clientX;
+    if (!touchStart) return;
     
-    if (!touchStart || !endX) return;
-    
-    const distance = touchStart - endX;
-    const isLeftSwipe = distance > 50;
-    const isRightSwipe = distance < -50;
+    const touchEnd = e.changedTouches[0].clientX;
+    const distance = touchStart - touchEnd;
+    const SWIPE_THRESHOLD = 50;
 
-    if (isLeftSwipe) {
+    if (distance > SWIPE_THRESHOLD) {
+      // Swiped left - next page
       goToNextPage();
-    } else if (isRightSwipe) {
+    } else if (distance < -SWIPE_THRESHOLD) {
+      // Swiped right - previous page
       goToPreviousPage();
     }
     
-    // Reset values
-    setTouchStart(0);
-    setTouchEnd(0);
+    setTouchStart(null);
   };
 
-  // Mouse drag support
+  // Handle Mouse Down
   const handleMouseDown = (e) => {
-    setMouseStart(e.clientX);
-    setIsMouseDown(true);
+    setDragStart(e.clientX);
   };
 
-  const handleMouseMove = (e) => {
-    if (!isMouseDown) return;
-  };
-
+  // Handle Mouse Up
   const handleMouseUp = (e) => {
-    if (!isMouseDown || !mouseStart) return;
+    if (!dragStart) return;
     
-    const distance = mouseStart - e.clientX;
-    const isLeftDrag = distance > 50;
-    const isRightDrag = distance < -50;
+    const distance = dragStart - e.clientX;
+    const DRAG_THRESHOLD = 50;
 
-    if (isLeftDrag) {
+    if (distance > DRAG_THRESHOLD) {
+      // Dragged left - next page
       goToNextPage();
-    } else if (isRightDrag) {
+    } else if (distance < -DRAG_THRESHOLD) {
+      // Dragged right - previous page
       goToPreviousPage();
     }
     
-    // Reset values
-    setIsMouseDown(false);
-    setMouseStart(0);
+    setDragStart(null);
   };
 
   if (products.length === 0) {
@@ -121,22 +118,23 @@ const CategoryProductsSection = ({
         </div>
 
         {/* Products Grid Container */}
-        <div 
-          ref={containerRef} 
-          onTouchStart={handleTouchStart} 
-          onTouchEnd={handleTouchEnd}
-          onMouseDown={handleMouseDown}
-          onMouseUp={handleMouseUp}
-          onMouseMove={handleMouseMove}
-          onMouseLeave={handleMouseUp}
-          className="select-none"
-        >
+        <div>
           {/* Products Grid (2 Columns) */}
-          <div className={`grid grid-cols-2 gap-3 md:gap-6 transition-opacity duration-500 ${isMouseDown ? 'cursor-grabbing' : 'cursor-grab'}`}>
-            {currentPageProducts.map((product) => (
+          <div 
+            ref={gridRef}
+            onTouchStart={handleTouchStart} 
+            onTouchEnd={handleTouchEnd}
+            onMouseDown={handleMouseDown}
+            onMouseUp={handleMouseUp}
+            onMouseLeave={handleMouseUp}
+            className={`grid grid-cols-2 gap-3 md:gap-6 transition-all duration-300 select-none ${dragStart ? 'cursor-grabbing opacity-75' : 'cursor-grab'}`}
+          >
+            {currentPageProducts.map((product, idx) => (
               <div
                 key={product.id}
-                className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 hover:scale-105 group cursor-pointer"
+                className={`bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-500 hover:scale-105 group cursor-pointer animate-fadeIn ${
+                  idx === 0 ? 'animation-delay-0' : 'animation-delay-100'
+                }`}
               >
                 {/* Product Image */}
                 <div className="relative h-48 sm:h-56 md:h-80 bg-gray-100 overflow-hidden">
@@ -264,6 +262,31 @@ const CategoryProductsSection = ({
           )}
         </div>
       </div>
+
+      <style jsx>{`
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+            transform: translateY(10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        :global(.animate-fadeIn) {
+          animation: fadeIn 0.5s ease-out forwards;
+        }
+
+        :global(.animation-delay-0) {
+          animation-delay: 0ms;
+        }
+
+        :global(.animation-delay-100) {
+          animation-delay: 100ms;
+        }
+      `}</style>
     </section>
   );
 };
