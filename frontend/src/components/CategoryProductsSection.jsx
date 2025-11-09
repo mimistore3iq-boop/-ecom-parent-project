@@ -13,9 +13,7 @@ const CategoryProductsSection = ({
   const [touchStart, setTouchStart] = useState(0);
   const [touchEnd, setTouchEnd] = useState(0);
 
-  const ITEMS_PER_ROW = 2;
-  const ROWS_PER_PAGE = 2;
-  const ITEMS_PER_PAGE = ITEMS_PER_ROW * ROWS_PER_PAGE;
+  const ITEMS_PER_PAGE = 2;
   
   const pages = Math.ceil(products.length / ITEMS_PER_PAGE);
   const currentPageProducts = products.slice(
@@ -99,15 +97,15 @@ const CategoryProductsSection = ({
           onTouchEnd={handleTouchEnd}
           className="touch-pan-y"
         >
-          {/* Products Grid (2x2) */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 transition-opacity duration-500">
+          {/* Products Grid (2 Columns) */}
+          <div className="grid grid-cols-2 gap-3 md:gap-6 transition-opacity duration-500">
             {currentPageProducts.map((product) => (
               <div
                 key={product.id}
                 className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 hover:scale-105 group cursor-pointer"
               >
                 {/* Product Image */}
-                <div className="relative h-48 md:h-64 bg-gray-100 overflow-hidden">
+                <div className="relative h-32 sm:h-40 md:h-64 bg-gray-100 overflow-hidden">
                   <img
                     src={product.image || product.main_image_url}
                     alt={product.name}
@@ -117,9 +115,9 @@ const CategoryProductsSection = ({
 
                   {/* Stock Indicator */}
                   {product.stock > 0 && product.stock <= 5 && (
-                    <div className="absolute top-3 right-3 bg-orange-500 text-white px-3 py-1 rounded-full text-xs font-medium shadow-lg flex items-center gap-1">
+                    <div className="absolute top-1 sm:top-2 md:top-3 right-1 sm:right-2 md:right-3 bg-orange-500 text-white px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-xs font-medium shadow-lg flex items-center gap-1">
                       <svg
-                        className="h-3 w-3"
+                        className="h-2.5 w-2.5 sm:h-3 sm:w-3"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -131,7 +129,7 @@ const CategoryProductsSection = ({
                           d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
                         />
                       </svg>
-                      متبقي {product.stock}
+                      <span className="hidden sm:inline">متبقي</span> {product.stock}
                     </div>
                   )}
 
@@ -149,24 +147,24 @@ const CategoryProductsSection = ({
                 </div>
 
                 {/* Product Info */}
-                <div className="p-3 md:p-4 bg-gradient-to-b from-white to-gray-50 border-t border-gray-100">
+                <div className="p-2 sm:p-3 md:p-4 bg-gradient-to-b from-white to-gray-50 border-t border-gray-100">
                   {/* Product Name */}
-                  <div className="flex justify-between items-start mb-2">
-                    <h4 className="font-bold text-sm md:text-base text-gray-800 line-clamp-2 flex-1 pr-2">
+                  <div className="flex justify-between items-start mb-1 sm:mb-2">
+                    <h4 className="font-bold text-xs sm:text-sm md:text-base text-gray-800 line-clamp-2 flex-1 pr-1">
                       {product.name}
                     </h4>
                     {product.brand && (
-                      <span className="text-xs text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded-full whitespace-nowrap ml-2">
+                      <span className="text-xs text-gray-500 bg-gray-100 px-1 py-0.5 rounded-full whitespace-nowrap ml-1">
                         {product.brand}
                       </span>
                     )}
                   </div>
 
                   {/* Price */}
-                  <div className="flex items-center justify-between mb-3 pb-2 border-b border-gray-100">
+                  <div className="flex items-center justify-between mb-2 pb-1 sm:pb-2 border-b border-gray-100">
                     {product.discount_percentage > 0 ? (
-                      <div className="flex items-center space-x-2 space-x-reverse flex-1">
-                        <span className="text-base md:text-lg font-bold text-indigo-600">
+                      <div className="flex items-center space-x-1 sm:space-x-2 space-x-reverse flex-1">
+                        <span className="text-xs sm:text-sm md:text-lg font-bold text-indigo-600">
                           {formatCurrency(product.discounted_price)}
                         </span>
                         <span className="text-xs text-gray-500 line-through">
@@ -174,7 +172,7 @@ const CategoryProductsSection = ({
                         </span>
                       </div>
                     ) : (
-                      <span className="text-base md:text-lg font-bold text-gray-800">
+                      <span className="text-xs sm:text-sm md:text-lg font-bold text-gray-800">
                         {formatCurrency(product.price)}
                       </span>
                     )}
@@ -184,14 +182,14 @@ const CategoryProductsSection = ({
                   <button
                     onClick={() => onAddToCart(product)}
                     disabled={product.stock === 0}
-                    className={`w-full py-2.5 rounded-lg font-semibold transition-all text-sm ${
+                    className={`w-full py-1.5 sm:py-2 md:py-2.5 rounded-lg font-semibold transition-all text-xs sm:text-sm ${
                       product.stock > 0
                         ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:shadow-lg active:scale-95'
                         : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                     }`}
                   >
                     <svg
-                      className="h-4 w-4 inline-block ml-1"
+                      className="h-3 w-3 sm:h-4 sm:w-4 inline-block ml-1"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -212,17 +210,17 @@ const CategoryProductsSection = ({
 
           {/* Pagination Dots */}
           {pages > 1 && (
-            <div className="flex justify-center items-center gap-2 mt-8">
+            <div className="flex justify-center items-center gap-1.5 mt-6 sm:mt-8">
               {Array.from({ length: pages }).map((_, index) => (
                 <button
                   key={index}
                   onClick={() => goToPage(index)}
-                  className={`h-2.5 rounded-full transition-all duration-300 ${
+                  className={`rounded-full transition-all duration-300 ${
                     index === currentPage
-                      ? 'bg-indigo-600 w-8'
-                      : 'bg-gray-300 w-2.5 hover:bg-gray-400'
+                      ? 'bg-indigo-600 w-8 h-2'
+                      : 'bg-gray-300 w-2 h-2 hover:bg-gray-400'
                   }`}
-                  aria-label={`Go to page ${index + 1}`}
+                  aria-label={`انتقل إلى الصفحة ${index + 1}`}
                 />
               ))}
             </div>
