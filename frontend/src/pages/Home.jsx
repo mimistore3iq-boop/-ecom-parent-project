@@ -7,6 +7,7 @@ import Cart from '../components/CartNew';
 import Checkout from '../components/CheckoutNew';
 import TopBar from '../components/TopBar';
 import BannerSlider from '../components/BannerSlider';
+import CategorySlider from '../components/CategorySlider';
 import CategoryProductsSection from '../components/CategoryProductsSection';
 import { formatCurrency } from '../utils/currency';
 
@@ -388,6 +389,9 @@ const Home = ({ user, setUser }) => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
         <BannerSlider />
       </div>
+
+      {/* Category Slider */}
+      <CategorySlider categories={categories} onSelectCategory={setSelectedCategory} />
 
       {/* Products by Category Sections */}
       <div className="bg-gradient-to-b from-white to-gray-50">

@@ -10,6 +10,8 @@ const CategoryProductsSection = ({
 }) => {
   const containerRef = useRef(null);
   const [currentPage, setCurrentPage] = useState(0);
+  const [touchStart, setTouchStart] = useState(0);
+  const [touchEnd, setTouchEnd] = useState(0);
 
   const ITEMS_PER_PAGE = 2;
   
@@ -29,6 +31,29 @@ const CategoryProductsSection = ({
 
   const goToPage = (page) => {
     setCurrentPage(page);
+  };
+
+  const handleTouchStart = (e) => {
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchEnd = (e) => {
+    setTouchEnd(e.changedTouches[0].clientX);
+    handleSwipe();
+  };
+
+  const handleSwipe = () => {
+    if (!touchStart || !touchEnd) return;
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > 50;
+    const isRightSwipe = distance < -50;
+
+    if (isLeftSwipe) {
+      goToNextPage();
+    }
+    if (isRightSwipe) {
+      goToPreviousPage();
+    }
   };
 
   if (products.length === 0) {
@@ -65,7 +90,7 @@ const CategoryProductsSection = ({
         </div>
 
         {/* Products Grid Container */}
-        <div ref={containerRef}>
+        <div ref={containerRef} onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
           {/* Products Grid (2 Columns) */}
           <div className="grid grid-cols-2 gap-3 md:gap-6 transition-opacity duration-500">
             {currentPageProducts.map((product) => (
@@ -82,23 +107,19 @@ const CategoryProductsSection = ({
                     onClick={() => onViewDetails(product)}
                   />
 
-                  {/* Stock Indicator */}
+                  {/* Stock Indicator - Show Number Only */}
                   {product.stock > 0 && product.stock <= 5 && (
-                    <div className="absolute top-1 sm:top-2 md:top-3 right-1 sm:right-2 md:right-3 bg-orange-500 text-white px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-xs font-medium shadow-lg flex items-center gap-1">
+                    <div className="absolute bottom-2 right-2 sm:bottom-3 sm:right-3 bg-orange-500 text-white px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-xs sm:text-sm font-bold shadow-lg flex items-center gap-1.5 hover:bg-orange-600 transition-colors">
                       <svg
-                        className="h-2.5 w-2.5 sm:h-3 sm:w-3"
-                        fill="none"
-                        stroke="currentColor"
+                        className="h-4 w-4 sm:h-5 sm:w-5"
+                        fill="currentColor"
                         viewBox="0 0 24 24"
                       >
                         <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                          d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z"
                         />
                       </svg>
-                      <span className="hidden sm:inline">متبقي</span> {product.stock}
+                      <span>{product.stock}</span>
                     </div>
                   )}
 
