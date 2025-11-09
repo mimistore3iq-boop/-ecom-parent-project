@@ -38,7 +38,7 @@ const CategorySlider = ({ categories, selectedCategory, onCategorySelect }) => {
   };
 
   return (
-    <section className="py-8 bg-white border-b border-gray-100 sticky top-16 z-30">
+    <section className="py-8 bg-white border-b border-gray-100 sticky top-14 z-30">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Categories Slider */}
         <div className="relative group">
