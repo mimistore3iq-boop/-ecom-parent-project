@@ -93,14 +93,9 @@ const CategoryProductsSection = ({
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Category Header */}
         <div className="flex items-center justify-between mb-6 pr-2">
-          <div>
-            <h3 className="text-2xl md:text-3xl font-bold text-gray-800">
-              {category.name}
-            </h3>
-            {category.description && (
-              <p className="text-gray-600 text-sm mt-1">{category.description}</p>
-            )}
-          </div>
+          <h3 className="text-2xl md:text-3xl font-bold text-gray-800">
+            {category.name}
+          </h3>
           <Link
             to={`/categories/${category.id}`}
             className="text-indigo-600 hover:text-indigo-700 font-medium text-sm md:text-base flex items-center gap-2 whitespace-nowrap"
@@ -127,7 +122,7 @@ const CategoryProductsSection = ({
             onMouseDown={handleMouseDown}
             onMouseUp={handleMouseUp}
             onMouseLeave={handleMouseUp}
-            className={`grid grid-cols-2 gap-3 md:gap-6 transition-all duration-300 select-none ${dragStart ? 'cursor-grabbing opacity-75' : 'cursor-grab'}`}
+            className={`grid grid-cols-2 gap-3 md:gap-6 transition-all duration-500 select-none ${dragStart ? 'cursor-grabbing opacity-75' : 'cursor-grab'}`}
           >
             {currentPageProducts.map((product, idx) => (
               <div
@@ -214,8 +209,8 @@ const CategoryProductsSection = ({
                   </div>
 
                   {/* Action Buttons */}
-                  <div className="flex gap-2">
-                    {/* View Details Button */}
+                  <div className="flex gap-2 flex-row-reverse">
+                    {/* View Details Button - Left */}
                     <button
                       onClick={() => onViewDetails(product)}
                       className="flex-1 py-1.5 sm:py-2 md:py-2.5 rounded-lg font-semibold transition-all text-xs sm:text-sm bg-gray-100 text-gray-800 hover:bg-gray-200 active:scale-95 border border-gray-300"
@@ -242,7 +237,7 @@ const CategoryProductsSection = ({
                       عرض
                     </button>
 
-                    {/* Add to Cart Button */}
+                    {/* Add to Cart Button - Right */}
                     <button
                       onClick={() => onAddToCart(product)}
                       disabled={product.stock === 0}
