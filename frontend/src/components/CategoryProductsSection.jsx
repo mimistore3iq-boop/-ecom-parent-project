@@ -12,6 +12,7 @@ const CategoryProductsSection = ({
   const [currentPage, setCurrentPage] = useState(0);
   const [touchStart, setTouchStart] = useState(null);
   const [dragStart, setDragStart] = useState(null);
+  const [dragDirection, setDragDirection] = useState(null);
 
   const ITEMS_PER_PAGE = 2;
   
@@ -23,13 +24,21 @@ const CategoryProductsSection = ({
 
   const goToNextPage = () => {
     if (currentPage < pages - 1) {
-      setCurrentPage((prev) => prev + 1);
+      setDragDirection('right');
+      setTimeout(() => {
+        setCurrentPage((prev) => prev + 1);
+        setTimeout(() => setDragDirection(null), 50);
+      }, 10);
     }
   };
 
   const goToPreviousPage = () => {
     if (currentPage > 0) {
-      setCurrentPage((prev) => prev - 1);
+      setDragDirection('left');
+      setTimeout(() => {
+        setCurrentPage((prev) => prev - 1);
+        setTimeout(() => setDragDirection(null), 50);
+      }, 10);
     }
   };
 
@@ -122,14 +131,16 @@ const CategoryProductsSection = ({
             onMouseDown={handleMouseDown}
             onMouseUp={handleMouseUp}
             onMouseLeave={handleMouseUp}
-            className={`grid grid-cols-2 gap-3 md:gap-6 transition-all duration-300 select-none ${dragStart ? 'cursor-grabbing opacity-75' : 'cursor-grab'}`}
+            className={`grid grid-cols-2 gap-3 md:gap-6 select-none ${dragStart ? 'cursor-grabbing opacity-75' : 'cursor-grab'} ${
+              dragDirection === 'left' ? 'animate-slideOutRight' : dragDirection === 'right' ? 'animate-slideOutLeft' : ''
+            } transition-all duration-400`}
           >
             {currentPageProducts.map((product, idx) => (
               <div
                 key={product.id}
-                className={`bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-500 hover:scale-105 group cursor-pointer animate-fadeIn ${
-                  idx === 0 ? 'animation-delay-0' : 'animation-delay-100'
-                }`}
+                className={`bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-500 hover:scale-105 group cursor-pointer ${
+                  dragDirection === 'left' ? 'animate-slideInRight' : dragDirection === 'right' ? 'animate-slideInLeft' : 'animate-fadeIn'
+                } ${idx === 0 ? 'animation-delay-0' : 'animation-delay-100'}`}
               >
                 {/* Product Image */}
                 <div className="relative h-48 sm:h-56 md:h-80 bg-gray-100 overflow-hidden">
@@ -303,7 +314,7 @@ const CategoryProductsSection = ({
         @keyframes slideInLeft {
           from {
             opacity: 0;
-            transform: translateX(-20px);
+            transform: translateX(-40px);
           }
           to {
             opacity: 1;
@@ -314,7 +325,7 @@ const CategoryProductsSection = ({
         @keyframes slideInRight {
           from {
             opacity: 0;
-            transform: translateX(20px);
+            transform: translateX(40px);
           }
           to {
             opacity: 1;
@@ -322,8 +333,46 @@ const CategoryProductsSection = ({
           }
         }
 
+        @keyframes slideOutLeft {
+          from {
+            opacity: 1;
+            transform: translateX(0);
+          }
+          to {
+            opacity: 0;
+            transform: translateX(-40px);
+          }
+        }
+
+        @keyframes slideOutRight {
+          from {
+            opacity: 1;
+            transform: translateX(0);
+          }
+          to {
+            opacity: 0;
+            transform: translateX(40px);
+          }
+        }
+
         :global(.animate-fadeIn) {
           animation: fadeIn 0.5s ease-out forwards;
+        }
+
+        :global(.animate-slideInLeft) {
+          animation: slideInLeft 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+
+        :global(.animate-slideInRight) {
+          animation: slideInRight 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+
+        :global(.animate-slideOutLeft) {
+          animation: slideOutLeft 0.3s ease-in forwards;
+        }
+
+        :global(.animate-slideOutRight) {
+          animation: slideOutRight 0.3s ease-in forwards;
         }
 
         :global(.animation-delay-0) {
