@@ -48,13 +48,13 @@ const CategoryProductsSection = ({
     
     const touchEnd = e.changedTouches[0].clientX;
     const distance = touchStart - touchEnd;
-    const SWIPE_THRESHOLD = 50;
+    const SWIPE_THRESHOLD = 30; // أقل = أسرع تفاعل
 
-    if (distance > SWIPE_THRESHOLD) {
-      // Swiped left - next page
+    if (distance < -SWIPE_THRESHOLD) {
+      // Swiped right (من اليسار لليمين) - next page
       goToNextPage();
-    } else if (distance < -SWIPE_THRESHOLD) {
-      // Swiped right - previous page
+    } else if (distance > SWIPE_THRESHOLD) {
+      // Swiped left (من اليمين لليسار) - previous page
       goToPreviousPage();
     }
     
@@ -71,13 +71,13 @@ const CategoryProductsSection = ({
     if (!dragStart) return;
     
     const distance = dragStart - e.clientX;
-    const DRAG_THRESHOLD = 50;
+    const DRAG_THRESHOLD = 30; // أقل = أسرع تفاعل
 
-    if (distance > DRAG_THRESHOLD) {
-      // Dragged left - next page
+    if (distance < -DRAG_THRESHOLD) {
+      // Dragged right (من اليسار لليمين) - next page
       goToNextPage();
-    } else if (distance < -DRAG_THRESHOLD) {
-      // Dragged right - previous page
+    } else if (distance > DRAG_THRESHOLD) {
+      // Dragged left (من اليمين لليسار) - previous page
       goToPreviousPage();
     }
     
@@ -122,7 +122,7 @@ const CategoryProductsSection = ({
             onMouseDown={handleMouseDown}
             onMouseUp={handleMouseUp}
             onMouseLeave={handleMouseUp}
-            className={`grid grid-cols-2 gap-3 md:gap-6 transition-all duration-500 select-none ${dragStart ? 'cursor-grabbing opacity-75' : 'cursor-grab'}`}
+            className={`grid grid-cols-2 gap-3 md:gap-6 transition-all duration-300 select-none ${dragStart ? 'cursor-grabbing opacity-75' : 'cursor-grab'}`}
           >
             {currentPageProducts.map((product, idx) => (
               <div
@@ -300,6 +300,28 @@ const CategoryProductsSection = ({
           }
         }
 
+        @keyframes slideInLeft {
+          from {
+            opacity: 0;
+            transform: translateX(-20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(0);
+          }
+        }
+
+        @keyframes slideInRight {
+          from {
+            opacity: 0;
+            transform: translateX(20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(0);
+          }
+        }
+
         :global(.animate-fadeIn) {
           animation: fadeIn 0.5s ease-out forwards;
         }
@@ -310,6 +332,10 @@ const CategoryProductsSection = ({
 
         :global(.animation-delay-100) {
           animation-delay: 100ms;
+        }
+
+        :global(.transition-all) {
+          transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
         }
       `}</style>
     </section>

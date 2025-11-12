@@ -105,7 +105,7 @@ const BannerSlider = () => {
         {banners.map((banner, index) => (
           <div
             key={banner.id}
-            className={`absolute top-0 left-0 w-full h-full transition-opacity duration-500 ease-in-out ${
+            className={`absolute top-0 left-0 w-full h-full transition-opacity duration-300 ease-in-out ${
               index === currentIndex ? 'opacity-100' : 'opacity-0'
             }`}
           >
@@ -143,10 +143,6 @@ const BannerSlider = () => {
                 alt={banner.title}
                 className="w-full h-full object-cover"
               />
-              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-4">
-                <h2 className="text-white text-xl font-bold">{banner.title}</h2>
-                <p className="text-white text-sm">{banner.description}</p>
-              </div>
             </div>
           </div>
         ))}
@@ -156,16 +152,16 @@ const BannerSlider = () => {
       {banners.length > 1 && (
         <>
           <button
-            onClick={goToPrevious}
+            onClick={goToNext}
             className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-75 transition-all"
-            aria-label="Previous banner"
+            aria-label="Next banner"
           >
             <ChevronLeft size={20} />
           </button>
           <button
-            onClick={goToNext}
+            onClick={goToPrevious}
             className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-75 transition-all"
-            aria-label="Next banner"
+            aria-label="Previous banner"
           >
             <ChevronRight size={20} />
           </button>
