@@ -310,7 +310,7 @@ const Categories = ({ user }) => {
                 {products.map((product, index) => (
                   <div
                     key={product.id}
-                    className="product-card bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-500 hover:scale-105 group cursor-pointer animate-fadeIn"
+                    className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-500 hover:scale-105 group cursor-pointer animate-fadeIn"
                     style={{ animationDelay: `${index * 0.1}s` }}
                   >
                     {/* Product Image */}
