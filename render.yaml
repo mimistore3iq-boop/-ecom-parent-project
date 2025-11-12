@@ -27,9 +27,7 @@ services:
       - key: ALLOWED_HOSTS
         value: ecom-parent-project.onrender.com,0.0.0.0,localhost
       - key: DATABASE_URL
-        fromDatabase:
-          name: mimi-store-db
-          property: connectionString
+        value: postgresql://ecom_postgres_db_t233_user:eEcNRFNyn24YswCdrBdKdCJvCiRQMzRq@dpg-d3lg780gjchc73ccsvpg-a/ecom_postgres_db_t233
       - key: CORS_ALLOWED_ORIGINS
         value: https://ecom-parent-project.onrender.com,http://localhost:3002
       - key: CORS_ALLOW_ALL_ORIGINS # Set to False for production security

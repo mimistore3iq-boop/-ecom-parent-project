@@ -12,16 +12,8 @@ services:
       - key: DEBUG
         value: false
       - key: DATABASE_URL
-        fromDatabase:
-          name: ecom-postgres
-          property: connectionString
+        value: postgresql://ecom_postgres_db_t233_user:eEcNRFNyn24YswCdrBdKdCJvCiRQMzRq@dpg-d3lg780gjchc73ccsvpg-a/ecom_postgres_db_t233
       - key: FIREBASE_CREDENTIALS_PATH
         value: firebase/ecomproject-a8173-38763797948f.json
       - key: FIREBASE_PROJECT_ID
         value: ecomproject-a8173
-
-# قاعدة البيانات
-databases:
-  - name: ecom-postgres
-    databaseName: ecom_db
-    user: ecom_user
