@@ -87,12 +87,17 @@ const Categories = ({ user }) => {
       console.log(`Found ${list.length} products for category ${categoryId}`);
 
       // Normalize to match UI expectations
-      const normalized = list.map((p) => ({
-        ...p,
-        image: p.main_image_url || p.main_image || null,
-        stock: typeof p.stock_quantity === 'number' ? p.stock_quantity : (p.is_in_stock ? 1 : 0),
-        discount: typeof p.discount_percentage === 'number' ? p.discount_percentage : (p.discount || 0),
-      }));
+      const normalized = list.map((p) => {
+        const discountPct = typeof p.discount_percentage === 'number' ? p.discount_percentage : (p.discount || 0);
+        return {
+          ...p,
+          image: p.main_image_url || p.main_image || null,
+          stock: typeof p.stock_quantity === 'number' ? p.stock_quantity : (p.is_in_stock ? 1 : 0),
+          discount: discountPct,
+          discount_percentage: discountPct,
+          discounted_price: p.discounted_price || Math.round(p.price * (1 - discountPct / 100)),
+        };
+      });
 
       setProducts(normalized);
       console.log('Normalized products:', normalized);
@@ -321,9 +326,9 @@ const Categories = ({ user }) => {
                         className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-300"
                         onClick={() => navigate(`/product/${product.id}`)}
                       />
-                      {product.discount > 0 && (
+                      {(product.discount_percentage || product.discount) > 0 && (
                         <div className="absolute top-2 sm:top-3 left-2 sm:left-3 bg-gradient-to-br from-red-500 to-red-600 text-white w-9 h-9 sm:w-11 sm:h-11 rounded-full text-xs sm:text-sm font-bold shadow-lg flex items-center justify-center hover:shadow-xl transition-shadow">
-                          <span>{product.discount}%</span>
+                          <span>{product.discount_percentage || product.discount}%</span>
                         </div>
                       )}
                       {product.stock > 0 && product.stock <= 5 && (
@@ -368,10 +373,10 @@ const Categories = ({ user }) => {
 
                       {/* Price */}
                       <div className="flex items-center justify-between mb-2 pb-1 sm:pb-2 border-b border-gray-100">
-                        {product.discount > 0 ? (
+                        {(product.discount_percentage || product.discount) > 0 ? (
                           <div className="flex items-center space-x-1 sm:space-x-2 space-x-reverse flex-1">
                             <span className="text-xs sm:text-sm md:text-lg font-bold text-indigo-600">
-                              {formatCurrency(product.price * (1 - product.discount / 100))}
+                              {formatCurrency(product.discounted_price)}
                             </span>
                             <span className="text-xs text-gray-500 line-through">
                               {formatCurrency(product.price)}
