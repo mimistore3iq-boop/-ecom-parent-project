@@ -16,6 +16,7 @@ const AdminPanel = ({ user, setUser }) => {
   const [editingItem, setEditingItem] = useState(null);
   const [selectedProducts, setSelectedProducts] = useState(new Set());
   const [homepageAction, setHomepageAction] = useState('show'); // 'show' or 'hide'
+  const [activeFormTab, setActiveFormTab] = useState('basic'); // 'basic', 'pricing', 'inventory', 'images'
   const navigate = useNavigate();
 
   // Form states
@@ -931,246 +932,316 @@ const AdminPanel = ({ user, setUser }) => {
 
             {modalType === 'product' ? (
               <form onSubmit={handleProductSubmit} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    اسم المنتج
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={productForm.name}
-                    onChange={(e) => setProductForm({ ...productForm, name: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
-                  />
+                {/* Form Tabs */}
+                <div className="flex border-b border-gray-200 mb-4 overflow-x-auto hide-scrollbar">
+                  <button
+                    type="button"
+                    onClick={() => setActiveFormTab('basic')}
+                    className={`px-4 py-2 text-sm font-medium whitespace-nowrap ${activeFormTab === 'basic' ? 'text-primary-600 border-b-2 border-primary-600' : 'text-gray-500 hover:text-gray-700'}`}
+                  >
+                    المعلومات الأساسية
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActiveFormTab('pricing')}
+                    className={`px-4 py-2 text-sm font-medium whitespace-nowrap ${activeFormTab === 'pricing' ? 'text-primary-600 border-b-2 border-primary-600' : 'text-gray-500 hover:text-gray-700'}`}
+                  >
+                    التسعير والخصومات
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActiveFormTab('inventory')}
+                    className={`px-4 py-2 text-sm font-medium whitespace-nowrap ${activeFormTab === 'inventory' ? 'text-primary-600 border-b-2 border-primary-600' : 'text-gray-500 hover:text-gray-700'}`}
+                  >
+                    إدارة المخزون
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActiveFormTab('images')}
+                    className={`px-4 py-2 text-sm font-medium whitespace-nowrap ${activeFormTab === 'images' ? 'text-primary-600 border-b-2 border-primary-600' : 'text-gray-500 hover:text-gray-700'}`}
+                  >
+                    صور المنتج
+                  </button>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    الوصف
-                  </label>
-                  <textarea
-                    required
-                    value={productForm.description}
-                    onChange={(e) => setProductForm({ ...productForm, description: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
-                    rows="3"
-                  />
-                </div>
+                {/* Tab Content: Basic Info */}
+                {activeFormTab === 'basic' && (
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        اسم المنتج
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={productForm.name}
+                        onChange={(e) => setProductForm({ ...productForm, name: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
+                      />
+                    </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      السعر (د.ع)
-                    </label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      required
-                      value={productForm.price}
-                      onChange={(e) => setProductForm({ ...productForm, price: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
-                    />
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        الوصف
+                      </label>
+                      <textarea
+                        required
+                        value={productForm.description}
+                        onChange={(e) => setProductForm({ ...productForm, description: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
+                        rows="3"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          القسم
+                        </label>
+                        <select
+                          required
+                          value={productForm.category}
+                          onChange={(e) => setProductForm({ ...productForm, category: e.target.value })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
+                        >
+                          <option value="">اختر القسم</option>
+                          {categories.map((category) => (
+                            <option key={category.id} value={category.id}>
+                              {category.name}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          العلامة التجارية (اختياري)
+                        </label>
+                        <input
+                          type="text"
+                          value={productForm.brand}
+                          onChange={(e) => setProductForm({ ...productForm, brand: e.target.value })}
+                          placeholder="Samsung, Apple..."
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
+                        />
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        إظهار في الواجهة الرئيسية
+                      </label>
+                      <select
+                        value={productForm.show_on_homepage ? 'true' : 'false'}
+                        onChange={(e) => setProductForm({ ...productForm, show_on_homepage: e.target.value === 'true' })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
+                      >
+                        <option value="true">نعم - إظهار في الواجهة الرئيسية</option>
+                        <option value="false">لا - إخفاء من الواجهة الرئيسية</option>
+                      </select>
+                    </div>
                   </div>
+                )}
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      المخزون
-                    </label>
-                    <input
-                      type="number"
-                      required
-                      value={productForm.stock}
-                      onChange={(e) => setProductForm({ ...productForm, stock: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
-                    />
+                {/* Tab Content: Pricing & Discounts */}
+                {activeFormTab === 'pricing' && (
+                  <div className="space-y-4">
+                    <div className="p-4 bg-blue-50 rounded-lg mb-4">
+                      <p className="text-sm text-blue-700">يمكنك تحديد سعر ثابت أو تفعيل نظام الخصومات الموقوتة من هنا.</p>
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        السعر الأصلي (د.ع)
+                      </label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        required
+                        value={productForm.price}
+                        onChange={(e) => setProductForm({ ...productForm, price: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500 font-bold text-lg"
+                      />
+                    </div>
+
+                    <div className="border-t border-gray-200 pt-4 mt-4">
+                      <h4 className="font-bold text-red-600 mb-4 flex items-center gap-2">
+                        <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        نظام الخصومات الموقوتة
+                      </h4>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            السعر بعد الخصم (د.ع)
+                          </label>
+                          <input
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            value={productForm.discount_price}
+                            onChange={(e) => setProductForm({ ...productForm, discount_price: e.target.value })}
+                            className="w-full px-3 py-2 border border-red-300 rounded-md focus:ring-red-500 focus:border-red-500 text-red-600 font-bold"
+                            placeholder="مثلاً: 15000"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            قيمة الخصم المباشر (د.ع)
+                          </label>
+                          <input
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            value={productForm.discount}
+                            onChange={(e) => setProductForm({ ...productForm, discount: e.target.value })}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            تاريخ ووقت بدء الخصم
+                          </label>
+                          <input
+                            type="datetime-local"
+                            value={productForm.discount_start}
+                            onChange={(e) => setProductForm({ ...productForm, discount_start: e.target.value })}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            تاريخ ووقت انتهاء الخصم
+                          </label>
+                          <input
+                            type="datetime-local"
+                            value={productForm.discount_end}
+                            onChange={(e) => setProductForm({ ...productForm, discount_end: e.target.value })}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
+                          />
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                </div>
+                )}
 
-                <div className="grid grid-cols-3 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      القسم
-                    </label>
-                    <select
-                      required
-                      value={productForm.category}
-                      onChange={(e) => setProductForm({ ...productForm, category: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
-                    >
-                      <option value="">اختر القسم</option>
-                      {categories.map((category) => (
-                        <option key={category.id} value={category.id}>
-                          {category.name}
-                        </option>
-                      ))}
-                    </select>
+                {/* Tab Content: Inventory */}
+                {activeFormTab === 'inventory' && (
+                  <div className="space-y-4">
+                    <div className="p-4 bg-orange-50 rounded-lg mb-4 text-orange-800 text-sm">
+                      تحكم في كمية المنتج المتاحة للبيع. سيظهر وسم "نفد المخزون" تلقائياً عندما تصل الكمية لـ 0.
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        الكمية المتوفرة في المخزن
+                      </label>
+                      <input
+                        type="number"
+                        required
+                        min="0"
+                        value={productForm.stock}
+                        onChange={(e) => setProductForm({ ...productForm, stock: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500 font-bold text-lg"
+                      />
+                    </div>
                   </div>
+                )}
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      الخصم (د.ع)
-                    </label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      value={productForm.discount}
-                      onChange={(e) => setProductForm({ ...productForm, discount: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
-                    />
+                {/* Tab Content: Images */}
+                {activeFormTab === 'images' && (
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {/* Main Image */}
+                      <div className="border p-4 rounded-lg bg-gray-50">
+                        <label className="block text-sm font-bold text-gray-700 mb-2">الصورة الرئيسية (غلاف المنتج)</label>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => setProductForm({ ...productForm, main_image: e.target.files[0] })}
+                          className="w-full text-xs"
+                        />
+                        {(productForm.main_image_url || productForm.main_image) && (
+                          <div className="mt-2 relative group">
+                            <img
+                              src={productForm.main_image instanceof File ? URL.createObjectURL(productForm.main_image) : productForm.main_image_url}
+                              alt="Preview"
+                              className="h-32 w-full object-contain rounded border bg-white"
+                            />
+                            <div className="absolute top-1 right-1 bg-green-500 text-white text-[10px] px-2 py-0.5 rounded-full shadow-sm">رئيسية</div>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Second Image */}
+                      <div className="border p-4 rounded-lg">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">الصورة الثانية</label>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => setProductForm({ ...productForm, second_image: e.target.files[0] })}
+                          className="w-full text-xs"
+                        />
+                        {(productForm.second_image_url || productForm.second_image) && (
+                          <img
+                            src={productForm.second_image instanceof File ? URL.createObjectURL(productForm.second_image) : productForm.second_image_url}
+                            alt="Preview"
+                            className="mt-2 h-32 w-full object-contain rounded border bg-white"
+                          />
+                        )}
+                      </div>
+
+                      {/* Third Image */}
+                      <div className="border p-4 rounded-lg">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">الصورة الثالثة</label>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => setProductForm({ ...productForm, third_image: e.target.files[0] })}
+                          className="w-full text-xs"
+                        />
+                        {(productForm.third_image_url || productForm.third_image) && (
+                          <img
+                            src={productForm.third_image instanceof File ? URL.createObjectURL(productForm.third_image) : productForm.third_image_url}
+                            alt="Preview"
+                            className="mt-2 h-32 w-full object-contain rounded border bg-white"
+                          />
+                        )}
+                      </div>
+
+                      {/* Fourth Image */}
+                      <div className="border p-4 rounded-lg">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">الصورة الرابعة</label>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => setProductForm({ ...productForm, fourth_image: e.target.files[0] })}
+                          className="w-full text-xs"
+                        />
+                        {(productForm.fourth_image_url || productForm.fourth_image) && (
+                          <img
+                            src={productForm.fourth_image instanceof File ? URL.createObjectURL(productForm.fourth_image) : productForm.fourth_image_url}
+                            alt="Preview"
+                            className="mt-2 h-32 w-full object-contain rounded border bg-white"
+                          />
+                        )}
+                      </div>
+                    </div>
                   </div>
+                )}
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      العلامة التجارية (اختياري)
-                    </label>
-                    <input
-                      type="text"
-                      value={productForm.brand}
-                      onChange={(e) => setProductForm({ ...productForm, brand: e.target.value })}
-                      placeholder="Samsung, Apple..."
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      السعر المخصوم (د.ع)
-                    </label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      value={productForm.discount_price}
-                      onChange={(e) => setProductForm({ ...productForm, discount_price: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      تاريخ بدء الخصم
-                    </label>
-                    <input
-                      type="datetime-local"
-                      value={productForm.discount_start}
-                      onChange={(e) => setProductForm({ ...productForm, discount_start: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      تاريخ انتهاء الخصم
-                    </label>
-                    <input
-                      type="datetime-local"
-                      value={productForm.discount_end}
-                      onChange={(e) => setProductForm({ ...productForm, discount_end: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      إظهار في الواجهة الرئيسية
-                    </label>
-                    <select
-                      value={productForm.show_on_homepage ? 'true' : 'false'}
-                      onChange={(e) => setProductForm({ ...productForm, show_on_homepage: e.target.value === 'true' })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
-                    >
-                      <option value="true">نعم - إظهار في الواجهة الرئيسية</option>
-                      <option value="false">لا - إخفاء من الواجهة الرئيسية</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    الصورة الرئيسية
-                  </label>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => setProductForm({ ...productForm, main_image: e.target.files[0] })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
-                  />
-                  {productForm.main_image_url && (
-                    <img
-                      src={productForm.main_image_url}
-                      alt="Preview"
-                      className="mt-2 h-20 w-20 object-cover rounded"
-                    />
-                  )}
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    الصورة الثانية
-                  </label>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => setProductForm({ ...productForm, second_image: e.target.files[0] })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
-                  />
-                  {productForm.second_image_url && (
-                    <img
-                      src={productForm.second_image_url}
-                      alt="Preview"
-                      className="mt-2 h-20 w-20 object-cover rounded"
-                    />
-                  )}
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    الصورة الثالثة
-                  </label>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => setProductForm({ ...productForm, third_image: e.target.files[0] })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
-                  />
-                  {productForm.third_image_url && (
-                    <img
-                      src={productForm.third_image_url}
-                      alt="Preview"
-                      className="mt-2 h-20 w-20 object-cover rounded"
-                    />
-                  )}
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    الصورة الرابعة
-                  </label>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => setProductForm({ ...productForm, fourth_image: e.target.files[0] })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
-                  />
-                  {productForm.fourth_image_url && (
-                    <img
-                      src={productForm.fourth_image_url}
-                      alt="Preview"
-                      className="mt-2 h-20 w-20 object-cover rounded"
-                    />
-                  )}
-                </div>
-
-                <div className="flex justify-end space-x-4 space-x-reverse pt-4">
+                <div className="flex justify-end space-x-4 space-x-reverse pt-6 border-t border-gray-100">
                   <button
                     type="button"
                     onClick={() => setShowModal(false)}
-                    className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                    className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium"
                   >
                     إلغاء
                   </button>
@@ -1179,7 +1250,7 @@ const AdminPanel = ({ user, setUser }) => {
                     disabled={loading}
                     className="btn-primary"
                   >
-                    {loading ? 'جاري الحفظ...' : 'حفظ'}
+                    {loading ? 'جاري الحفظ...' : 'حفظ المنتج النهائي'}
                   </button>
                 </div>
               </form>
