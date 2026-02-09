@@ -9,89 +9,6 @@ const CategoryProductsSection = ({
   onViewDetails 
 }) => {
   const gridRef = useRef(null);
-  const [currentPage, setCurrentPage] = useState(0);
-  const [touchStart, setTouchStart] = useState(null);
-  const [dragStart, setDragStart] = useState(null);
-  const [dragDirection, setDragDirection] = useState(null);
-
-  const ITEMS_PER_PAGE = 2;
-  
-  const pages = Math.ceil(products.length / ITEMS_PER_PAGE);
-  const currentPageProducts = products.slice(
-    currentPage * ITEMS_PER_PAGE,
-    (currentPage + 1) * ITEMS_PER_PAGE
-  );
-
-  const goToNextPage = () => {
-    if (currentPage < pages - 1) {
-      setDragDirection('right');
-      setTimeout(() => {
-        setCurrentPage((prev) => prev + 1);
-        setTimeout(() => setDragDirection(null), 50);
-      }, 10);
-    }
-  };
-
-  const goToPreviousPage = () => {
-    if (currentPage > 0) {
-      setDragDirection('left');
-      setTimeout(() => {
-        setCurrentPage((prev) => prev - 1);
-        setTimeout(() => setDragDirection(null), 50);
-      }, 10);
-    }
-  };
-
-  const goToPage = (page) => {
-    setCurrentPage(page);
-  };
-
-  // Handle Touch Start
-  const handleTouchStart = (e) => {
-    setTouchStart(e.touches[0].clientX);
-  };
-
-  // Handle Touch End
-  const handleTouchEnd = (e) => {
-    if (!touchStart) return;
-    
-    const touchEnd = e.changedTouches[0].clientX;
-    const distance = touchStart - touchEnd;
-    const SWIPE_THRESHOLD = 30; // أقل = أسرع تفاعل
-
-    if (distance < -SWIPE_THRESHOLD) {
-      // Swiped right (من اليسار لليمين) - next page
-      goToNextPage();
-    } else if (distance > SWIPE_THRESHOLD) {
-      // Swiped left (من اليمين لليسار) - previous page
-      goToPreviousPage();
-    }
-    
-    setTouchStart(null);
-  };
-
-  // Handle Mouse Down
-  const handleMouseDown = (e) => {
-    setDragStart(e.clientX);
-  };
-
-  // Handle Mouse Up
-  const handleMouseUp = (e) => {
-    if (!dragStart) return;
-    
-    const distance = dragStart - e.clientX;
-    const DRAG_THRESHOLD = 30; // أقل = أسرع تفاعل
-
-    if (distance < -DRAG_THRESHOLD) {
-      // Dragged right (من اليسار لليمين) - next page
-      goToNextPage();
-    } else if (distance > DRAG_THRESHOLD) {
-      // Dragged left (من اليمين لليسار) - previous page
-      goToPreviousPage();
-    }
-    
-    setDragStart(null);
-  };
 
   if (products.length === 0) {
     return null;
@@ -122,39 +39,45 @@ const CategoryProductsSection = ({
         </div>
 
         {/* Products Grid Container */}
-        <div>
-          {/* Products Grid (2 Columns) */}
+        <div className="relative">
+          {/* Scrollable Container */}
           <div 
             ref={gridRef}
-            onTouchStart={handleTouchStart} 
-            onTouchEnd={handleTouchEnd}
-            onMouseDown={handleMouseDown}
-            onMouseUp={handleMouseUp}
-            onMouseLeave={handleMouseUp}
-            className={`grid grid-cols-2 gap-3 md:gap-6 select-none ${dragStart ? 'cursor-grabbing opacity-75' : 'cursor-grab'} ${
-              dragDirection === 'left' ? 'animate-slideOutRight' : dragDirection === 'right' ? 'animate-slideOutLeft' : ''
-            } transition-all duration-400`}
+            className="flex overflow-x-auto gap-4 pb-6 snap-x snap-mandatory hide-scrollbar touch-pan-x"
+            style={{ 
+              WebkitOverflowScrolling: 'touch',
+              scrollbarWidth: 'none',
+              msOverflowStyle: 'none'
+            }}
           >
-            {currentPageProducts.map((product, idx) => (
+            {products.map((product) => (
               <div
                 key={product.id}
-                className={`bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-500 hover:scale-105 group cursor-pointer ${
-                  dragDirection === 'left' ? 'animate-slideInRight' : dragDirection === 'right' ? 'animate-slideInLeft' : 'animate-fadeIn'
-                } ${idx === 0 ? 'animation-delay-0' : 'animation-delay-100'}`}
+                className="flex-shrink-0 w-[80%] md:w-[45%] snap-center"
               >
-                {/* Product Image */}
-                <div className="relative h-48 sm:h-56 md:h-80 bg-gray-100 overflow-hidden">
-                  <img
-                    src={product.image || product.main_image_url}
-                    alt={product.name}
-                    className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-300"
-                    onClick={() => onViewDetails(product)}
-                  />
+                <div className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 hover:scale-[1.02] group cursor-pointer border border-gray-100 h-full">
+                  {/* Product Image */}
+                  <div className="relative h-48 sm:h-56 md:h-80 bg-gray-50 overflow-hidden">
+                    <img
+                      src={product.image || product.main_image_url}
+                      alt={product.name}
+                      className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500"
+                      onClick={() => onViewDetails(product)}
+                      loading="lazy"
+                      style={{ viewTransitionName: `product-image-${product.id}` }}
+                    />
 
                   {/* Discount Badge - Top Left */}
                   {product.discount_percentage > 0 && (
-                    <div className="absolute top-2 sm:top-3 left-2 sm:left-3 bg-gradient-to-br from-red-500 to-red-600 text-white w-9 h-9 sm:w-11 sm:h-11 rounded-full text-xs sm:text-sm font-bold shadow-lg flex items-center justify-center hover:shadow-xl transition-shadow">
+                    <div className="absolute top-2 sm:top-3 left-2 sm:left-3 bg-gradient-to-br from-red-500 to-red-600 text-white w-9 h-9 sm:w-11 sm:h-11 rounded-full text-xs sm:text-sm font-bold shadow-lg flex items-center justify-center hover:shadow-xl transition-shadow z-10">
                       <span>{product.discount_percentage}%</span>
+                    </div>
+                  )}
+
+                  {/* Time Left Badge - Top Left (below discount) */}
+                  {product.is_on_sale && product.time_left > 0 && (
+                    <div className="absolute top-12 sm:top-16 left-2 sm:left-3 bg-green-600 text-white px-2 py-1 rounded-lg text-[10px] sm:text-xs font-bold shadow-lg z-10 animate-pulse">
+                      باقي {Math.ceil(product.time_left / 86400)} يوم
                     </div>
                   )}
 
@@ -203,9 +126,9 @@ const CategoryProductsSection = ({
 
                   {/* Price */}
                   <div className="flex items-center justify-between mb-2 pb-1 sm:pb-2 border-b border-gray-100">
-                    {product.discount_percentage > 0 ? (
+                    {product.is_on_sale ? (
                       <div className="flex items-center space-x-1 sm:space-x-2 space-x-reverse flex-1">
-                        <span className="text-xs sm:text-sm md:text-lg font-bold text-indigo-600">
+                        <span className="text-xs sm:text-sm md:text-lg font-bold text-red-600">
                           {formatCurrency(product.discounted_price)}
                         </span>
                         <span className="text-xs text-gray-500 line-through">
@@ -278,113 +201,16 @@ const CategoryProductsSection = ({
               </div>
             ))}
           </div>
-
-          {/* Pagination Dots */}
-          {pages > 1 && (
-            <div className="flex justify-center items-center gap-1.5 mt-6 sm:mt-8">
-              {Array.from({ length: pages }).map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => goToPage(index)}
-                  className={`rounded-full transition-all duration-300 ${
-                    index === currentPage
-                      ? 'bg-indigo-600 w-8 h-2'
-                      : 'bg-gray-300 w-2 h-2 hover:bg-gray-400'
-                  }`}
-                  aria-label={`انتقل إلى الصفحة ${index + 1}`}
-                />
-              ))}
-            </div>
-          )}
         </div>
       </div>
 
       <style jsx>{`
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-            transform: translateY(10px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
+        .hide-scrollbar::-webkit-scrollbar {
+          display: none;
         }
-
-        @keyframes slideInLeft {
-          from {
-            opacity: 0;
-            transform: translateX(-40px);
-          }
-          to {
-            opacity: 1;
-            transform: translateX(0);
-          }
-        }
-
-        @keyframes slideInRight {
-          from {
-            opacity: 0;
-            transform: translateX(40px);
-          }
-          to {
-            opacity: 1;
-            transform: translateX(0);
-          }
-        }
-
-        @keyframes slideOutLeft {
-          from {
-            opacity: 1;
-            transform: translateX(0);
-          }
-          to {
-            opacity: 0;
-            transform: translateX(-40px);
-          }
-        }
-
-        @keyframes slideOutRight {
-          from {
-            opacity: 1;
-            transform: translateX(0);
-          }
-          to {
-            opacity: 0;
-            transform: translateX(40px);
-          }
-        }
-
-        :global(.animate-fadeIn) {
-          animation: fadeIn 0.5s ease-out forwards;
-        }
-
-        :global(.animate-slideInLeft) {
-          animation: slideInLeft 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-        }
-
-        :global(.animate-slideInRight) {
-          animation: slideInRight 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-        }
-
-        :global(.animate-slideOutLeft) {
-          animation: slideOutLeft 0.3s ease-in forwards;
-        }
-
-        :global(.animate-slideOutRight) {
-          animation: slideOutRight 0.3s ease-in forwards;
-        }
-
-        :global(.animation-delay-0) {
-          animation-delay: 0ms;
-        }
-
-        :global(.animation-delay-100) {
-          animation-delay: 100ms;
-        }
-
-        :global(.transition-all) {
-          transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+        .hide-scrollbar {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
         }
       `}</style>
     </section>

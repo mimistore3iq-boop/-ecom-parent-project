@@ -260,3 +260,43 @@ body::before {
 .custom-radio {
   @apply appearance-none w-5 h-5 border-2 border-gray-300 rounded-full checked:bg-primary-500 checked:border-primary-500 focus:ring-2 focus:ring-primary-500 focus:ring-offset-2;
 }
+
+/* View Transitions (Hero Animation) */
+::view-transition-old(product-image) {
+  animation: 0.4s cubic-bezier(0.4, 0, 0.2, 1) both fade-out;
+}
+
+::view-transition-new(product-image) {
+  animation: 0.4s cubic-bezier(0.4, 0, 0.2, 1) both fade-in;
+}
+
+@keyframes fade-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Smooth Scrolling & Performance */
+.snap-x {
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+
+.snap-center {
+  scroll-snap-align: center;
+}
+
+/* Fix for Scroll Freeze */
+.custom-scroll-container {
+  overflow-x: auto;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;  /* IE/Edge */
+}
+
+.custom-scroll-container::-webkit-scrollbar {
+  display: none; /* Chrome/Safari */
+}

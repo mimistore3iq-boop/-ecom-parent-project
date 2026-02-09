@@ -579,8 +579,8 @@ try:
 
     if cred:
         firebase_admin.initialize_app(cred)
-        print("✅ Firebase initialized successfully.")
+        print("Firebase initialized successfully.")
     else:
-        print("⚠️ Firebase credentials not found. Skipping initialization.")
+        print("Firebase credentials not found. Skipping initialization.")
 except ModuleNotFoundError:
-    print("⚠️ مكتبة Firebase Admin غير مثبتة. يمكنك تثبيتها لاحقًا باستخدام pip install firebase-admin")
+    print("Firebase Admin library not installed.")

@@ -172,7 +172,15 @@ const SpecialOffers = ({ user }) => {
                   key={product.id}
                   className="product-card bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-gray-100 fade-in cursor-pointer"
                   style={{ animationDelay: `${index * 0.1}s` }}
-                  onClick={() => navigate(`/product/${product.id}`)}
+                  onClick={() => {
+                    if (document.startViewTransition) {
+                      document.startViewTransition(() => {
+                        navigate(`/product/${product.id}`);
+                      });
+                    } else {
+                      navigate(`/product/${product.id}`);
+                    }
+                  }}
                 >
                   {/* Product Image */}
                   <div className="relative overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 h-40 md:h-48">
@@ -180,10 +188,16 @@ const SpecialOffers = ({ user }) => {
                       src={product.image || '/placeholder-product.png'}
                       alt={product.name}
                       className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+                      style={{ viewTransitionName: `product-image-${product.id}` }}
                     />
-                    <div className="absolute top-3 left-3 bg-gradient-to-r from-red-500 to-red-600 text-white w-10 h-10 rounded-full text-xs font-bold shadow-lg flex items-center justify-center">
+                    <div className="absolute top-3 left-3 bg-gradient-to-r from-red-500 to-red-600 text-white w-10 h-10 rounded-full text-xs font-bold shadow-lg flex items-center justify-center z-10">
                       <span>{product.discount}%</span>
                     </div>
+                    {product.is_on_sale && product.time_left > 0 && (
+                      <div className="absolute top-14 left-3 bg-green-600 text-white px-2 py-1 rounded text-[10px] font-bold shadow-lg z-10">
+                        باقي {Math.ceil(product.time_left / 86400)} يوم
+                      </div>
+                    )}
                     {product.stock <= 5 && product.stock > 0 && (
                       <div className="absolute top-3 left-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white px-3 py-1 rounded-full text-sm font-medium shadow-lg flex items-center">
                         <svg className="h-4 w-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -221,16 +235,23 @@ const SpecialOffers = ({ user }) => {
                     {/* Price */}
                     <div className="flex items-center justify-between mb-3 pb-2 border-b border-gray-100">
                       <div className="flex items-center space-x-2 space-x-reverse">
-                        <>
+                        {product.is_on_sale ? (
+                          <>
+                            <span className="text-base md:text-lg font-bold text-red-600 flex items-center">
+                              {formatCurrency(product.discounted_price)}
+                              <span className="text-xs text-gray-500 mr-1">د.ع</span>
+                            </span>
+                            <span className="text-xs md:text-sm text-gray-500 line-through flex items-center hidden sm:inline">
+                              {formatCurrency(product.price)}
+                              <span className="text-xs text-gray-500 mr-1">د.ع</span>
+                            </span>
+                          </>
+                        ) : (
                           <span className="text-base md:text-lg font-bold text-indigo-600 flex items-center">
-                            {formatCurrency(product.price * (1 - product.discount / 100))}
-                            <span className="text-xs text-gray-500 mr-1">د.ع</span>
-                          </span>
-                          <span className="text-xs md:text-sm text-gray-500 line-through flex items-center hidden sm:inline">
                             {formatCurrency(product.price)}
                             <span className="text-xs text-gray-500 mr-1">د.ع</span>
                           </span>
-                        </>
+                        )}
                       </div>
                     </div>
 

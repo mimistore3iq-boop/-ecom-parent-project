@@ -27,15 +27,17 @@ class ProductListSerializer(serializers.ModelSerializer):
     discount_percentage = serializers.SerializerMethodField()
     discounted_price = serializers.SerializerMethodField()
     is_on_sale = serializers.SerializerMethodField()
+    time_left = serializers.IntegerField(source='time_left', read_only=True)
     stock = serializers.IntegerField(source='stock_quantity', read_only=True)
 
     class Meta:
         model = Product
-        fields = ['id', 'name', 'price', 'discount_amount', 'discount_percentage', 'discounted_price', 
-                  'is_on_sale', 'stock_quantity', 'stock', 'category_name', 'main_image', 'image_2', 
-                  'image_3', 'image_4', 'main_image_url', 'image', 'is_featured', 'show_on_homepage', 
-                  'brand', 'is_in_stock']
-        read_only_fields = ['id', 'main_image_url', 'image', 'discount_percentage', 'discounted_price', 'is_on_sale', 'category_name', 'stock', 'is_in_stock']
+        fields = ['id', 'name', 'price', 'discount_price', 'discount_amount', 'discount_start', 'discount_end', 
+                  'discount_percentage', 'discounted_price', 'is_on_sale', 'time_left', 'stock_quantity', 'stock', 
+                  'category_name', 'main_image', 'image_2', 'image_3', 'image_4', 'main_image_url', 'image', 
+                  'is_featured', 'show_on_homepage', 'brand', 'is_in_stock']
+        read_only_fields = ['id', 'main_image_url', 'image', 'discount_percentage', 'discounted_price', 'is_on_sale', 
+                            'time_left', 'category_name', 'stock', 'is_in_stock']
 
     def get_main_image_url(self, obj):
         """الصورة الرئيسية بوضوح"""
@@ -71,13 +73,15 @@ class ProductSerializer(serializers.ModelSerializer):
     discount_percentage = serializers.SerializerMethodField()
     discounted_price = serializers.SerializerMethodField()
     is_on_sale = serializers.SerializerMethodField()
+    time_left = serializers.IntegerField(source='time_left', read_only=True)
     stock = serializers.IntegerField(source='stock_quantity', read_only=True)
 
     class Meta:
         model = Product
         fields = [
             'id', 'name', 'description', 'category', 'category_name',
-            'price', 'discount_amount', 'discount_percentage', 'discounted_price', 'is_on_sale',
+            'price', 'discount_price', 'discount_amount', 'discount_start', 'discount_end',
+            'discount_percentage', 'discounted_price', 'is_on_sale', 'time_left',
             'stock_quantity', 'stock', 'low_stock_threshold',
             'main_image', 'image_2', 'image_3', 'image_4', 'main_image_url', 'image', 'all_images',
             'brand', 'model', 'color', 'size', 'weight',
@@ -85,7 +89,7 @@ class ProductSerializer(serializers.ModelSerializer):
             'is_active', 'is_featured', 'show_on_homepage', 'display_order',
             'created_at', 'updated_at'
         ]
-        read_only_fields = ['id', 'created_at', 'updated_at', 'main_image_url', 'image', 'all_images']
+        read_only_fields = ['id', 'created_at', 'updated_at', 'main_image_url', 'image', 'all_images', 'time_left']
 
     def get_main_image_url(self, obj):
         """إرجاع الصورة الرئيسية"""

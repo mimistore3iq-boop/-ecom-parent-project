@@ -53,10 +53,19 @@ class Product(models.Model):
     
     # Pricing
     price = models.DecimalField(
-        'السعر',
+        'السعر الأصلي',
         max_digits=10,
         decimal_places=2,
         validators=[MinValueValidator(0)]
+    )
+    discount_price = models.DecimalField(
+        'السعر بعد الخصم',
+        max_digits=10,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(0)],
+        help_text='اترك الحقل فارغاً إذا لم يكن هناك خصم'
     )
     discount_amount = models.DecimalField(
         'مبلغ الخصم (د.ع)',
@@ -66,6 +75,8 @@ class Product(models.Model):
         validators=[MinValueValidator(0)],
         help_text='أدخل مبلغ الخصم بالدينار العراقي (مثال: 2000 لخصم 2000 د.ع)'
     )
+    discount_start = models.DateTimeField('تاريخ بدء الخصم', null=True, blank=True)
+    discount_end = models.DateTimeField('تاريخ انتهاء الخصم', null=True, blank=True)
     
     # Inventory
     stock_quantity = models.PositiveIntegerField('الكمية المتوفرة', default=0)
@@ -129,23 +140,46 @@ class Product(models.Model):
     
     @property
     def discounted_price(self):
-        """Calculate discounted price"""
-        if self.discount_amount > 0:
-            final_price = self.price - self.discount_amount
-            return max(final_price, 0)  # لا يمكن أن يكون السعر سالباً
+        """Calculate discounted price based on new fields or old discount_amount"""
+        if self.is_on_sale:
+            if self.discount_price:
+                return self.discount_price
+            if self.discount_amount > 0:
+                return max(self.price - self.discount_amount, 0)
         return self.price
     
     @property
     def discount_percentage(self):
         """Calculate discount percentage for display"""
-        if self.discount_amount > 0 and self.price > 0:
-            return int((self.discount_amount / self.price) * 100)
+        if self.is_on_sale:
+            final_price = self.discounted_price
+            if self.price > 0 and final_price < self.price:
+                return int(((self.price - final_price) / self.price) * 100)
         return 0
     
     @property
     def is_on_sale(self):
-        """Check if product is on sale"""
-        return self.discount_amount > 0
+        """Check if product is on sale based on time and price"""
+        now = timezone.now()
+        
+        # Check if within time period (if set)
+        if self.discount_start and now < self.discount_start:
+            return False
+        if self.discount_end and now > self.discount_end:
+            return False
+            
+        # If time is valid, check if there's a discount
+        return (self.discount_price is not None and self.discount_price < self.price) or self.discount_amount > 0
+    
+    @property
+    def time_left(self):
+        """Calculate time left for discount in seconds"""
+        if self.is_on_sale and self.discount_end:
+            now = timezone.now()
+            if self.discount_end > now:
+                delta = self.discount_end - now
+                return int(delta.total_seconds())
+        return 0
     
     @property
     def is_in_stock(self):

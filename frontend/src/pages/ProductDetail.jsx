@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { api, endpoints } from '../api';
 import { formatCurrency, getFreeShippingThreshold } from '../utils/currency';
 import Cart from '../components/CartNew';
 import CheckoutNew from '../components/CheckoutNew';
+import CountdownTimer from '../components/CountdownTimer';
 
 const ProductDetail = ({ user }) => {
   const { id } = useParams();
@@ -243,7 +244,10 @@ const ProductDetail = ({ user }) => {
                       src={productImages[selectedImage]}
                       alt={product.name}
                       className="max-w-full max-h-full object-contain"
-                      style={{ backgroundColor: '#ffffff' }}
+                      style={{ 
+                        backgroundColor: '#ffffff',
+                        viewTransitionName: `product-image-${product.id}`
+                      }}
                       onError={(e) => {
                         console.error('Failed to load image:', productImages[selectedImage]);
                         e.target.onerror = null;
@@ -308,20 +312,30 @@ const ProductDetail = ({ user }) => {
             </div>
 
             {/* Price and Stock */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4 space-x-reverse">
-                <span className="text-4xl font-bold text-primary-600">
-                  {formatCurrency(finalPrice)}
-                </span>
-                {discountAmount > 0 && (
-                  <span className="text-xl text-gray-500 line-through">
-                    {formatCurrency(priceNum)}
+            <div className="flex flex-col space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-4 space-x-reverse">
+                  <span className={`text-4xl font-bold ${product.is_on_sale ? 'text-red-600' : 'text-primary-600'}`}>
+                    {formatCurrency(finalPrice)}
                   </span>
+                  {product.is_on_sale && (
+                    <span className="text-xl text-gray-500 line-through">
+                      {formatCurrency(priceNum)}
+                    </span>
+                  )}
+                </div>
+                {stockCount <= 5 && stockCount > 0 && (
+                  <div className="bg-blue-500 text-white px-4 py-2 rounded-lg font-semibold">
+                    متبقي {stockCount}
+                  </div>
                 )}
               </div>
-              {stockCount <= 5 && stockCount > 0 && (
-                <div className="bg-blue-500 text-white px-4 py-2 rounded-lg font-semibold">
-                  متبقي {stockCount}
+
+              {/* Countdown Timer */}
+              {product.is_on_sale && product.discount_end && (
+                <div className="bg-green-50 rounded-2xl p-4 border border-green-100 shadow-inner">
+                  <p className="text-center text-green-800 font-bold mb-2">ينتهي العرض خلال:</p>
+                  <CountdownTimer expiryDate={product.discount_end} />
                 </div>
               )}
             </div>

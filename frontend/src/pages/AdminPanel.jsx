@@ -28,6 +28,9 @@ const AdminPanel = ({ user, setUser }) => {
     discount: '',
     brand: '',
     show_on_homepage: true,
+    discount_price: '',
+    discount_start: '',
+    discount_end: '',
     main_image: null,
     second_image: null,
     third_image: null,
@@ -158,6 +161,14 @@ const AdminPanel = ({ user, setUser }) => {
     }
   };
 
+  const copyToClipboard = (text, label) => {
+    navigator.clipboard.writeText(text).then(() => {
+      alert(`تم نسخ ${label} بنجاح: ${text}`);
+    }).catch(err => {
+      console.error('خطأ في النسخ:', err);
+    });
+  };
+
   const markAsRead = async (id) => {
     try {
       await api.post(`/api/notifications/${id}/mark_as_read/`);
@@ -281,6 +292,9 @@ const AdminPanel = ({ user, setUser }) => {
         discount_amount: parseFloat(productForm.discount) || 0,
         brand: productForm.brand,
         show_on_homepage: productForm.show_on_homepage,
+        discount_price: parseFloat(productForm.discount_price) || null,
+        discount_start: productForm.discount_start || null,
+        discount_end: productForm.discount_end || null,
         main_image: mainImageUrl,
         image_2: secondImageUrl,
         image_3: thirdImageUrl,
@@ -312,6 +326,9 @@ const AdminPanel = ({ user, setUser }) => {
         discount: '',
         brand: '',
         show_on_homepage: true,
+        discount_price: '',
+        discount_start: '',
+        discount_end: '',
         main_image: null,
         second_image: null,
         third_image: null,
@@ -442,6 +459,9 @@ const AdminPanel = ({ user, setUser }) => {
           discount: item.discount?.toString() || '',
           brand: item.brand || '',
           show_on_homepage: item.show_on_homepage !== undefined ? item.show_on_homepage : true,
+          discount_price: item.discount_price?.toString() || '',
+          discount_start: item.discount_start ? new Date(item.discount_start).toISOString().slice(0, 16) : '',
+          discount_end: item.discount_end ? new Date(item.discount_end).toISOString().slice(0, 16) : '',
           main_image: null,
           second_image: null,
           third_image: null,
@@ -461,6 +481,9 @@ const AdminPanel = ({ user, setUser }) => {
           discount: '',
           brand: '',
           show_on_homepage: true,
+          discount_price: '',
+          discount_start: '',
+          discount_end: '',
           main_image: null,
           second_image: null,
           third_image: null,
@@ -798,6 +821,9 @@ const AdminPanel = ({ user, setUser }) => {
                         العميل
                       </th>
                       <th className="px-3 md:px-6 py-3 text-right text-xs md:text-sm font-bold uppercase tracking-wider">
+                        رقم الهاتف
+                      </th>
+                      <th className="px-3 md:px-6 py-3 text-right text-xs md:text-sm font-bold uppercase tracking-wider">
                         المبلغ الإجمالي
                       </th>
                       <th className="px-3 md:px-6 py-3 text-right text-xs md:text-sm font-bold uppercase tracking-wider">
@@ -818,7 +844,36 @@ const AdminPanel = ({ user, setUser }) => {
                           #{order.id}
                         </td>
                         <td className="px-3 md:px-6 py-3 whitespace-nowrap text-xs md:text-sm text-gray-900 font-medium">
-                          {order.user?.phone || 'غير محدد'}
+                          <div className="flex items-center gap-2">
+                            <span>{order.customer_name || 'غير محدد'}</span>
+                            {order.customer_name && (
+                              <button 
+                                onClick={() => copyToClipboard(order.customer_name, 'اسم الزبون')}
+                                className="text-primary-600 hover:text-primary-800 p-1"
+                                title="نسخ الاسم"
+                              >
+                                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                                </svg>
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                        <td className="px-3 md:px-6 py-3 whitespace-nowrap text-xs md:text-sm text-gray-900 font-medium">
+                          <div className="flex items-center gap-2">
+                            <span>{order.customer_phone || order.user?.phone || 'غير محدد'}</span>
+                            {(order.customer_phone || order.user?.phone) && (
+                              <button 
+                                onClick={() => copyToClipboard(order.customer_phone || order.user?.phone, 'رقم الهاتف')}
+                                className="text-primary-600 hover:text-primary-800 p-1"
+                                title="نسخ الرقم"
+                              >
+                                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                                </svg>
+                              </button>
+                            )}
+                          </div>
                         </td>
                         <td className="px-3 md:px-6 py-3 whitespace-nowrap text-xs md:text-sm text-gray-900 font-bold">
                           {order.total_amount} د.ع
@@ -931,7 +986,7 @@ const AdminPanel = ({ user, setUser }) => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-3 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       القسم
@@ -964,9 +1019,7 @@ const AdminPanel = ({ user, setUser }) => {
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
                     />
                   </div>
-                </div>
 
-                <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       العلامة التجارية (اختياري)
@@ -975,7 +1028,49 @@ const AdminPanel = ({ user, setUser }) => {
                       type="text"
                       value={productForm.brand}
                       onChange={(e) => setProductForm({ ...productForm, brand: e.target.value })}
-                      placeholder="مثال: Samsung, Apple, إلخ"
+                      placeholder="Samsung, Apple..."
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      السعر المخصوم (د.ع)
+                    </label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={productForm.discount_price}
+                      onChange={(e) => setProductForm({ ...productForm, discount_price: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      تاريخ بدء الخصم
+                    </label>
+                    <input
+                      type="datetime-local"
+                      value={productForm.discount_start}
+                      onChange={(e) => setProductForm({ ...productForm, discount_start: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      تاريخ انتهاء الخصم
+                    </label>
+                    <input
+                      type="datetime-local"
+                      value={productForm.discount_end}
+                      onChange={(e) => setProductForm({ ...productForm, discount_end: e.target.value })}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
                     />
                   </div>

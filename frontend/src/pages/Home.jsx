@@ -573,7 +573,15 @@ const Home = ({ user, setUser }) => {
                   category={category}
                   products={categoryProducts}
                   onAddToCart={addToCart}
-                  onViewDetails={(product) => navigate(`/product/${product.id}`)}
+                  onViewDetails={(product) => {
+                  if (document.startViewTransition) {
+                    document.startViewTransition(() => {
+                      navigate(`/product/${product.id}`);
+                    });
+                  } else {
+                    navigate(`/product/${product.id}`);
+                  }
+                }}
                 />
               );
             })}

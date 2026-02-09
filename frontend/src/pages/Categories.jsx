@@ -324,11 +324,25 @@ const Categories = ({ user }) => {
                         src={product.image || product.main_image_url}
                         alt={product.name}
                         className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-300"
-                        onClick={() => navigate(`/product/${product.id}`)}
+                        onClick={() => {
+                          if (document.startViewTransition) {
+                            document.startViewTransition(() => {
+                              navigate(`/product/${product.id}`);
+                            });
+                          } else {
+                            navigate(`/product/${product.id}`);
+                          }
+                        }}
+                        style={{ viewTransitionName: `product-image-${product.id}` }}
                       />
                       {(product.discount_percentage || product.discount) > 0 && (
-                        <div className="absolute top-2 sm:top-3 left-2 sm:left-3 bg-gradient-to-br from-red-500 to-red-600 text-white w-9 h-9 sm:w-11 sm:h-11 rounded-full text-xs sm:text-sm font-bold shadow-lg flex items-center justify-center hover:shadow-xl transition-shadow">
+                        <div className="absolute top-2 sm:top-3 left-2 sm:left-3 bg-gradient-to-br from-red-500 to-red-600 text-white w-9 h-9 sm:w-11 sm:h-11 rounded-full text-xs sm:text-sm font-bold shadow-lg flex items-center justify-center hover:shadow-xl transition-shadow z-10">
                           <span>{product.discount_percentage || product.discount}%</span>
+                        </div>
+                      )}
+                      {product.is_on_sale && product.time_left > 0 && (
+                        <div className="absolute top-12 sm:top-16 left-2 sm:left-3 bg-green-600 text-white px-2 py-1 rounded text-[10px] sm:text-xs font-bold shadow-lg z-10">
+                          باقي {Math.ceil(product.time_left / 86400)} يوم
                         </div>
                       )}
                       {product.stock > 0 && product.stock <= 5 && (
@@ -373,9 +387,9 @@ const Categories = ({ user }) => {
 
                       {/* Price */}
                       <div className="flex items-center justify-between mb-2 pb-1 sm:pb-2 border-b border-gray-100">
-                        {(product.discount_percentage || product.discount) > 0 ? (
+                        {product.is_on_sale ? (
                           <div className="flex items-center space-x-1 sm:space-x-2 space-x-reverse flex-1">
-                            <span className="text-xs sm:text-sm md:text-lg font-bold text-indigo-600">
+                            <span className="text-xs sm:text-sm md:text-lg font-bold text-red-600">
                               {formatCurrency(product.discounted_price)}
                             </span>
                             <span className="text-xs text-gray-500 line-through">
