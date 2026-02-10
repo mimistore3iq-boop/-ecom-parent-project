@@ -67,11 +67,12 @@ const CategorySlider = ({ categories, selectedCategory, onCategorySelect }) => {
           {/* Categories Container */}
           <div
             ref={sliderRef}
-            className="flex gap-3 overflow-x-auto scrollbar-hide pb-2"
+            className="flex gap-3 overflow-x-auto scrollbar-hide pb-2 horizontal-scroll-fix"
             style={{
               scrollBehavior: 'smooth',
               scrollbarWidth: 'none',
               msOverflowStyle: 'none',
+              overscrollBehaviorX: 'contain',
             }}
           >
             {/* All Categories Button */}

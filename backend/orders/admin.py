@@ -97,15 +97,23 @@ class BaseOrderAdmin(admin.ModelAdmin):
     order_number_display.admin_order_field = 'id'
     
     def customer_display(self, obj):
-        """Display customer with phone and copy buttons"""
+        """Display customer with phone and copy buttons - Professional Style"""
+        copy_script = "navigator.clipboard.writeText('{}');"
+        
         return format_html(
-            '<div style="min-width: 150px;">'
-            '<strong>{}</strong> <a href="javascript:void(0)" onclick="navigator.clipboard.writeText(\'{}\'); alert(\'تم نسخ الاسم\')" style="font-size: 0.85em; background: #e9ecef; padding: 2px 6px; border-radius: 4px; color: #4c6ef5; text-decoration: none; margin-right: 4px;" title="نسخ الاسم">نسخ</a><br>'
-            '<small style="direction: ltr; margin-top: 4px; display: inline-block;">📱 {}</small> <a href="javascript:void(0)" onclick="navigator.clipboard.writeText(\'{}\'); alert(\'تم نسخ الرقم\')" style="font-size: 0.85em; background: #e9ecef; padding: 2px 6px; border-radius: 4px; color: #4c6ef5; text-decoration: none; margin-right: 4px;" title="نسخ الرقم">نسخ</a>'
+            '<div style="min-width: 180px; background: #f8f9fa; padding: 8px; border-radius: 6px; border: 1px solid #e9ecef;">'
+            '<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">'
+            '<strong style="color: #212529;">{}</strong>'
+            '<button type="button" onclick="' + copy_script + ' alert(\'تم نسخ الاسم\')" style="padding: 2px 8px; font-size: 11px; background: #4c6ef5; color: white; border: none; border-radius: 3px; cursor: pointer;">نسخ الاسم</button>'
+            '</div>'
+            '<div style="display: flex; justify-content: space-between; align-items: center;">'
+            '<span style="direction: ltr; color: #495057; font-size: 0.9em;">📱 {}</span>'
+            '<button type="button" onclick="' + copy_script + ' alert(\'تم نسخ الرقم\')" style="padding: 2px 8px; font-size: 11px; background: #28a745; color: white; border: none; border-radius: 3px; cursor: pointer;">نسخ الرقم</button>'
+            '</div>'
             '</div>',
             obj.customer_name, obj.customer_name, obj.customer_phone, obj.customer_phone
         )
-    customer_display.short_description = '👤 العميل'
+    customer_display.short_description = '👤 معلومات العميل'
     customer_display.admin_order_field = 'customer_name'
     
     def total_display(self, obj):

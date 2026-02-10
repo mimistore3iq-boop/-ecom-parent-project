@@ -281,9 +281,15 @@ body::before {
 }
 
 /* Smooth Scrolling & Performance */
+html, body {
+  overscroll-behavior-y: contain; /* Prevent pull-to-refresh freezing */
+}
+
 .snap-x {
   scroll-snap-type: x mandatory;
   -webkit-overflow-scrolling: touch;
+  touch-action: pan-x pan-y;
+  overscroll-behavior-x: contain;
 }
 
 .snap-center {
@@ -295,17 +301,15 @@ body::before {
   overflow-x: auto;
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none;  /* IE/Edge */
+  touch-action: pan-x pan-y;
 }
 
-.custom-scroll-container::-webkit-scrollbar {
-  display: none; /* Chrome/Safari */
+/* Fix for touch conflict */
+.horizontal-scroll-fix {
+  touch-action: pan-x;
+  -webkit-overflow-scrolling: touch;
 }
 
-.hide-scrollbar {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-
-.hide-scrollbar::-webkit-scrollbar {
-  display: none;
+.vertical-scroll-fix {
+  touch-action: pan-y;
 }

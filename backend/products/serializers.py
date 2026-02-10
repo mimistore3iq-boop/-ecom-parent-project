@@ -27,7 +27,7 @@ class ProductListSerializer(serializers.ModelSerializer):
     discount_percentage = serializers.SerializerMethodField()
     discounted_price = serializers.SerializerMethodField()
     is_on_sale = serializers.SerializerMethodField()
-    time_left = serializers.IntegerField(source='time_left', read_only=True)
+    time_left = serializers.IntegerField(read_only=True)
     stock = serializers.IntegerField(source='stock_quantity', read_only=True)
 
     class Meta:
@@ -78,7 +78,7 @@ class ProductSerializer(serializers.ModelSerializer):
     discount_percentage = serializers.SerializerMethodField()
     discounted_price = serializers.SerializerMethodField()
     is_on_sale = serializers.SerializerMethodField()
-    time_left = serializers.IntegerField(source='time_left', read_only=True)
+    time_left = serializers.IntegerField(read_only=True)
     stock = serializers.IntegerField(source='stock_quantity', read_only=True)
 
     class Meta:

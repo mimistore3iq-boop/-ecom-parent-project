@@ -2,8 +2,11 @@
 {% extends "admin/change_form.html" %}
 {% load i18n static %}
 
-{% block extrastyle %}{{ block.super }}
+{% block extrahead %}{{ block.super }}
 <script src="{% static 'js/product_form.js' %}"></script>
+{% endblock %}
+
+{% block extrastyle %}{{ block.super }}
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 <style>
@@ -238,25 +241,25 @@ input[type="checkbox"], input[type="radio"] {
 
         <!-- Tab Navigation -->
         <div class="tab-nav">
-            <button type="button" class="tab-nav-item active" data-tab="basic-info">
+            <button type="button" class="tab-nav-item active" data-tab="basic-info" onclick="switchToTab('basic-info')">
                 <i class="fas fa-info-circle"></i> معلومات أساسية
             </button>
-            <button type="button" class="tab-nav-item" data-tab="pricing">
+            <button type="button" class="tab-nav-item" data-tab="pricing" onclick="switchToTab('pricing')">
                 <i class="fas fa-money-bill-wave"></i> التسعير والخصومات
             </button>
-            <button type="button" class="tab-nav-item" data-tab="inventory">
+            <button type="button" class="tab-nav-item" data-tab="inventory" onclick="switchToTab('inventory')">
                 <i class="fas fa-boxes"></i> إدارة المخزون
             </button>
-            <button type="button" class="tab-nav-item" data-tab="gallery">
+            <button type="button" class="tab-nav-item" data-tab="gallery" onclick="switchToTab('gallery')">
                 <i class="fas fa-images"></i> معرض الصور
             </button>
-            <button type="button" class="tab-nav-item" data-tab="details">
+            <button type="button" class="tab-nav-item" data-tab="details" onclick="switchToTab('details')">
                 <i class="fas fa-tag"></i> تفاصيل المنتج
             </button>
-            <button type="button" class="tab-nav-item" data-tab="seo">
+            <button type="button" class="tab-nav-item" data-tab="seo" onclick="switchToTab('seo')">
                 <i class="fas fa-search"></i> SEO والبيانات الوصفية
             </button>
-            <button type="button" class="tab-nav-item" data-tab="features">
+            <button type="button" class="tab-nav-item" data-tab="features" onclick="switchToTab('features')">
                 <i class="fas fa-star"></i> الحالة والمميزات
             </button>
         </div>
