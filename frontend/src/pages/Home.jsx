@@ -203,28 +203,34 @@ const Home = ({ user, setUser }) => {
   };
 
   const filteredProducts = products.filter(product => {
-    console.log('Filtering product:', product, 'selectedCategory:', selectedCategory);
-    const matchesCategory = !selectedCategory || product.category === selectedCategory;
+    // التحقق مما إذا كان المنتج ينتمي للقسم المختار أو أي من أبنائه
+    const isDirectMatch = !selectedCategory || product.category === selectedCategory;
+    
+    // جلب القسم المختار مع أبنائه
+    const selectedCatObj = categories.find(c => c.id === selectedCategory);
+    const childIds = selectedCatObj?.children?.map(child => child.id) || [];
+    const isChildMatch = childIds.includes(product.category);
+
+    const matchesCategory = isDirectMatch || isChildMatch;
+
     const matchesSearch = searchTerm === '' || 
       (product.name && product.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
       (product.description && product.description.toLowerCase().includes(searchTerm.toLowerCase()));
     
-    // If no category is selected (homepage), only show products with show_on_homepage = true
-    // If a category is selected, show all products in that category
     const matchesHomepage = selectedCategory ? true : (product.show_on_homepage !== false);
     
     return matchesCategory && matchesSearch && matchesHomepage;
   });
 
-  // Helper function to get products for a specific category
-  const getProductsForCategory = (categoryId) => {
+  // دالة جلب منتجات القسم مع كافة أبنائه (للعرض في الصفحة الرئيسية)
+  const getProductsForCategoryTree = (category) => {
+    const childIds = category.children?.map(child => child.id) || [];
+    const allIds = [category.id, ...childIds];
+    
     return products.filter(product => {
-      const matchesCategory = product.category === categoryId;
+      const matchesCategory = allIds.includes(product.category);
       const isActive = product.is_active !== false;
-      const matchesSearch = searchTerm === '' ||
-        (product.name && product.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        (product.description && product.description.toLowerCase().includes(searchTerm.toLowerCase()));
-      return matchesCategory && isActive && matchesSearch;
+      return matchesCategory && isActive;
     });
   };
 
@@ -330,7 +336,7 @@ const Home = ({ user, setUser }) => {
                       </svg>
                     </button>
                     <div className="border-t border-gray-100 my-1"></div>
-                    {categories.map(category => (
+                    {categories.filter(c => !c.parent).map(category => (
                       <button
                         key={category.id}
                         onClick={() => {
@@ -391,7 +397,11 @@ const Home = ({ user, setUser }) => {
       </div>
 
       {/* Category Slider */}
-      <CategorySlider categories={categories} selectedCategory={selectedCategory} onCategorySelect={setSelectedCategory} />
+      <CategorySlider 
+        categories={categories.filter(c => !c.parent)} 
+        selectedCategory={selectedCategory} 
+        onCategorySelect={setSelectedCategory} 
+      />
 
       {/* Products by Category Sections */}
       <div className="bg-gradient-to-b from-white to-gray-50">
@@ -399,193 +409,43 @@ const Home = ({ user, setUser }) => {
           // If a specific category is selected, show grid view with filter
           <section className="py-12">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="text-center mb-12">
-                <h3 className="text-3xl md:text-4xl font-bold mb-4 text-gray-800 inline-block relative">
-                  {categories.find(c => c.id === selectedCategory)?.name || 'منتجاتنا'}
-                  <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-16 h-1 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full"></div>
-                </h3>
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+                <div>
+                  <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight">
+                    {categories.find(c => c.id === selectedCategory)?.name || 'المنتجات'}
+                  </h2>
+                  <p className="mt-2 text-sm text-gray-500">
+                    تم العثور على {filteredProducts.length} منتج
+                  </p>
+                </div>
               </div>
-
-              {filteredProducts.length === 0 ? (
-                <div className="text-center py-16 fade-in">
-                  <div className="inline-block p-6 rounded-full bg-gray-100 mb-6">
-                    <svg className="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-                    </svg>
-                  </div>
-                  <h3 className="text-2xl font-bold text-gray-700 mb-3">لا توجد منتجات</h3>
-                  <p className="text-gray-600 max-w-md mx-auto mb-6">لم يتم العثور على منتجات في هذا القسم</p>
-                </div>
-              ) : (
-                <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-8">
-              {filteredProducts.map((product, index) => (
-                <div 
-                  key={product.id} 
-                  className="product-card bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-gray-100 fade-in cursor-pointer"
-                  style={{ animationDelay: `${index * 0.1}s` }}
-                  onClick={() => navigate(`/product/${product.id}`)}
-                >
-                  {/* Product Image */}
-                  <div className="relative overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 w-full aspect-square">
-                    <img
-                      src={product.image || '/placeholder-product.png'}
-                      alt={product.name}
-                      className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
-                      onLoad={(e) => {
-                        if (index < 3) {
-                          console.log(`✅ تم تحميل صورة: ${product.name}`);
-                        }
-                      }}
-                      onError={(e) => {
-                        console.log(`❌ فشل تحميل صورة: ${product.name}`);
-                        console.log(`   URL كان: ${product.image || '/placeholder-product.png'}`);
-                        e.target.onerror = null;
-                        e.target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400"%3E%3Crect fill="%23f3f4f6" width="400" height="400"/%3E%3Ctext fill="%239ca3af" font-family="sans-serif" font-size="24" dy="10.5" font-weight="bold" x="50%25" y="50%25" text-anchor="middle"%3Eلا توجد صورة%3C/text%3E%3C/svg%3E';
-                      }}
-                    />
-                    {(product.discount_percentage || product.discount) > 0 && (
-                      <div className="absolute top-3 left-3 bg-gradient-to-r from-red-500 to-red-600 text-white w-10 h-10 rounded-full text-xs font-bold shadow-lg flex items-center justify-center">
-                        <span>{product.discount_percentage || product.discount}%</span>
-                      </div>
-                    )}
-                    {product.stock <= 5 && product.stock > 0 && (
-                      <div className="absolute top-3 right-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white px-3 py-1 rounded-full text-sm font-medium shadow-lg flex items-center">
-                        <svg className="h-4 w-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        <span className="mr-1">متبقي {product.stock}</span>
-                      </div>
-                    )}
-                    {product.stock === 0 && (
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-black/50 flex items-center justify-center">
-                        <div className="text-center p-4">
-                          <span className="text-white font-bold text-xl block mb-2">نفد المخزون</span>
-                          <span className="text-white/80 text-sm">غير متوفر حالياً</span>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Product Info */}
-                  <div className="p-3 md:p-4 bg-gradient-to-b from-white to-gray-50 border-t border-gray-100">
-                    <div className="flex justify-between items-start mb-2">
-                      <h4 className="font-bold text-sm md:text-base text-gray-800 line-clamp-3 flex-1 pr-2">
-                        {product.name}
-                      </h4>
-                      {product.brand && (
-                        <span className="text-xs text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded-full whitespace-nowrap">
-                          {product.brand}
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-gray-600 text-xs mb-3 line-clamp-1 pr-2 hidden md:block">
-                      {product.description || 'لا يوجد وصف متاح للمنتج'}
-                    </p>
-
-                    {/* Price */}
-                    <div className="flex items-center justify-between mb-3 pb-2 border-b border-gray-100">
-                      {(product.discount_percentage || product.discount) > 0 ? (
-                        <div className="flex items-center space-x-2 space-x-reverse flex-1">
-                          <span className="text-base md:text-lg font-bold text-indigo-600">
-                            {formatCurrency(product.discounted_price || (product.price * (1 - (product.discount_percentage || product.discount) / 100)))}
-                          </span>
-                          <span className="text-xs md:text-sm text-gray-500 line-through">
-                            {formatCurrency(product.price)}
-                          </span>
-                        </div>
-                      ) : (
-                        <div className="flex-1">
-                          <span className="text-base md:text-lg font-bold text-indigo-600">
-                            {formatCurrency(product.price)}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Action Buttons */}
-                    <div className="flex space-x-1 space-x-reverse">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          addToCart(product);
-                        }}
-                        disabled={product.stock === 0}
-                        className={`flex-1 py-2 px-2 rounded-lg font-medium transition-all text-xs ${product.stock === 0
-                          ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
-                          : 'btn-primary shadow-md hover:shadow-lg'
-                          }`}
-                      >
-                        {product.stock === 0 ? (
-                          <span className="flex items-center justify-center">
-                            <svg className="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
-                            </svg>
-                            نفد المخزون
-                          </span>
-                        ) : (
-                          <span className="flex items-center justify-center">
-                            <svg className="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m0 0h8" />
-                            </svg>
-                            <span className="hidden sm:inline">أضف للسلة</span><span className="sm:hidden">سلة</span>
-                          </span>
-                        )}
-                      </button>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          navigate(`/product/${product.id}`);
-                        }}
-                        className="px-2 py-2 border border-indigo-500 text-indigo-600 rounded-lg hover:bg-indigo-50 transition-colors flex items-center text-xs"
-                      >
-                        <svg className="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                        </svg>
-                        <span className="hidden sm:inline">تفاصيل</span><span className="sm:hidden">عرض</span>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-                </div>
-              )}
+              
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
+                {filteredProducts.map(product => (
+                  <CategoryProductsSection.ProductCard 
+                    key={product.id} 
+                    product={product} 
+                    onAddToCart={addToCart} 
+                  />
+                ))}
+              </div>
             </div>
           </section>
         ) : (
-          // If no category selected, show carousel view of all categories with their products
-          <>
-            <section className="py-8">
-              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="text-center mb-8">
-                  <h3 className="text-3xl md:text-4xl font-bold mb-4 text-gray-800">منتجاتنا</h3>
-                  <p className="text-gray-600">اكتشف أحدث المنتجات الإلكترونية بأفضل الأسعار وجودة في العراق</p>
-                </div>
-              </div>
-            </section>
+          // Homepage: Show sections for each parent category
+          categories.filter(c => !c.parent).map(category => {
+            const categoryProducts = getProductsForCategoryTree(category);
+            if (categoryProducts.length === 0) return null;
             
-            {/* Category Product Sliders */}
-            {categories.map(category => {
-              const categoryProducts = getProductsForCategory(category.id);
-              return (
-                <CategoryProductsSection
-                  key={category.id}
-                  category={category}
-                  products={categoryProducts}
-                  onAddToCart={addToCart}
-                  onViewDetails={(product) => {
-                  if (document.startViewTransition) {
-                    document.startViewTransition(() => {
-                      navigate(`/product/${product.id}`);
-                    });
-                  } else {
-                    navigate(`/product/${product.id}`);
-                  }
-                }}
-                />
-              );
-            })}
-          </>
+            return (
+              <CategoryProductsSection
+                key={category.id}
+                category={category}
+                products={categoryProducts}
+                onAddToCart={addToCart}
+              />
+            );
+          })
         )}
       </div>
 

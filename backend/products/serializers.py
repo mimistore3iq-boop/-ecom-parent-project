@@ -34,8 +34,8 @@ class ProductListSerializer(serializers.ModelSerializer):
         model = Product
         fields = ['id', 'name', 'price', 'discount_price', 'discount_amount', 'discount_start', 'discount_end', 
                   'discount_percentage', 'discounted_price', 'is_on_sale', 'time_left', 'stock_quantity', 'stock', 
-                  'category_name', 'main_image', 'image_2', 'image_3', 'image_4', 'main_image_url', 'image', 
-                  'is_featured', 'show_on_homepage', 'brand', 'is_in_stock']
+                  'category_name', 'main_image', 'image_2', 'image_3', 'image_4', 'image_5', 'image_6', 'image_7', 'image_8',
+                  'main_image_url', 'image', 'is_featured', 'show_on_homepage', 'brand', 'is_in_stock']
         read_only_fields = ['id', 'main_image_url', 'image', 'discount_percentage', 'discounted_price', 'is_on_sale', 
                             'time_left', 'category_name', 'stock', 'is_in_stock']
 
@@ -88,7 +88,8 @@ class ProductSerializer(serializers.ModelSerializer):
             'price', 'discount_price', 'discount_amount', 'discount_start', 'discount_end',
             'discount_percentage', 'discounted_price', 'is_on_sale', 'time_left',
             'stock_quantity', 'stock', 'low_stock_threshold',
-            'main_image', 'image_2', 'image_3', 'image_4', 'main_image_url', 'image', 'all_images',
+            'main_image', 'image_2', 'image_3', 'image_4', 'image_5', 'image_6', 'image_7', 'image_8',
+            'main_image_url', 'image', 'all_images',
             'brand', 'model', 'color', 'size', 'weight',
             'slug', 'meta_description', 'tags',
             'is_active', 'is_featured', 'show_on_homepage', 'display_order',
@@ -104,7 +105,8 @@ class ProductSerializer(serializers.ModelSerializer):
 
     def get_image(self, obj):
         """إرجاع أول صورة متاحة - يستخدمها Frontend لعرض الصورة"""
-        for img_field in [obj.main_image, obj.image_2, obj.image_3, obj.image_4]:
+        for img_field in [obj.main_image, obj.image_2, obj.image_3, obj.image_4,
+                         obj.image_5, obj.image_6, obj.image_7, obj.image_8]:
             if img_field:
                 return img_field
         return None
@@ -112,7 +114,8 @@ class ProductSerializer(serializers.ModelSerializer):
     def get_all_images(self, obj):
         """إرجاع كل الصور كقائمة"""
         images = []
-        for img_field in [obj.main_image, obj.image_2, obj.image_3, obj.image_4]:
+        for img_field in [obj.main_image, obj.image_2, obj.image_3, obj.image_4,
+                         obj.image_5, obj.image_6, obj.image_7, obj.image_8]:
             if img_field:
                 images.append(img_field)
         return images if images else None
@@ -136,10 +139,11 @@ class ProductSerializer(serializers.ModelSerializer):
         # تسجيل للتحقق من البيانات
         if instance.id <= 3:  # تسجيل أول 3 منتجات فقط
             print(f"🖼️ Serializing Product: {instance.name} (ID: {instance.id})")
-            print(f"   main_image: {instance.main_image}")
-            print(f"   image_2: {instance.image_2}")
-            print(f"   image_3: {instance.image_3}")
-            print(f"   image_4: {instance.image_4}")
+            for i in range(1, 9):
+                field = 'main_image' if i == 1 else f'image_{i}'
+                val = getattr(instance, field)
+                if val:
+                    print(f"   {field}: {val}")
             print(f"   Final image field: {representation.get('image')}")
         
         return representation

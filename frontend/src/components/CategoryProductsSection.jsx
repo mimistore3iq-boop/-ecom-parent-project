@@ -56,8 +56,13 @@ const CategoryProductsSection = ({
             {products.map((product) => (
               <div
                 key={product.id}
-                className="flex-shrink-0 w-[75%] md:w-[35%] snap-center first:mr-4 last:ml-4"
-                style={{ contentVisibility: 'auto', containIntrinsicSize: '300px 400px' }}
+                className="flex-shrink-0 w-[80%] md:w-[35%] snap-center first:mr-4 last:ml-4"
+                style={{ 
+                  contentVisibility: 'auto', 
+                  containIntrinsicSize: '300px 400px',
+                  // RepaintBoundary equivalent in React
+                  willChange: 'transform'
+                }}
               >
                 <div className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 group cursor-pointer border border-gray-100 h-full flex flex-col relative">
                   {/* Time Left Badge - Top Left */}

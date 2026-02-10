@@ -31,6 +31,10 @@ class ProductAdminForm(forms.ModelForm):
             'image_2': ImgBBUploadWidget(attrs={'placeholder': 'رابط الصورة الثانية من ImgBB'}),
             'image_3': ImgBBUploadWidget(attrs={'placeholder': 'رابط الصورة الثالثة من ImgBB'}),
             'image_4': ImgBBUploadWidget(attrs={'placeholder': 'رابط الصورة الرابعة من ImgBB'}),
+            'image_5': ImgBBUploadWidget(attrs={'placeholder': 'رابط الصورة الخامسة من ImgBB'}),
+            'image_6': ImgBBUploadWidget(attrs={'placeholder': 'رابط الصورة السادسة من ImgBB'}),
+            'image_7': ImgBBUploadWidget(attrs={'placeholder': 'رابط الصورة السابعة من ImgBB'}),
+            'image_8': ImgBBUploadWidget(attrs={'placeholder': 'رابط الصورة الثامنة من ImgBB'}),
         }
 
 
@@ -60,7 +64,7 @@ class ProductAdmin(admin.ModelAdmin):
             'fields': ('stock_quantity', 'low_stock_threshold')
         }),
         ('🖼️ معرض الصور', {
-            'fields': ('main_image', 'image_2', 'image_3', 'image_4')
+            'fields': ('main_image', 'image_2', 'image_3', 'image_4', 'image_5', 'image_6', 'image_7', 'image_8')
         }),
         ('🏷️ تفاصيل المنتج', {
             'fields': ('color', 'size', 'weight')

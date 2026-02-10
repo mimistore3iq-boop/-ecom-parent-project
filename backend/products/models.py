@@ -87,6 +87,10 @@ class Product(models.Model):
     image_2 = models.URLField('رابط الصورة الثانية (ImgBB)', blank=True, null=True)
     image_3 = models.URLField('رابط الصورة الثالثة (ImgBB)', blank=True, null=True)
     image_4 = models.URLField('رابط الصورة الرابعة (ImgBB)', blank=True, null=True)
+    image_5 = models.URLField('رابط الصورة الخامسة (ImgBB)', blank=True, null=True)
+    image_6 = models.URLField('رابط الصورة السادسة (ImgBB)', blank=True, null=True)
+    image_7 = models.URLField('رابط الصورة السابعة (ImgBB)', blank=True, null=True)
+    image_8 = models.URLField('رابط الصورة الثامنة (ImgBB)', blank=True, null=True)
     
     # Product details
     brand = models.CharField('العلامة التجارية', max_length=100, blank=True)
@@ -215,7 +219,8 @@ class Product(models.Model):
     def all_images(self):
         """Get all product image URLs (strings)"""
         images = []
-        for img in [self.main_image, self.image_2, self.image_3, self.image_4]:
+        for img in [self.main_image, self.image_2, self.image_3, self.image_4, 
+                    self.image_5, self.image_6, self.image_7, self.image_8]:
             if img:
                 images.append(img)
         return images
