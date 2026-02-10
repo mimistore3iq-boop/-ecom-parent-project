@@ -457,4 +457,101 @@ input[type="checkbox"], input[type="radio"] {
         </div>
     </form>
 </div>
+
+<script>
+// كود تشغيل التبويبات المباشر لضمان عدم التعليق
+function switchToTab(tabId) {
+    console.log('محاولة فتح التبويب:', tabId);
+    
+    // تنظيف المعرف من أي علامات إضافية
+    let cleanId = tabId.toString().replace('#', '').replace('tab-', '').replace('-tab', '');
+    
+    // خريطة الربط بين الأسماء العربية والانجليزية
+    const mapping = {
+        'معلومات-أساسية': 'basic-info',
+        'التسعير-والخصومات': 'pricing',
+        'إدارة-المخزون': 'inventory',
+        'معرض-الصور': 'gallery',
+        'تفاصيل-المنتج': 'details',
+        'SEO-والبيانات-الوصفية': 'seo',
+        'الحالة-والمميزات': 'features',
+        'basic-info': 'basic-info',
+        'pricing': 'pricing',
+        'inventory': 'inventory',
+        'gallery': 'gallery',
+        'details': 'details',
+        'seo': 'seo',
+        'features': 'features'
+    };
+    
+    const targetId = mapping[cleanId] || cleanId;
+    const targetTab = document.querySelector(`[data-tab="${targetId}"]`);
+    const targetContent = document.getElementById(targetId);
+
+    if (targetTab && targetContent) {
+        // إخفاء الكل أولاً
+        document.querySelectorAll('.tab-nav-item').forEach(btn => btn.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(content => {
+            content.classList.remove('active');
+            content.style.display = 'none';
+        });
+        
+        // إظهار التبويب المطلوب
+        targetTab.classList.add('active');
+        targetContent.classList.add('active');
+        targetContent.style.display = 'block';
+        
+        // تحديث شريط العنوان (URL)
+        window.history.replaceState(null, null, '#' + cleanId + '-tab');
+        
+        // تحديث العداد السفلي إذا وجد
+        const currentIdx = Array.from(document.querySelectorAll('.tab-nav-item')).indexOf(targetTab) + 1;
+        if (document.querySelector('.current-tab')) {
+            document.querySelector('.current-tab').textContent = currentIdx;
+        }
+        
+        console.log('تم التبديل إلى:', targetId);
+    } else {
+        console.error('لم يتم العثور على التبويب:', targetId);
+    }
+}
+
+// تشغيل عند تحميل الصفحة
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('تم تحميل قالب المنتج، بدء تهيئة التبويبات...');
+    
+    // التأكد من أن التبويب الأول يظهر دائماً كبداية
+    const activeTab = document.querySelector('.tab-nav-item.active');
+    if (activeTab) {
+        switchToTab(activeTab.getAttribute('data-tab'));
+    } else {
+        switchToTab('basic-info');
+    }
+
+    // إضافة مستمع للأحداث للروابط (Hash)
+    window.addEventListener('hashchange', function() {
+        if (window.location.hash) {
+            switchToTab(window.location.hash);
+        }
+    });
+});
+
+// دالة التنقل (السابق/التالي)
+function navigateTab(direction) {
+    const tabs = Array.from(document.querySelectorAll('.tab-nav-item'));
+    const activeTab = document.querySelector('.tab-nav-item.active');
+    const currentIndex = tabs.indexOf(activeTab);
+    
+    let newIndex;
+    if (direction === 'next') {
+        newIndex = Math.min(currentIndex + 1, tabs.length - 1);
+    } else {
+        newIndex = Math.max(currentIndex - 1, 0);
+    }
+    
+    if (newIndex !== currentIndex) {
+        switchToTab(tabs[newIndex].getAttribute('data-tab'));
+    }
+}
+</script>
 {% endblock %}
