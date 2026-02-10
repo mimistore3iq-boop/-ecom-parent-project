@@ -77,9 +77,18 @@ def product_list(request):
     """
     قائمة جميع المنتجات مرتبة حسب display_order
     """
-    products = Product.objects.all().order_by('display_order', '-created_at')
-    serializer = ProductSerializer(products, many=True)
-    return Response(serializer.data)
+    try:
+        products = Product.objects.all().order_by('display_order', '-created_at')
+        print(f"📡 Product list requested. Found {products.count()} products.")
+        serializer = ProductSerializer(products, many=True)
+        data = serializer.data
+        print(f"✅ Successfully serialized {len(data)} products.")
+        return Response(data)
+    except Exception as e:
+        import traceback
+        print(f"❌ Error in product_list: {str(e)}")
+        traceback.print_exc()
+        return Response({'error': str(e)}, status=500)
 
 @api_view(['GET'])
 @permission_classes([AllowAny])

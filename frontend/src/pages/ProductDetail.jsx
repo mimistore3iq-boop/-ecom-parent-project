@@ -306,8 +306,8 @@ const ProductDetail = ({ user }) => {
           <div className="space-y-6">
             <div>
               <h1 className="text-3xl font-bold text-gray-900 mb-2">{product.name}</h1>
-              {product.category && (
-                <p className="text-primary-600 font-medium">{product.category.name}</p>
+              {product.category_name && (
+                <p className="text-primary-600 font-medium">{product.category_name}</p>
               )}
             </div>
 

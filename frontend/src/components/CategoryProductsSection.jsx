@@ -47,13 +47,18 @@ const CategoryProductsSection = ({
             style={{ 
               WebkitOverflowScrolling: 'touch',
               scrollbarWidth: 'none',
-              msOverflowStyle: 'none'
+              msOverflowStyle: 'none',
+              overscrollBehaviorX: 'contain',
+              scrollPadding: '1rem',
+              contain: 'content',
+              scrollBehavior: 'smooth'
             }}
           >
             {products.map((product) => (
               <div
                 key={product.id}
                 className="flex-shrink-0 w-[80%] md:w-[45%] snap-center"
+                style={{ contentVisibility: 'auto', containIntrinsicSize: '300px 400px' }}
               >
                 <div className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 hover:scale-[1.02] group cursor-pointer border border-gray-100 h-full flex flex-col">
                   {/* Product Image Wrapper */}
@@ -76,7 +81,10 @@ const CategoryProductsSection = ({
 
                     {/* Time Left Badge - Top Left (below discount) */}
                     {product.is_on_sale && product.time_left > 0 && (
-                      <div className="absolute top-12 sm:top-16 left-2 sm:left-3 bg-green-600 text-white px-2 py-1 rounded-lg text-[10px] sm:text-xs font-bold shadow-lg z-10 animate-pulse">
+                      <div 
+                        className="absolute top-12 sm:top-16 left-2 sm:left-3 bg-green-600 text-white px-2 py-1 rounded-lg text-[10px] sm:text-xs font-bold shadow-lg z-10 animate-pulse"
+                        style={{ willChange: 'transform' }}
+                      >
                         باقي {Math.ceil(product.time_left / 86400)} يوم
                       </div>
                     )}

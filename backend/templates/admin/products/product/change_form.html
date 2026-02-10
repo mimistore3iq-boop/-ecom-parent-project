@@ -5,9 +5,10 @@
 {% block extrastyle %}{{ block.super }}
 <script src="{% static 'js/product_form.js' %}"></script>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 <style>
 body {
-    font-family: 'Poppins', sans-serif;
+    font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 /* Main form container */
@@ -29,7 +30,7 @@ body {
 }
 
 .form-container h2 i {
-    margin-right: 0.5rem;
+    margin-left: 0.5rem;
     color: #4c6ef5;
 }
 
@@ -55,6 +56,10 @@ body {
     transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
 }
 
+.form-row input[type="checkbox"] {
+    width: auto;
+}
+
 .form-row input:focus,
 .form-row select:focus,
 .form-row textarea:focus {
@@ -74,41 +79,37 @@ body {
     flex-wrap: wrap;
     margin-bottom: 1.5rem;
     border-bottom: 1px solid #e9ecef;
+    background: #f8f9fa;
+    padding: 0.5rem;
+    border-radius: 0.5rem;
 }
 
 .tab-nav-item {
-    padding: 0.75rem 1.5rem;
+    padding: 0.75rem 1.25rem;
     cursor: pointer;
     background: none;
     border: none;
-    font-size: 1rem;
+    font-size: 0.95rem;
     font-weight: 500;
     color: #6c757d;
     position: relative;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
+    border-radius: 0.25rem;
+    margin-right: 0.25rem;
 }
 
 .tab-nav-item:hover {
+    background: rgba(76, 110, 245, 0.05);
     color: #4c6ef5;
 }
 
 .tab-nav-item.active {
-    color: #4c6ef5;
-}
-
-.tab-nav-item.active::after {
-    content: "";
-    position: absolute;
-    bottom: -1px;
-    left: 0;
-    width: 100%;
-    height: 3px;
     background: #4c6ef5;
-    border-radius: 3px 3px 0 0;
+    color: white;
 }
 
 .tab-nav-item i {
-    margin-right: 0.5rem;
+    margin-left: 0.5rem;
 }
 
 /* Tab content */
@@ -118,7 +119,7 @@ body {
 
 .tab-content.active {
     display: block;
-    animation: fadeIn 0.3s ease-in-out;
+    animation: fadeIn 0.2s ease-in-out;
 }
 
 /* Manual Tab Navigation */
@@ -142,7 +143,7 @@ body {
     border-radius: 0.25rem;
     cursor: pointer;
     font-weight: 500;
-    transition: background 0.3s ease;
+    transition: background 0.2s ease;
 }
 
 .tab-nav-btn:hover {
@@ -159,38 +160,33 @@ body {
 }
 
 .tab-indicator {
-    font-weight: 500;
+    font-weight: 600;
     color: #495057;
 }
 
 @keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+    from { opacity: 0; transform: translateY(5px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 /* Buttons */
 .submit-row {
     padding: 1.5rem 0;
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-end;
+    gap: 1rem;
     border-top: 1px solid #e9ecef;
     margin-top: 1.5rem;
 }
 
 .button, .submit-row input {
-    padding: 0.5rem 1.5rem;
+    padding: 0.6rem 1.5rem;
     border-radius: 0.25rem;
     font-weight: 500;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
     border: none;
-    font-size: 1rem;
+    font-size: 0.95rem;
 }
 
 .button.default, .submit-row input[type="submit"] {
@@ -211,138 +207,25 @@ body {
     background: #dee2e6;
 }
 
-/* Image upload */
-.image-upload {
-    display: flex;
-    align-items: center;
-    margin-bottom: 1rem;
-}
-
-.image-upload img {
-    max-width: 100px;
-    max-height: 100px;
-    border-radius: 0.25rem;
-    margin-right: 1rem;
-}
-
-.image-upload .upload-btn {
-    background: #4c6ef5;
-    color: white;
-    padding: 0.5rem 1rem;
-    border-radius: 0.25rem;
-    cursor: pointer;
-    transition: background 0.3s ease;
-}
-
-.image-upload .upload-btn:hover {
-    background: #364fc7;
-}
-
 /* Checkbox and radio */
 input[type="checkbox"], input[type="radio"] {
-    margin-right: 0.5rem;
-    width: 1rem;
-    height: 1rem;
+    margin-left: 0.5rem;
+    width: 1.1rem;
+    height: 1.1rem;
     cursor: pointer;
 }
 
 /* Responsive */
 @media (max-width: 768px) {
-    .form-container {
-        padding: 1rem;
-        margin-bottom: 1rem;
-    }
-
-    .form-container h2 {
-        font-size: 1.1rem;
-    }
-
     .tab-nav {
-        flex-direction: column;
-        margin-bottom: 1rem;
+        flex-direction: row;
+        overflow-x: auto;
+        white-space: nowrap;
     }
-
+    
     .tab-nav-item {
-        text-align: right;
-        padding: 0.75rem 1rem;
-        border-bottom: 1px solid #e9ecef;
-    }
-
-    .tab-nav-item:last-child {
-        border-bottom: none;
-    }
-
-    .tab-nav-item.active::after {
-        left: 0;
-        width: 100%;
-        height: 2px;
-    }
-
-    .tab-nav-item i {
-        width: 20px;
-        text-align: center;
-        margin-left: 0.5rem;
-    }
-
-    /* Manual Tab Navigation */
-    .tab-navigation-buttons {
-        flex-direction: column;
-        gap: 1rem;
-        padding: 0.5rem;
-    }
-
-    .tab-nav-btn {
-        width: 100%;
-        justify-content: center;
-    }
-
-    .tab-indicator {
-        order: -1;
-        padding: 0.5rem;
-        background: #e9ecef;
-        border-radius: 0.25rem;
-        text-align: center;
-    }
-
-    .submit-row {
-        flex-direction: column;
-        gap: 1rem;
-        padding: 1rem 0;
-    }
-
-    .submit-row .button, .submit-row input {
-        width: 100%;
-        padding: 0.75rem;
-    }
-
-    /* Form fields */
-    .form-row {
-        margin-bottom: 1.25rem;
-    }
-
-    .form-row input,
-    .form-row select,
-    .form-row textarea {
-        padding: 0.75rem;
-        font-size: 16px; /* Prevents zoom on iOS */
-    }
-
-    /* Image upload */
-    .image-upload {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-
-    .image-upload img {
-        margin-right: 0;
-        margin-bottom: 1rem;
-        max-width: 100%;
-        height: auto;
-    }
-
-    .upload-btn {
-        width: 100%;
-        text-align: center;
+        padding: 0.5rem 1rem;
+        font-size: 0.85rem;
     }
 }
 </style>
@@ -355,25 +238,25 @@ input[type="checkbox"], input[type="radio"] {
 
         <!-- Tab Navigation -->
         <div class="tab-nav">
-            <button class="tab-nav-item active" data-tab="basic-info">
+            <button type="button" class="tab-nav-item active" data-tab="basic-info">
                 <i class="fas fa-info-circle"></i> معلومات أساسية
             </button>
-            <button class="tab-nav-item" data-tab="pricing">
+            <button type="button" class="tab-nav-item" data-tab="pricing">
                 <i class="fas fa-money-bill-wave"></i> التسعير والخصومات
             </button>
-            <button class="tab-nav-item" data-tab="inventory">
+            <button type="button" class="tab-nav-item" data-tab="inventory">
                 <i class="fas fa-boxes"></i> إدارة المخزون
             </button>
-            <button class="tab-nav-item" data-tab="gallery">
+            <button type="button" class="tab-nav-item" data-tab="gallery">
                 <i class="fas fa-images"></i> معرض الصور
             </button>
-            <button class="tab-nav-item" data-tab="details">
+            <button type="button" class="tab-nav-item" data-tab="details">
                 <i class="fas fa-tag"></i> تفاصيل المنتج
             </button>
-            <button class="tab-nav-item" data-tab="seo">
+            <button type="button" class="tab-nav-item" data-tab="seo">
                 <i class="fas fa-search"></i> SEO والبيانات الوصفية
             </button>
-            <button class="tab-nav-item" data-tab="features">
+            <button type="button" class="tab-nav-item" data-tab="features">
                 <i class="fas fa-star"></i> الحالة والمميزات
             </button>
         </div>
@@ -428,23 +311,28 @@ input[type="checkbox"], input[type="radio"] {
                 <h2><i class="fas fa-money-bill-wave"></i> التسعير والخصومات</h2>
 
                 <div class="form-row">
-                    <label for="{{ form.price.id_for_label }}">السعر</label>
+                    <label for="{{ form.price.id_for_label }}">السعر الأصلي</label>
                     {{ form.price }}
                 </div>
 
                 <div class="form-row">
-                    <label for="{{ form.discount.id_for_label }}">الخصم (%)</label>
-                    {{ form.discount }}
+                    <label for="{{ form.discount_price.id_for_label }}">السعر بعد الخصم</label>
+                    {{ form.discount_price }}
                 </div>
 
                 <div class="form-row">
-                    <label for="{{ form.special_offer.id_for_label }}">عرض خاص</label>
-                    {{ form.special_offer }}
+                    <label for="{{ form.discount_amount.id_for_label }}">مبلغ الخصم (د.ع)</label>
+                    {{ form.discount_amount }}
                 </div>
 
                 <div class="form-row">
-                    <label for="{{ form.special_price.id_for_label }}">سعر العرض الخاص</label>
-                    {{ form.special_price }}
+                    <label for="{{ form.discount_start.id_for_label }}">تاريخ بدء الخصم</label>
+                    {{ form.discount_start }}
+                </div>
+
+                <div class="form-row">
+                    <label for="{{ form.discount_end.id_for_label }}">تاريخ انتهاء الخصم</label>
+                    {{ form.discount_end }}
                 </div>
             </div>
         </div>
@@ -454,23 +342,13 @@ input[type="checkbox"], input[type="radio"] {
                 <h2><i class="fas fa-boxes"></i> إدارة المخزون</h2>
 
                 <div class="form-row">
-                    <label for="{{ form.stock.id_for_label }}">الكمية المتوفرة</label>
-                    {{ form.stock }}
+                    <label for="{{ form.stock_quantity.id_for_label }}">الكمية المتوفرة</label>
+                    {{ form.stock_quantity }}
                 </div>
 
                 <div class="form-row">
-                    <label for="{{ form.low_stock_threshold.id_for_label }}">عتبة المخزون المنخفض</label>
+                    <label for="{{ form.low_stock_threshold.id_for_label }}">حد التنبيه للمخزون</label>
                     {{ form.low_stock_threshold }}
-                </div>
-
-                <div class="form-row">
-                    <label for="{{ form.track_inventory.id_for_label }}">تتبع المخزون</label>
-                    {{ form.track_inventory }}
-                </div>
-
-                <div class="form-row">
-                    <label for="{{ form.allow_backorder.id_for_label }}">السماح بالطلب عند نفاد المخزون</label>
-                    {{ form.allow_backorder }}
                 </div>
             </div>
         </div>
@@ -480,21 +358,23 @@ input[type="checkbox"], input[type="radio"] {
                 <h2><i class="fas fa-images"></i> معرض الصور</h2>
 
                 <div class="form-row">
-                    <label for="{{ form.image.id_for_label }}">الصورة الرئيسية</label>
-                    <div class="image-upload">
-                        {% if form.instance.image %}
-                        <img src="{{ form.instance.image.url }}" alt="الصورة الرئيسية">
-                        {% else %}
-                        <img src="/placeholder-product.png" alt="لا توجد صورة">
-                        {% endif %}
-                        <div class="upload-btn">رفع صورة</div>
-                        {{ form.image }}
-                    </div>
+                    <label for="{{ form.main_image.id_for_label }}">الصورة الرئيسية (رابط ImgBB)</label>
+                    {{ form.main_image }}
                 </div>
 
                 <div class="form-row">
-                    <label for="{{ form.gallery.id_for_label }}">معرض الصور</label>
-                    {{ form.gallery }}
+                    <label for="{{ form.image_2.id_for_label }}">الصورة الثانية (رابط ImgBB)</label>
+                    {{ form.image_2 }}
+                </div>
+
+                <div class="form-row">
+                    <label for="{{ form.image_3.id_for_label }}">الصورة الثالثة (رابط ImgBB)</label>
+                    {{ form.image_3 }}
+                </div>
+
+                <div class="form-row">
+                    <label for="{{ form.image_4.id_for_label }}">الصورة الرابعة (رابط ImgBB)</label>
+                    {{ form.image_4 }}
                 </div>
             </div>
         </div>
@@ -504,28 +384,18 @@ input[type="checkbox"], input[type="radio"] {
                 <h2><i class="fas fa-tag"></i> تفاصيل المنتج</h2>
 
                 <div class="form-row">
-                    <label for="{{ form.sku.id_for_label }}">SKU</label>
-                    {{ form.sku }}
-                </div>
-
-                <div class="form-row">
-                    <label for="{{ form.weight.id_for_label }}">الوزن (kg)</label>
-                    {{ form.weight }}
-                </div>
-
-                <div class="form-row">
-                    <label for="{{ form.dimensions.id_for_label }}">الأبعاد (طول × عرض × ارتفاع)</label>
-                    {{ form.dimensions }}
-                </div>
-
-                <div class="form-row">
-                    <label for="{{ form.material.id_for_label }}">المادة</label>
-                    {{ form.material }}
-                </div>
-
-                <div class="form-row">
                     <label for="{{ form.color.id_for_label }}">اللون</label>
                     {{ form.color }}
+                </div>
+
+                <div class="form-row">
+                    <label for="{{ form.size.id_for_label }}">المقاس</label>
+                    {{ form.size }}
+                </div>
+
+                <div class="form-row">
+                    <label for="{{ form.weight.id_for_label }}">الوزن (كجم)</label>
+                    {{ form.weight }}
                 </div>
             </div>
         </div>
@@ -535,23 +405,18 @@ input[type="checkbox"], input[type="radio"] {
                 <h2><i class="fas fa-search"></i> SEO والبيانات الوصفية</h2>
 
                 <div class="form-row">
-                    <label for="{{ form.meta_title.id_for_label }}">عنوان الصفحة (Meta Title)</label>
-                    {{ form.meta_title }}
+                    <label for="{{ form.slug.id_for_label }}">الرابط (Slug)</label>
+                    {{ form.slug }}
                 </div>
 
                 <div class="form-row">
-                    <label for="{{ form.meta_description.id_for_label }}">وصف الصفحة (Meta Description)</label>
+                    <label for="{{ form.meta_description.id_for_label }}">وصف SEO</label>
                     {{ form.meta_description }}
                 </div>
 
                 <div class="form-row">
-                    <label for="{{ form.keywords.id_for_label }}">الكلمات المفتاحية</label>
-                    {{ form.keywords }}
-                </div>
-
-                <div class="form-row">
-                    <label for="{{ form.slug.id_for_label }}">الرابط (Slug)</label>
-                    {{ form.slug }}
+                    <label for="{{ form.tags.id_for_label }}">الكلمات المفتاحية</label>
+                    {{ form.tags }}
                 </div>
             </div>
         </div>
@@ -561,30 +426,31 @@ input[type="checkbox"], input[type="radio"] {
                 <h2><i class="fas fa-star"></i> الحالة والمميزات</h2>
 
                 <div class="form-row">
-                    <label for="{{ form.status.id_for_label }}">الحالة</label>
-                    {{ form.status }}
+                    <label for="{{ form.is_active.id_for_label }}">نشط</label>
+                    {{ form.is_active }}
                 </div>
 
                 <div class="form-row">
-                    <label for="{{ form.featured.id_for_label }}">مميز</label>
-                    {{ form.featured }}
+                    <label for="{{ form.is_featured.id_for_label }}">منتج مميز</label>
+                    {{ form.is_featured }}
                 </div>
 
                 <div class="form-row">
-                    <label for="{{ form.new_arrival.id_for_label }}">وصول حديث</label>
-                    {{ form.new_arrival }}
+                    <label for="{{ form.show_on_homepage.id_for_label }}">إظهار في الواجهة الرئيسية</label>
+                    {{ form.show_on_homepage }}
                 </div>
 
                 <div class="form-row">
-                    <label for="{{ form.specifications.id_for_label }}">المواصفات التقنية</label>
-                    {{ form.specifications }}
+                    <label for="{{ form.display_order.id_for_label }}">ترتيب العرض</label>
+                    {{ form.display_order }}
                 </div>
             </div>
         </div>
 
         <div class="submit-row">
-            <a href="{{ changelist_url }}" class="button">إلغاء</a>
-            <input type="submit" value="حفظ المنتج" class="default">
+            <input type="submit" value="{% trans 'Save and add another' %}" name="_addanother">
+            <input type="submit" value="{% trans 'Save and continue editing' %}" name="_continue">
+            <input type="submit" value="{% trans 'Save' %}" class="default" name="_save">
         </div>
     </form>
 </div>

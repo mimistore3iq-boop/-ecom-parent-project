@@ -36,6 +36,7 @@ class ProductAdminForm(forms.ModelForm):
 
 class ProductAdmin(admin.ModelAdmin):
     form = ProductAdminForm
+    change_form_template = 'admin/products/product/change_form.html'
     list_display = ('product_image', 'name', 'category', 'brand', 'price', 'stock_quantity', 'display_order', 'is_active', 'is_featured', 'show_on_homepage', 'created_at')
     list_filter = ('category', 'brand', 'is_active', 'is_featured', 'show_on_homepage', 'created_at')
     search_fields = ('name', 'description', 'brand', 'model')

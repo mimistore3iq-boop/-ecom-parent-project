@@ -65,7 +65,12 @@ class ProductListSerializer(serializers.ModelSerializer):
         return obj.is_on_sale
 
 class ProductSerializer(serializers.ModelSerializer):
-    category_name = serializers.CharField(source='category.name', read_only=True)
+    category_name = serializers.SerializerMethodField()
+    
+    def get_category_name(self, obj):
+        if obj.category:
+            return obj.category.name
+        return "بدون قسم"
     main_image_url = serializers.SerializerMethodField()
     image = serializers.SerializerMethodField()
     all_images = serializers.SerializerMethodField()

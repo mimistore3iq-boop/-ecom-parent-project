@@ -41,14 +41,14 @@ class BaseOrderAdmin(admin.ModelAdmin):
         'customer_name', 'customer_phone', 'customer_email'
     )
     readonly_fields = (
-        'id', 'created_at', 'updated_at', 'total'
+        'id', 'created_at', 'updated_at', 'total', 'customer_name_copy', 'customer_phone_copy'
     )
     inlines = [OrderItemInline]
     list_per_page = 25
     
     fieldsets = (
         ('🛒 معلومات الطلب الأساسية', {
-            'fields': ('id', 'customer_name', 'customer_phone', 'customer_email', 'created_at', 'updated_at'),
+            'fields': ('id', 'customer_name_copy', 'customer_phone_copy', 'customer_email', 'created_at', 'updated_at'),
             'classes': ('wide',)
         }),
         ('📊 حالة الطلب والدفع', {
@@ -73,6 +73,20 @@ class BaseOrderAdmin(admin.ModelAdmin):
     
     actions = ['mark_as_confirmed', 'mark_as_preparing', 'mark_as_shipped', 'mark_as_delivered', 'mark_as_cancelled']
     
+    def customer_name_copy(self, obj):
+        return format_html(
+            '<strong>{}</strong> <a href="javascript:void(0)" onclick="navigator.clipboard.writeText(\'{}\'); alert(\'تم نسخ الاسم\')" style="background: #e9ecef; padding: 4px 8px; border-radius: 4px; color: #4c6ef5; text-decoration: none; margin-right: 10px; border: 1px solid #dee2e6;" title="نسخ الاسم">📋 نسخ الاسم</a>',
+            obj.customer_name, obj.customer_name
+        )
+    customer_name_copy.short_description = '👤 اسم العميل'
+
+    def customer_phone_copy(self, obj):
+        return format_html(
+            '<span style="direction: ltr; display: inline-block;">{}</span> <a href="javascript:void(0)" onclick="navigator.clipboard.writeText(\'{}\'); alert(\'تم نسخ الرقم\')" style="background: #e9ecef; padding: 4px 8px; border-radius: 4px; color: #4c6ef5; text-decoration: none; margin-right: 10px; border: 1px solid #dee2e6;" title="نسخ الرقم">📋 نسخ الرقم</a>',
+            obj.customer_phone, obj.customer_phone
+        )
+    customer_phone_copy.short_description = '📱 رقم الهاتف'
+
     def order_number_display(self, obj):
         """Display order number with icon"""
         return format_html(
@@ -83,10 +97,13 @@ class BaseOrderAdmin(admin.ModelAdmin):
     order_number_display.admin_order_field = 'id'
     
     def customer_display(self, obj):
-        """Display customer with phone"""
+        """Display customer with phone and copy buttons"""
         return format_html(
-            '<strong>{}</strong><br><small style="direction: ltr;">📱 {}</small>',
-            obj.customer_name, obj.customer_phone
+            '<div style="min-width: 150px;">'
+            '<strong>{}</strong> <a href="javascript:void(0)" onclick="navigator.clipboard.writeText(\'{}\'); alert(\'تم نسخ الاسم\')" style="font-size: 0.85em; background: #e9ecef; padding: 2px 6px; border-radius: 4px; color: #4c6ef5; text-decoration: none; margin-right: 4px;" title="نسخ الاسم">نسخ</a><br>'
+            '<small style="direction: ltr; margin-top: 4px; display: inline-block;">📱 {}</small> <a href="javascript:void(0)" onclick="navigator.clipboard.writeText(\'{}\'); alert(\'تم نسخ الرقم\')" style="font-size: 0.85em; background: #e9ecef; padding: 2px 6px; border-radius: 4px; color: #4c6ef5; text-decoration: none; margin-right: 4px;" title="نسخ الرقم">نسخ</a>'
+            '</div>',
+            obj.customer_name, obj.customer_name, obj.customer_phone, obj.customer_phone
         )
     customer_display.short_description = '👤 العميل'
     customer_display.admin_order_field = 'customer_name'

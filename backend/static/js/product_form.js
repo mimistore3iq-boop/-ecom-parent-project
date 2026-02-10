@@ -1,6 +1,8 @@
 
 // Unified Product Form JavaScript for MIMI STORE
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('Product form JS loaded');
+    
     // Tab navigation elements
     const tabButtons = document.querySelectorAll('.tab-nav-item');
     const tabContents = document.querySelectorAll('.tab-content');
@@ -15,45 +17,60 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Function to switch tabs
     window.switchToTab = function(tabId) {
-        console.log('Switching to tab:', tabId);
+        if (!tabId) return;
         
-        // Remove active class from all tabs and contents
-        tabButtons.forEach(btn => btn.classList.remove('active'));
-        tabContents.forEach(content => content.classList.remove('active'));
+        // Clean tabId from hash and suffixes
+        let cleanId = tabId.replace('#', '').replace('tab-', '').replace('-tab', '');
+        
+        // Decode URI component for Arabic hashes
+        try {
+            cleanId = decodeURIComponent(cleanId);
+        } catch (e) {
+            console.error('Error decoding tab ID:', e);
+        }
+        
+        console.log('Switching to tab:', cleanId);
+        
+        // Map Arabic names to English IDs used in data-tab and id
+        const mapping = {
+            'معلومات-أساسية': 'basic-info',
+            'التسعير-والخصومات': 'pricing',
+            'إدارة-المخزون': 'inventory',
+            'معرض-الصور': 'gallery',
+            'تفاصيل-المنتج': 'details',
+            'SEO-والبيانات-الوصفية': 'seo',
+            'الحالة-والمميزات': 'features'
+        };
+        
+        const mappedId = mapping[cleanId] || cleanId;
+        console.log('Mapped ID:', mappedId);
 
         // Find and activate the requested tab
-        // Support both exact ID and localized hashes if they occur
-        let targetTab = document.querySelector(`[data-tab="${tabId}"]`);
-        let targetContent = document.getElementById(tabId);
-
-        // Fallback for localized hashes (e.g., #/tab-معرض-الصور)
-        if (!targetTab && tabId.includes('tab-')) {
-            const cleanId = tabId.split('tab-')[1];
-            // Map Arabic names to English IDs if necessary
-            const mapping = {
-                'معلومات-أساسية': 'basic-info',
-                'التسعير-والخصومات': 'pricing',
-                'إدارة-المخزون': 'inventory',
-                'معرض-الصور': 'gallery',
-                'تفاصيل-المنتج': 'details',
-                'SEO-والبيانات-الوصفية': 'seo',
-                'الحالة-والمميزات': 'features'
-            };
-            const mappedId = mapping[cleanId] || cleanId;
-            targetTab = document.querySelector(`[data-tab="${mappedId}"]`);
-            targetContent = document.getElementById(mappedId);
-        }
+        const targetTab = document.querySelector(`[data-tab="${mappedId}"]`);
+        const targetContent = document.getElementById(mappedId);
 
         if (targetTab && targetContent) {
+            // Remove active class from all
+            tabButtons.forEach(btn => btn.classList.remove('active'));
+            tabContents.forEach(content => content.classList.remove('active'));
+            
+            // Add to target
             targetTab.classList.add('active');
             targetContent.classList.add('active');
             
             // Update URL hash without jumping
             const url = new URL(window.location);
-            url.hash = targetTab.getAttribute('data-tab');
+            url.hash = cleanId + '-tab';
             window.history.pushState({}, '', url);
             
             updateTabIndicator();
+            console.log('Successfully switched to', mappedId);
+        } else {
+            console.warn('Tab or content not found for:', mappedId);
+            // If not found and it's the first time, default to first tab
+            if (!document.querySelector('.tab-nav-item.active') && tabButtons.length > 0) {
+                window.switchToTab(tabButtons[0].getAttribute('data-tab'));
+            }
         }
     };
 
@@ -99,40 +116,25 @@ document.addEventListener('DOMContentLoaded', function() {
 
         if (prevBtn) prevBtn.disabled = currentIndex === 1;
         if (nextBtn) nextBtn.disabled = currentIndex === tabs.length;
-        
-        // Ensure manual navigation visibility
-        const navContainer = document.querySelector('.tab-navigation-buttons');
-        if (navContainer) navContainer.style.display = 'flex';
     }
 
     // Initialize from URL hash or first tab
-    const initialHash = window.location.hash.substring(1);
-    if (initialHash) {
-        window.switchToTab(initialHash);
-    } else if (tabButtons.length > 0) {
-        window.switchToTab(tabButtons[0].getAttribute('data-tab'));
-    }
+    setTimeout(() => {
+        const initialHash = window.location.hash;
+        if (initialHash) {
+            window.switchToTab(initialHash);
+        } else if (tabButtons.length > 0) {
+            window.switchToTab(tabButtons[0].getAttribute('data-tab'));
+        }
+    }, 100);
 
-    // --- Original Logic from product_form.js ---
-
-    // Image preview functionality
-    const imageField = document.getElementById('id_image');
-    const imagePreview = document.querySelector('.image-upload img');
-    const uploadBtn = document.querySelector('.upload-btn');
-
-    if (imageField && imagePreview && uploadBtn) {
-        uploadBtn.addEventListener('click', function() {
-            imageField.click();
-        });
-
-        imageField.addEventListener('change', function() {
-            if (this.files && this.files[0]) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    imagePreview.src = e.target.result;
-                };
-                reader.readAsDataURL(this.files[0]);
-            }
+    // Image preview functionality for main image
+    const mainImageField = document.getElementById('id_main_image');
+    if (mainImageField) {
+        mainImageField.addEventListener('input', function() {
+            const url = this.value;
+            // You could add a preview element here if needed
+            console.log('Main image URL changed:', url);
         });
     }
 
@@ -155,21 +157,29 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Price calculation
+    // Price and Discount amount calculation
     const priceField = document.querySelector('#id_price');
-    const discountField = document.querySelector('#id_discount');
-    const specialPriceField = document.querySelector('#id_special_price');
+    const discountPriceField = document.querySelector('#id_discount_price');
+    const discountAmountField = document.querySelector('#id_discount_amount');
 
-    if (priceField && discountField && specialPriceField) {
-        const updatePrice = function() {
+    if (priceField && discountPriceField && discountAmountField) {
+        const updateFromDiscountPrice = function() {
             const price = parseFloat(priceField.value) || 0;
-            const discount = parseFloat(discountField.value) || 0;
-            if (discount > 0 && discount < 100) {
-                const discountedPrice = price * (1 - discount / 100);
-                specialPriceField.value = discountedPrice.toFixed(2);
+            const discountPrice = parseFloat(discountPriceField.value) || 0;
+            if (price > 0 && discountPrice > 0) {
+                discountAmountField.value = (price - discountPrice).toFixed(2);
             }
         };
-        discountField.addEventListener('input', updatePrice);
-        priceField.addEventListener('input', updatePrice);
+
+        const updateFromDiscountAmount = function() {
+            const price = parseFloat(priceField.value) || 0;
+            const discountAmount = parseFloat(discountAmountField.value) || 0;
+            if (price > 0 && discountAmount > 0) {
+                discountPriceField.value = (price - discountAmount).toFixed(2);
+            }
+        };
+
+        discountPriceField.addEventListener('input', updateFromDiscountPrice);
+        discountAmountField.addEventListener('input', updateFromDiscountAmount);
     }
 });
