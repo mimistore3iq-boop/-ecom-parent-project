@@ -3,7 +3,6 @@
 {% load i18n static %}
 
 {% block extrastyle %}{{ block.super }}
-<script src="{% static 'js/tab_navigation_fix.js' %}"></script>
 <script src="{% static 'js/product_form.js' %}"></script>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap">
 <style>
@@ -444,7 +443,7 @@ input[type="checkbox"], input[type="radio"] {
                 </div>
 
                 <div class="form-row">
-                    <label for="{{ form.special_price.id_for_label ">سعر العرض الخاص</label>
+                    <label for="{{ form.special_price.id_for_label }}">سعر العرض الخاص</label>
                     {{ form.special_price }}
                 </div>
             </div>
@@ -455,22 +454,22 @@ input[type="checkbox"], input[type="radio"] {
                 <h2><i class="fas fa-boxes"></i> إدارة المخزون</h2>
 
                 <div class="form-row">
-                    <label for="{{ form.stock.id_for_label ">الكمية المتوفرة</label>
+                    <label for="{{ form.stock.id_for_label }}">الكمية المتوفرة</label>
                     {{ form.stock }}
                 </div>
 
                 <div class="form-row">
-                    <label for="{{ form.low_stock_threshold.id_for_label ">عتبة المخزون المنخفض</label>
+                    <label for="{{ form.low_stock_threshold.id_for_label }}">عتبة المخزون المنخفض</label>
                     {{ form.low_stock_threshold }}
                 </div>
 
                 <div class="form-row">
-                    <label for="{{ form.track_inventory.id_for_label ">تتبع المخزون</label>
+                    <label for="{{ form.track_inventory.id_for_label }}">تتبع المخزون</label>
                     {{ form.track_inventory }}
                 </div>
 
                 <div class="form-row">
-                    <label for="{{ form.allow_backorder.id_for_label ">السماح بالطلب عند نفاد المخزون</label>
+                    <label for="{{ form.allow_backorder.id_for_label }}">السماح بالطلب عند نفاد المخزون</label>
                     {{ form.allow_backorder }}
                 </div>
             </div>
@@ -481,7 +480,7 @@ input[type="checkbox"], input[type="radio"] {
                 <h2><i class="fas fa-images"></i> معرض الصور</h2>
 
                 <div class="form-row">
-                    <label for="{{ form.image.id_for_label ">الصورة الرئيسية</label>
+                    <label for="{{ form.image.id_for_label }}">الصورة الرئيسية</label>
                     <div class="image-upload">
                         {% if form.instance.image %}
                         <img src="{{ form.instance.image.url }}" alt="الصورة الرئيسية">
@@ -494,7 +493,7 @@ input[type="checkbox"], input[type="radio"] {
                 </div>
 
                 <div class="form-row">
-                    <label for="{{ form.gallery.id_for_label ">معرض الصور</label>
+                    <label for="{{ form.gallery.id_for_label }}">معرض الصور</label>
                     {{ form.gallery }}
                 </div>
             </div>
@@ -505,27 +504,27 @@ input[type="checkbox"], input[type="radio"] {
                 <h2><i class="fas fa-tag"></i> تفاصيل المنتج</h2>
 
                 <div class="form-row">
-                    <label for="{{ form.sku.id_for_label ">SKU</label>
+                    <label for="{{ form.sku.id_for_label }}">SKU</label>
                     {{ form.sku }}
                 </div>
 
                 <div class="form-row">
-                    <label for="{{ form.weight.id_for_label ">الوزن (kg)</label>
+                    <label for="{{ form.weight.id_for_label }}">الوزن (kg)</label>
                     {{ form.weight }}
                 </div>
 
                 <div class="form-row">
-                    <label for="{{ form.dimensions.id_for_label ">الأبعاد (طول × عرض × ارتفاع)</label>
+                    <label for="{{ form.dimensions.id_for_label }}">الأبعاد (طول × عرض × ارتفاع)</label>
                     {{ form.dimensions }}
                 </div>
 
                 <div class="form-row">
-                    <label for="{{ form.material.id_for_label ">المادة</label>
+                    <label for="{{ form.material.id_for_label }}">المادة</label>
                     {{ form.material }}
                 </div>
 
                 <div class="form-row">
-                    <label for="{{ form.color.id_for_label ">اللون</label>
+                    <label for="{{ form.color.id_for_label }}">اللون</label>
                     {{ form.color }}
                 </div>
             </div>
@@ -536,22 +535,22 @@ input[type="checkbox"], input[type="radio"] {
                 <h2><i class="fas fa-search"></i> SEO والبيانات الوصفية</h2>
 
                 <div class="form-row">
-                    <label for="{{ form.meta_title.id_for_label ">عنوان الصفحة (Meta Title)</label>
+                    <label for="{{ form.meta_title.id_for_label }}">عنوان الصفحة (Meta Title)</label>
                     {{ form.meta_title }}
                 </div>
 
                 <div class="form-row">
-                    <label for="{{ form.meta_description.id_for_label ">وصف الصفحة (Meta Description)</label>
+                    <label for="{{ form.meta_description.id_for_label }}">وصف الصفحة (Meta Description)</label>
                     {{ form.meta_description }}
                 </div>
 
                 <div class="form-row">
-                    <label for="{{ form.keywords.id_for_label ">الكلمات المفتاحية</label>
+                    <label for="{{ form.keywords.id_for_label }}">الكلمات المفتاحية</label>
                     {{ form.keywords }}
                 </div>
 
                 <div class="form-row">
-                    <label for="{{ form.slug.id_for_label ">الرابط (Slug)</label>
+                    <label for="{{ form.slug.id_for_label }}">الرابط (Slug)</label>
                     {{ form.slug }}
                 </div>
             </div>
@@ -562,22 +561,22 @@ input[type="checkbox"], input[type="radio"] {
                 <h2><i class="fas fa-star"></i> الحالة والمميزات</h2>
 
                 <div class="form-row">
-                    <label for="{{ form.status.id_for_label ">الحالة</label>
+                    <label for="{{ form.status.id_for_label }}">الحالة</label>
                     {{ form.status }}
                 </div>
 
                 <div class="form-row">
-                    <label for="{{ form.featured.id_for_label ">مميز</label>
+                    <label for="{{ form.featured.id_for_label }}">مميز</label>
                     {{ form.featured }}
                 </div>
 
                 <div class="form-row">
-                    <label for="{{ form.new_arrival.id_for_label ">وصول حديث</label>
+                    <label for="{{ form.new_arrival.id_for_label }}">وصول حديث</label>
                     {{ form.new_arrival }}
                 </div>
 
                 <div class="form-row">
-                    <label for="{{ form.specifications.id_for_label ">المواصفات التقنية</label>
+                    <label for="{{ form.specifications.id_for_label }}">المواصفات التقنية</label>
                     {{ form.specifications }}
                 </div>
             </div>
@@ -589,112 +588,4 @@ input[type="checkbox"], input[type="radio"] {
         </div>
     </form>
 </div>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Tab functionality
-    const tabNavItems = document.querySelectorAll('.tab-nav-item');
-    const tabContents = document.querySelectorAll('.tab-content');
-
-    tabNavItems.forEach(item => {
-        item.addEventListener('click', function() {
-            // Remove active class from all tabs and contents
-            tabNavItems.forEach(navItem => navItem.classList.remove('active'));
-            tabContents.forEach(content => content.classList.remove('active'));
-
-            // Add active class to clicked tab and corresponding content
-            this.classList.add('active');
-            const tabId = this.getAttribute('data-tab');
-            document.getElementById(tabId).classList.add('active');
-        });
-    });
-
-    // Auto-fill product name in meta title if empty
-    const nameField = document.querySelector('#id_name');
-    const metaTitleField = document.querySelector('#id_meta_title');
-
-    if (nameField && metaTitleField && !metaTitleField.value) {
-        nameField.addEventListener('blur', function() {
-            if (!metaTitleField.value) {
-                metaTitleField.value = this.value;
-            }
-        });
-    }
-
-    // Auto-fill product name in slug if empty
-    const slugField = document.querySelector('#id_slug');
-
-    if (nameField && slugField && !slugField.value) {
-        nameField.addEventListener('blur', function() {
-            if (!slugField.value) {
-                // Convert to slug format
-                let slug = this.value.toLowerCase().replace(/[^ا-يa-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-                slugField.value = slug;
-            }
-        });
-    }
-
-    // Image upload preview
-    const imageUpload = document.querySelector('#id_image');
-    if (imageUpload) {
-        imageUpload.addEventListener('change', function() {
-            const preview = document.querySelector('.image-upload img');
-            if (this.files && this.files[0]) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    preview.src = e.target.result;
-                }
-                reader.readAsDataURL(this.files[0]);
-            }
-        });
-    }
-
-    // Auto-calculate discounted price
-    const priceField = document.querySelector('#id_price');
-    const discountField = document.querySelector('#id_discount');
-    const specialPriceField = document.querySelector('#id_special_price');
-
-    if (priceField && discountField) {
-        discountField.addEventListener('blur', function() {
-            const price = parseFloat(priceField.value) || 0;
-            const discount = parseFloat(this.value) || 0;
-
-            if (discount > 0 && discount < 100) {
-                const discountedPrice = price * (1 - discount / 100);
-                if (!specialPriceField.value) {
-                    specialPriceField.value = discountedPrice.toFixed(2);
-                }
-            }
-        });
-    }
-
-    // Form validation
-    const form = document.querySelector('#product_form');
-    if (form) {
-        form.addEventListener('submit', function(e) {
-            const name = document.querySelector('#id_name').value.trim();
-            const description = document.querySelector('#id_description').value.trim();
-            const category = document.querySelector('#id_category').value;
-
-            if (!name) {
-                e.preventDefault();
-                alert('يرجى إدخال اسم المنتج');
-                return;
-            }
-
-            if (!description) {
-                e.preventDefault();
-                alert('يرجى إدخال وصف المنتج');
-                return;
-            }
-
-            if (!category) {
-                e.preventDefault();
-                alert('يرجى اختيار قسم المنتج');
-                return;
-            }
-        });
-    }
-});
-</script>
 {% endblock %}
