@@ -97,21 +97,22 @@ class BaseOrderAdmin(admin.ModelAdmin):
     order_number_display.admin_order_field = 'id'
     
     def customer_display(self, obj):
-        """Display customer with professional copy buttons"""
-        copy_script = "navigator.clipboard.writeText('{}').then(() => {{ const btn = event.target; const oldText = btn.innerText; btn.innerText = '✅ تم النسخ'; btn.style.background = '#28a745'; setTimeout(() => {{ btn.innerText = oldText; btn.style.background = btn.getAttribute('data-bg'); }}, 2000); }});"
+        """Display customer with professional copy buttons - Stable Version"""
+        name = obj.customer_name or "بدون اسم"
+        phone = obj.customer_phone or "بدون رقم"
         
         return format_html(
             '<div style="min-width: 220px; background: #ffffff; padding: 10px; border-radius: 8px; border: 1px solid #dee2e6; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">'
             '<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px dashed #eee;">'
             '<span style="font-weight: 600; color: #1a1a1a; font-size: 14px;">👤 {}</span>'
-            '<button type="button" data-bg="#4c6ef5" onclick="' + copy_script.format(obj.customer_name) + '" style="padding: 4px 10px; font-size: 11px; background: #4c6ef5; color: white; border: none; border-radius: 4px; cursor: pointer; transition: all 0.2s; font-weight: bold;">نسخ الاسم</button>'
+            '<button type="button" onclick="navigator.clipboard.writeText(\'{}\').then(() => {{ this.innerText = \'✅ تم\'; setTimeout(() => this.innerText = \'نسخ\', 2000) }})" style="padding: 4px 10px; font-size: 11px; background: #4c6ef5; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">نسخ</button>'
             '</div>'
             '<div style="display: flex; justify-content: space-between; align-items: center;">'
             '<span style="direction: ltr; color: #495057; font-size: 13px; font-family: monospace;">📱 {}</span>'
-            '<button type="button" data-bg="#12b886" onclick="' + copy_script.format(obj.customer_phone) + '" style="padding: 4px 10px; font-size: 11px; background: #12b886; color: white; border: none; border-radius: 4px; cursor: pointer; transition: all 0.2s; font-weight: bold;">نسخ الرقم</button>'
+            '<button type="button" onclick="navigator.clipboard.writeText(\'{}\').then(() => {{ this.innerText = \'✅ تم\'; setTimeout(() => this.innerText = \'نسخ\', 2000) }})" style="padding: 4px 10px; font-size: 11px; background: #12b886; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">نسخ</button>'
             '</div>'
             '</div>',
-            obj.customer_name, obj.customer_phone
+            name, name, phone, phone
         )
     customer_display.short_description = '👤 معلومات العميل'
     customer_display.admin_order_field = 'customer_name'

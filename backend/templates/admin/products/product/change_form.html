@@ -479,10 +479,10 @@ input[type="checkbox"], input[type="radio"] {
 </div>
 
 <script>
-// كود التشغيل القسري للتبويبات لضمان العمل تحت أي ظرف
+// كود التشغيل القسري المتطور لحل مشكلة التجميد
 window.switchToTab = function(tabId) {
     if (!tabId) return;
-    console.log('Force Switching to:', tabId);
+    console.log('Force Switch to:', tabId);
 
     let cleanId = tabId.toString().replace('#', '').replace('tab-', '').replace('-tab', '');
     try { cleanId = decodeURIComponent(cleanId); } catch(e){}
@@ -506,56 +506,53 @@ window.switchToTab = function(tabId) {
 
     const targetId = mapping[cleanId] || cleanId;
     
-    // إخفاء كافة المحتويات وإزالة النشاط من الأزرار
-    const contents = document.querySelectorAll('.tab-content');
-    const buttons = document.querySelectorAll('.tab-nav-item');
+    // إخفاء فوري وعدواني لكافة التبويبات
+    const contents = document.getElementsByClassName('tab-content');
+    const buttons = document.getElementsByClassName('tab-nav-item');
 
-    contents.forEach(c => {
-        c.style.display = 'none';
-        c.classList.remove('active');
-    });
-    buttons.forEach(b => b.classList.remove('active'));
+    for (let i = 0; i < contents.length; i++) {
+        contents[i].style.setProperty('display', 'none', 'important');
+        contents[i].classList.remove('active');
+    }
+    for (let i = 0; i < buttons.length; i++) {
+        buttons[i].classList.remove('active');
+    }
 
-    // إظهار المحتوى المطلوب
-    const targetContent = document.getElementById(targetId);
-    const targetButton = document.querySelector(`[data-tab="${targetId}"]`);
+    // إظهار التبويب المطلوب
+    const target = document.getElementById(targetId);
+    const btn = document.querySelector('[data-tab="' + targetId + '"]');
 
-    if (targetContent) {
-        targetContent.style.display = 'block';
-        targetContent.classList.add('active');
-        if (targetButton) targetButton.classList.add('active');
+    if (target) {
+        target.style.setProperty('display', 'block', 'important');
+        target.classList.add('active');
+        if (btn) btn.classList.add('active');
         
         // تحديث المؤشر الرقمي
-        const currentTabIndicator = document.querySelector('.current-tab');
-        if (currentTabIndicator) {
-            const tabs = Array.from(buttons);
-            const index = tabs.indexOf(targetButton);
-            if (index !== -1) currentTabIndicator.textContent = index + 1;
+        const ind = document.querySelector('.current-tab');
+        if (ind) {
+            const btns = Array.from(buttons);
+            const idx = btns.indexOf(btn);
+            if (idx !== -1) ind.innerText = idx + 1;
         }
 
-        // تحديث الرابط دون القفز
+        // تحديث الرابط
         history.replaceState(null, null, '#' + cleanId + '-tab');
-        console.log('Switch successful:', targetId);
-    } else {
-        console.error('Target not found:', targetId);
     }
 };
 
 (function() {
-    // مراقب الضغطات العام كخطة احتياطية
-    document.addEventListener('click', function(e) {
-        const btn = e.target.closest('.tab-nav-item');
-        if (btn) {
-            e.preventDefault();
-            const tabId = btn.getAttribute('data-tab');
-            window.switchToTab(tabId);
+    // مراقب الضغطات الفوري
+    document.addEventListener('mousedown', function(e) {
+        const b = e.target.closest('.tab-nav-item');
+        if (b) {
+            const id = b.getAttribute('data-tab');
+            window.switchToTab(id);
         }
     }, true);
 
     window.addEventListener('load', function() {
-        const hash = window.location.hash;
-        if (hash) {
-            window.switchToTab(hash);
+        if (window.location.hash) {
+            window.switchToTab(window.location.hash);
         } else {
             window.switchToTab('basic-info');
         }
