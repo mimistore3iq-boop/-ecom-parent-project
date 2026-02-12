@@ -386,9 +386,9 @@ os.makedirs(BASE_DIR / 'logs', exist_ok=True)
 # Jazzmin settings
 JAZZMIN_SETTINGS = {
     # Site branding
-    "site_title": "MIMI STORE - لوحة الإدارة",
-    "site_header": "🛍️ MIMI STORE",
-    "site_brand": "MIMI STORE",
+    "site_title": "voro - لوحة الإدارة",
+    "site_header": "🛍️ voro",
+    "site_brand": "voro",
     "site_logo": None,
     "login_logo": None,
     "login_logo_dark": None,
@@ -396,8 +396,8 @@ JAZZMIN_SETTINGS = {
     "site_icon": None,
 
     # Welcome message
-    "welcome_sign": "مرحباً بك في لوحة تحكم متجر ميمي الاحترافية",
-    "copyright": "© 2024 MIMI STORE - جميع الحقوق محفوظة",
+    "welcome_sign": "مرحباً بك في لوحة تحكم متجر voro الاحترافية",
+    "copyright": "© 2024 voro - جميع الحقوق محفوظة",
 
     # Search model
     "search_model": ["users.User", "products.Product", "products.Coupon", "orders.Order"],

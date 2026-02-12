@@ -46,7 +46,7 @@ const TopBar = () => {
                     {/* Right side placeholder / brand */}
                     <div className="hidden sm:flex items-center gap-2 text-gray-500">
                         <span>هلا بك في</span>
-                        <span className="font-semibold">MIMI STORE</span>
+                        <span className="font-semibold">voro</span>
                     </div>
                 </div>
             </div>

@@ -177,6 +177,12 @@
             activateByHash(location.hash);
         });
 
+        // Activate the first tab by default if no hash
+        if (!activateByHash(location.hash)) {
+            const firstId = panels[0].dataset.mimiTabId;
+            if (firstId) activate(firstId);
+        }
+
         // Ignore built-in collapse since tabs control visibility
         panels.forEach(p => p.classList.remove('collapse'));
     }

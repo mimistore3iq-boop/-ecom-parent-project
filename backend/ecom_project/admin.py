@@ -7,11 +7,10 @@ from users.models import User
 from products.models import Product, Category, ProductReview, ProductView
 from orders.models import Order, OrderItem
 from products.views_fixed import add_category_view, category_list_view, category_add_success_view
-from decimal import Decimal
 
-class MIMIAdminSite(AdminSite):
-    site_header = "MIMI STORE إدارة"
-    site_title = "MIMI STORE"
+class VoroAdminSite(AdminSite):
+    site_header = "إدارة voro"
+    site_title = "voro"
     index_title = "لوحة التحكم الرئيسية"
 
     def get_urls(self):
@@ -19,6 +18,7 @@ class MIMIAdminSite(AdminSite):
         custom_urls = [
             path('products/admin/category/add/', add_category_view, name='admin-category-add'),
             path('products/admin/category/list/', category_list_view, name='admin-category-list'),
+            path('products/admin/category/add/success/', category_add_success_view, name='admin-category-add-success'),
         ]
         return custom_urls + urls
     
@@ -64,7 +64,7 @@ class MIMIAdminSite(AdminSite):
         return super().index(request, extra_context)
 
 # Create custom admin site instance
-admin_site = MIMIAdminSite(name='mimi_admin')
+admin_site = VoroAdminSite(name='voro_admin')
 
 # Import and register all admin classes
 from users.admin import UserAdmin

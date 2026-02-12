@@ -180,9 +180,9 @@ const ProductDetail = ({ user }) => {
               </button>
               <Link to="/" className="flex items-center space-x-2 space-x-reverse">
                 <div className="bg-gradient-to-r from-primary-500 to-secondary-500 text-white w-8 h-8 rounded-lg flex items-center justify-center font-bold">
-                  M
+                  V
                 </div>
-                <span className="text-xl font-bold text-primary-600">MIMI STORE</span>
+                <span className="text-xl font-bold text-primary-600">voro</span>
               </Link>
             </div>
 
@@ -245,8 +245,7 @@ const ProductDetail = ({ user }) => {
                       alt={product.name}
                       className="max-w-full max-h-full object-contain"
                       style={{ 
-                        backgroundColor: '#ffffff',
-                        viewTransitionName: `product-image-${product.id}`
+                        backgroundColor: '#ffffff'
                       }}
                       onError={(e) => {
                         console.error('Failed to load image:', productImages[selectedImage]);

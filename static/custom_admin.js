@@ -1,4 +1,4 @@
-/* ===== MIMI STORE Admin Custom JavaScript ===== */
+/* ===== voro Admin Custom JavaScript ===== */
 
 // Helper function to safely run code after DOM is loaded
 function onDocumentReady(fn) {
@@ -10,7 +10,7 @@ function onDocumentReady(fn) {
 }
 
 onDocumentReady(function() {
-    console.log('🛍️ MIMI STORE Admin Panel Initializing...');
+    console.log('🛍️ voro Admin Panel Initializing...');
 
     // Initialize all custom features
     addNotificationStyles();
@@ -26,7 +26,7 @@ onDocumentReady(function() {
     initializeDarkMode();
     initializePerformanceMonitoring();
 
-    console.log('✅ MIMI STORE Admin Panel Loaded Successfully!');
+    console.log('✅ voro Admin Panel Loaded Successfully!');
 });
 
 

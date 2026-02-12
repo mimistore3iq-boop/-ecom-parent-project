@@ -100,19 +100,33 @@ class BaseOrderAdmin(admin.ModelAdmin):
         """Display customer with professional copy buttons - Stable Version"""
         name = obj.customer_name or "بدون اسم"
         phone = obj.customer_phone or "بدون رقم"
+        address = obj.customer_address or "بدون عنوان"
+        governorate = obj.governorate or ""
+        full_address = f"{governorate} - {address}" if governorate else address
         
         return format_html(
-            '<div style="min-width: 220px; background: #ffffff; padding: 10px; border-radius: 8px; border: 1px solid #dee2e6; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">'
-            '<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px dashed #eee;">'
-            '<span style="font-weight: 600; color: #1a1a1a; font-size: 14px;">👤 {}</span>'
-            '<button type="button" onclick="navigator.clipboard.writeText(\'{}\').then(() => {{ this.innerText = \'✅ تم\'; setTimeout(() => this.innerText = \'نسخ\', 2000) }})" style="padding: 4px 10px; font-size: 11px; background: #4c6ef5; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">نسخ</button>'
+            '<div style="min-width: 250px; background: #ffffff; padding: 12px; border-radius: 10px; border: 1px solid #dee2e6; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">'
+            
+            # Name row
+            '<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid #f1f3f5;">'
+            '<span style="font-weight: 700; color: #212529; font-size: 14px;">👤 {}</span>'
+            '<button type="button" onclick="navigator.clipboard.writeText(\'{}\').then(() => {{ this.innerText = \'✅\'; this.style.background=\'#40c057\'; setTimeout(() => {{ this.innerText = \'نسخ\'; this.style.background=\'#4c6ef5\' }}, 2000) }})" style="padding: 4px 12px; font-size: 11px; background: #4c6ef5; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; transition: all 0.2s;">نسخ</button>'
             '</div>'
-            '<div style="display: flex; justify-content: space-between; align-items: center;">'
-            '<span style="direction: ltr; color: #495057; font-size: 13px; font-family: monospace;">📱 {}</span>'
-            '<button type="button" onclick="navigator.clipboard.writeText(\'{}\').then(() => {{ this.innerText = \'✅ تم\'; setTimeout(() => this.innerText = \'نسخ\', 2000) }})" style="padding: 4px 10px; font-size: 11px; background: #12b886; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">نسخ</button>'
+            
+            # Phone row
+            '<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid #f1f3f5;">'
+            '<span style="direction: ltr; color: #495057; font-size: 13px; font-family: monospace; font-weight: 600;">📱 {}</span>'
+            '<button type="button" onclick="navigator.clipboard.writeText(\'{}\').then(() => {{ this.innerText = \'✅\'; this.style.background=\'#40c057\'; setTimeout(() => {{ this.innerText = \'نسخ\'; this.style.background=\'#12b886\' }}, 2000) }})" style="padding: 4px 12px; font-size: 11px; background: #12b886; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; transition: all 0.2s;">نسخ</button>'
             '</div>'
+            
+            # Address row
+            '<div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px;">'
+            '<span style="color: #495057; font-size: 12px; line-height: 1.4; flex: 1;">📍 {}</span>'
+            '<button type="button" onclick="navigator.clipboard.writeText(\'{}\').then(() => {{ this.innerText = \'✅\'; this.style.background=\'#40c057\'; setTimeout(() => {{ this.innerText = \'نسخ\'; this.style.background=\'#fd7e14\' }}, 2000) }})" style="padding: 4px 12px; font-size: 11px; background: #fd7e14; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; transition: all 0.2s; white-space: nowrap;">نسخ</button>'
+            '</div>'
+            
             '</div>',
-            name, name, phone, phone
+            name, name, phone, phone, full_address, full_address
         )
     customer_display.short_description = '👤 معلومات العميل'
     customer_display.admin_order_field = 'customer_name'

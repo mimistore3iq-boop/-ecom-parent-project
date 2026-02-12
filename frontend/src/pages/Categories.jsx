@@ -181,9 +181,9 @@ const Categories = ({ user }) => {
               </button>
               <Link to="/" className="flex items-center space-x-2 space-x-reverse">
                 <div className="bg-gradient-to-r from-primary-500 to-secondary-500 text-white w-8 h-8 rounded-lg flex items-center justify-center font-bold">
-                  M
+                  V
                 </div>
-                <span className="text-xl font-bold text-primary-600">MIMI STORE</span>
+                <span className="text-xl font-bold text-primary-600">voro</span>
               </Link>
             </div>
 
@@ -315,25 +315,16 @@ const Categories = ({ user }) => {
                 {products.map((product, index) => (
                   <div
                     key={product.id}
-                    className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-500 hover:scale-105 group cursor-pointer animate-fadeIn"
-                    style={{ animationDelay: `${index * 0.1}s` }}
+                    onClick={() => navigate(`/product/${product.id}`)}
+                    className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 hover:scale-[1.02] group cursor-pointer"
                   >
                     {/* Product Image */}
                     <div className="relative h-48 sm:h-56 md:h-80 bg-gray-100 overflow-hidden">
                       <img
                         src={product.image || product.main_image_url}
                         alt={product.name}
-                        className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-300"
-                        onClick={() => {
-                          if (document.startViewTransition) {
-                            document.startViewTransition(() => {
-                              navigate(`/product/${product.id}`);
-                            });
-                          } else {
-                            navigate(`/product/${product.id}`);
-                          }
-                        }}
-                        style={{ viewTransitionName: `product-image-${product.id}` }}
+                        className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500 p-2"
+                        loading="lazy"
                       />
                       {(product.discount_percentage || product.discount) > 0 && (
                         <div className="absolute top-2 sm:top-3 left-2 sm:left-3 bg-gradient-to-br from-red-500 to-red-600 text-white w-9 h-9 sm:w-11 sm:h-11 rounded-full text-xs sm:text-sm font-bold shadow-lg flex items-center justify-center hover:shadow-xl transition-shadow z-10">

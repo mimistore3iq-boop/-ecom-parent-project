@@ -271,7 +271,7 @@ const Home = ({ user, setUser }) => {
                 <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
               </div>
               <div>
-                <h1 className="text-lg md:text-2xl font-bold gradient-text">MIMI STORE</h1>
+                <h1 className="text-lg md:text-2xl font-bold gradient-text">voro</h1>
               </div>
             </div>
 
@@ -454,7 +454,7 @@ const Home = ({ user, setUser }) => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
-              <h3 className="text-xl font-bold mb-4">MIMI STORE</h3>
+              <h3 className="text-xl font-bold mb-4">voro</h3>
               <p className="text-gray-300">
                 متجرك الإلكتروني المفضل للحصول على أفضل المنتجات بأسعار مميزة
               </p>
@@ -487,7 +487,7 @@ const Home = ({ user, setUser }) => {
             </div>
           </div>
           <div className="border-t border-gray-700 mt-8 pt-8 text-center text-gray-300">
-            <p>&copy; 2025 MIMI STORE. جميع الحقوق محفوظة.</p>
+            <p>&copy; 2025 voro. جميع الحقوق محفوظة.</p>
           </div>
         </div>
       </footer>
