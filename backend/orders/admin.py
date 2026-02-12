@@ -41,7 +41,7 @@ class BaseOrderAdmin(admin.ModelAdmin):
         'customer_name', 'customer_phone', 'customer_email'
     )
     readonly_fields = (
-        'id', 'created_at', 'updated_at', 'total', 'customer_name_copy', 'customer_phone_copy'
+        'id', 'created_at', 'updated_at', 'total', 'customer_name_copy', 'customer_phone_copy', 'customer_address_copy'
     )
     inlines = [OrderItemInline]
     list_per_page = 25
@@ -61,7 +61,7 @@ class BaseOrderAdmin(admin.ModelAdmin):
         }),
         ('🚚 معلومات الشحن والتوصيل', {
             'fields': (
-                'customer_address', 'governorate'
+                'customer_address_copy', 'governorate'
             ),
             'classes': ('wide',)
         }),
@@ -86,6 +86,16 @@ class BaseOrderAdmin(admin.ModelAdmin):
             obj.customer_phone, obj.customer_phone
         )
     customer_phone_copy.short_description = '📱 رقم الهاتف'
+
+    def customer_address_copy(self, obj):
+        address = obj.customer_address or ""
+        governorate = obj.governorate or ""
+        full_address = f"{governorate} - {address}" if governorate else address
+        return format_html(
+            '<span>{}</span> <a href="javascript:void(0)" onclick="navigator.clipboard.writeText(\'{}\'); alert(\'تم نسخ العنوان\')" style="background: #e9ecef; padding: 4px 8px; border-radius: 4px; color: #4c6ef5; text-decoration: none; margin-right: 10px; border: 1px solid #dee2e6;" title="نسخ العنوان">📋 نسخ العنوان</a>',
+            full_address, full_address
+        )
+    customer_address_copy.short_description = '📍 العنوان'
 
     def order_number_display(self, obj):
         """Display order number with icon"""

@@ -7,6 +7,7 @@ from users.models import User
 from products.models import Product, Category, ProductReview, ProductView
 from orders.models import Order, OrderItem
 from products.views_fixed import add_category_view, category_list_view, category_add_success_view
+from decimal import Decimal
 
 class VoroAdminSite(AdminSite):
     site_header = "إدارة voro"

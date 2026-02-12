@@ -1,19 +1,19 @@
-/* ===== MIMI STORE Admin Custom Styles ===== */
+/* ===== voro Admin Custom Styles ===== */
 
 /* Import Google Fonts */
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap');
 
 /* Root Variables */
 :root {
-    --mimi-primary: #6f42c1;
-    --mimi-secondary: #20c997;
-    --mimi-accent: #fd7e14;
-    --mimi-dark: #343a40;
-    --mimi-light: #f8f9fa;
-    --mimi-gradient: linear-gradient(135deg, #6f42c1 0%, #20c997 100%);
-    --mimi-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    --mimi-border-radius: 8px;
-    --mimi-transition: all 0.3s ease;
+    --voro-primary: #6f42c1;
+    --voro-secondary: #20c997;
+    --voro-accent: #fd7e14;
+    --voro-dark: #343a40;
+    --voro-light: #f8f9fa;
+    --voro-gradient: linear-gradient(135deg, #6f42c1 0%, #20c997 100%);
+    --voro-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --voro-border-radius: 8px;
+    --voro-transition: all 0.3s ease;
 }
 
 /* Global Styles */
@@ -29,8 +29,8 @@ body {
 
 /* Header Styles */
 .navbar-dark {
-    background: var(--mimi-gradient) !important;
-    box-shadow: var(--mimi-shadow) !important;
+    background: var(--voro-gradient) !important;
+    box-shadow: var(--voro-shadow) !important;
     border: none !important;
 }
 
@@ -44,7 +44,7 @@ body {
 .navbar-nav .nav-link {
     color: rgba(255, 255, 255, 0.9) !important;
     font-weight: 500 !important;
-    transition: var(--mimi-transition) !important;
+    transition: var(--voro-transition) !important;
     border-radius: 20px !important;
     margin: 0 5px !important;
     padding: 8px 15px !important;
@@ -64,18 +64,18 @@ body {
 
 .sidebar-dark-purple .nav-sidebar>.nav-item>.nav-link {
     color: rgba(255, 255, 255, 0.9) !important;
-    border-radius: var(--mimi-border-radius) !important;
+    border-radius: var(--voro-border-radius) !important;
     margin: 2px 8px !important;
-    transition: var(--mimi-transition) !important;
+    transition: var(--voro-transition) !important;
     font-weight: 500 !important;
 }
 
 .sidebar-dark-purple .nav-sidebar>.nav-item>.nav-link:hover,
 .sidebar-dark-purple .nav-sidebar>.nav-item>.nav-link.active {
-    background: var(--mimi-gradient) !important;
+    background: var(--voro-gradient) !important;
     color: white !important;
     transform: translateX(5px) !important;
-    box-shadow: var(--mimi-shadow) !important;
+    box-shadow: var(--voro-shadow) !important;
 }
 
 .sidebar-dark-purple .nav-sidebar>.nav-item>.nav-link>.nav-icon {
@@ -105,14 +105,14 @@ body {
 
 .content-header {
     background: white !important;
-    border-radius: var(--mimi-border-radius) !important;
-    box-shadow: var(--mimi-shadow) !important;
+    border-radius: var(--voro-border-radius) !important;
+    box-shadow: var(--voro-shadow) !important;
     margin-bottom: 20px !important;
     padding: 20px !important;
 }
 
 .content-header h1 {
-    color: var(--mimi-primary) !important;
+    color: var(--voro-primary) !important;
     font-weight: 700 !important;
     margin: 0 !important;
 }
@@ -121,9 +121,9 @@ body {
 .card,
 .box {
     border: none !important;
-    border-radius: var(--mimi-border-radius) !important;
-    box-shadow: var(--mimi-shadow) !important;
-    transition: var(--mimi-transition) !important;
+    border-radius: var(--voro-border-radius) !important;
+    box-shadow: var(--voro-shadow) !important;
+    transition: var(--voro-transition) !important;
     overflow: hidden !important;
 }
 
@@ -135,7 +135,7 @@ body {
 
 .card-header,
 .box-header {
-    background: var(--mimi-gradient) !important;
+    background: var(--voro-gradient) !important;
     color: white !important;
     font-weight: 600 !important;
     border: none !important;
@@ -149,9 +149,9 @@ body {
 
 /* Dashboard Cards */
 .info-box {
-    border-radius: var(--mimi-border-radius) !important;
-    box-shadow: var(--mimi-shadow) !important;
-    transition: var(--mimi-transition) !important;
+    border-radius: var(--voro-border-radius) !important;
+    box-shadow: var(--voro-shadow) !important;
+    transition: var(--voro-transition) !important;
     border: none !important;
     overflow: hidden !important;
 }
@@ -162,7 +162,7 @@ body {
 }
 
 .info-box-icon {
-    border-radius: var(--mimi-border-radius) 0 0 var(--mimi-border-radius) !important;
+    border-radius: var(--voro-border-radius) 0 0 var(--voro-border-radius) !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
@@ -174,13 +174,13 @@ body {
 
 .info-box-text {
     font-weight: 600 !important;
-    color: var(--mimi-dark) !important;
+    color: var(--voro-dark) !important;
 }
 
 .info-box-number {
     font-weight: 700 !important;
     font-size: 1.8rem !important;
-    color: var(--mimi-primary) !important;
+    color: var(--voro-primary) !important;
 }
 
 /* Buttons */
@@ -188,15 +188,15 @@ body {
     border-radius: 25px !important;
     font-weight: 600 !important;
     padding: 10px 20px !important;
-    transition: var(--mimi-transition) !important;
+    transition: var(--voro-transition) !important;
     border: none !important;
     text-transform: uppercase !important;
     letter-spacing: 0.5px !important;
 }
 
 .btn-primary {
-    background: var(--mimi-gradient) !important;
-    box-shadow: var(--mimi-shadow) !important;
+    background: var(--voro-gradient) !important;
+    box-shadow: var(--voro-shadow) !important;
 }
 
 .btn-primary:hover {
@@ -219,13 +219,13 @@ body {
 /* Tables */
 .table {
     background: white !important;
-    border-radius: var(--mimi-border-radius) !important;
+    border-radius: var(--voro-border-radius) !important;
     overflow: hidden !important;
-    box-shadow: var(--mimi-shadow) !important;
+    box-shadow: var(--voro-shadow) !important;
 }
 
 .table thead th {
-    background: var(--mimi-gradient) !important;
+    background: var(--voro-gradient) !important;
     color: white !important;
     font-weight: 600 !important;
     border: none !important;
@@ -234,7 +234,7 @@ body {
 }
 
 .table tbody tr {
-    transition: var(--mimi-transition) !important;
+    transition: var(--voro-transition) !important;
 }
 
 .table tbody tr:hover {
@@ -251,21 +251,21 @@ body {
 /* Forms */
 .form-control {
     border: 2px solid #e9ecef !important;
-    border-radius: var(--mimi-border-radius) !important;
+    border-radius: var(--voro-border-radius) !important;
     padding: 12px 15px !important;
-    transition: var(--mimi-transition) !important;
+    transition: var(--voro-transition) !important;
     font-size: 14px !important;
 }
 
 .form-control:focus {
-    border-color: var(--mimi-primary) !important;
+    border-color: var(--voro-primary) !important;
     box-shadow: 0 0 0 0.2rem rgba(111, 66, 193, 0.25) !important;
     transform: translateY(-2px) !important;
 }
 
 .form-group label {
     font-weight: 600 !important;
-    color: var(--mimi-dark) !important;
+    color: var(--voro-dark) !important;
     margin-bottom: 8px !important;
 }
 
@@ -283,13 +283,13 @@ body {
     align-items: center !important;
     justify-content: center !important;
     margin: 0 3px !important;
-    transition: var(--mimi-transition) !important;
+    transition: var(--voro-transition) !important;
     font-weight: 600 !important;
 }
 
 .page-link:hover,
 .page-item.active .page-link {
-    background: var(--mimi-gradient) !important;
+    background: var(--voro-gradient) !important;
     color: white !important;
     transform: scale(1.1) !important;
 }
@@ -306,21 +306,21 @@ body {
 }
 
 .breadcrumb-item.active {
-    color: var(--mimi-primary) !important;
+    color: var(--voro-primary) !important;
     font-weight: 600 !important;
 }
 
 .breadcrumb-item+.breadcrumb-item::before {
     content: "←" !important;
-    color: var(--mimi-primary) !important;
+    color: var(--voro-primary) !important;
     font-weight: bold !important;
 }
 
 /* Footer */
 .main-footer {
     background: white !important;
-    border-top: 3px solid var(--mimi-primary) !important;
-    color: var(--mimi-dark) !important;
+    border-top: 3px solid var(--voro-primary) !important;
+    color: var(--voro-dark) !important;
     font-weight: 500 !important;
     text-align: center !important;
     padding: 15px !important;
@@ -328,18 +328,18 @@ body {
 
 /* Login Page */
 .login-page {
-    background: var(--mimi-gradient) !important;
+    background: var(--voro-gradient) !important;
 }
 
 .login-box {
     background: white !important;
-    border-radius: var(--mimi-border-radius) !important;
+    border-radius: var(--voro-border-radius) !important;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2) !important;
     overflow: hidden !important;
 }
 
 .login-logo {
-    background: var(--mimi-gradient) !important;
+    background: var(--voro-gradient) !important;
     color: white !important;
     padding: 30px !important;
     text-align: center !important;
@@ -421,19 +421,19 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-    background: var(--mimi-gradient) !important;
+    background: var(--voro-gradient) !important;
     border-radius: 10px !important;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: var(--mimi-primary) !important;
+    background: var(--voro-primary) !important;
 }
 
 /* Success Messages */
 .alert-success {
     background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%) !important;
     border: none !important;
-    border-radius: var(--mimi-border-radius) !important;
+    border-radius: var(--voro-border-radius) !important;
     color: #155724 !important;
     font-weight: 500 !important;
 }
@@ -442,7 +442,7 @@ body {
 .alert-danger {
     background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%) !important;
     border: none !important;
-    border-radius: var(--mimi-border-radius) !important;
+    border-radius: var(--voro-border-radius) !important;
     color: #721c24 !important;
     font-weight: 500 !important;
 }
@@ -450,7 +450,7 @@ body {
 .alert-warning {
     background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%) !important;
     border: none !important;
-    border-radius: var(--mimi-border-radius) !important;
+    border-radius: var(--voro-border-radius) !important;
     color: #856404 !important;
     font-weight: 500 !important;
 }
@@ -475,11 +475,11 @@ body {
 /* Custom Dashboard Widgets */
 .dashboard-widget {
     background: white !important;
-    border-radius: var(--mimi-border-radius) !important;
-    box-shadow: var(--mimi-shadow) !important;
+    border-radius: var(--voro-border-radius) !important;
+    box-shadow: var(--voro-shadow) !important;
     padding: 20px !important;
     margin-bottom: 20px !important;
-    transition: var(--mimi-transition) !important;
+    transition: var(--voro-transition) !important;
 }
 
 .dashboard-widget:hover {
@@ -497,7 +497,7 @@ body {
     width: 50px !important;
     height: 50px !important;
     border-radius: 50% !important;
-    background: var(--mimi-gradient) !important;
+    background: var(--voro-gradient) !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
@@ -509,14 +509,14 @@ body {
 .widget-title {
     font-size: 1.2rem !important;
     font-weight: 600 !important;
-    color: var(--mimi-dark) !important;
+    color: var(--voro-dark) !important;
     margin: 0 !important;
 }
 
 .widget-value {
     font-size: 2rem !important;
     font-weight: 700 !important;
-    color: var(--mimi-primary) !important;
+    color: var(--voro-primary) !important;
     text-align: center !important;
 }
 
@@ -583,7 +583,7 @@ body {
     left: 0;
     width: 4px;
     height: 100%;
-    background: var(--mimi-gradient);
+    background: var(--voro-gradient);
 }
 
 .stat-card:hover {
@@ -628,7 +628,7 @@ body {
 }
 
 .results th {
-    background: var(--mimi-gradient);
+    background: var(--voro-gradient);
     color: white;
     padding: 15px;
     font-weight: 600;
@@ -688,7 +688,7 @@ input:focus,
 select:focus,
 textarea:focus {
     outline: none;
-    border-color: var(--mimi-primary);
+    border-color: var(--voro-primary);
     box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
@@ -708,7 +708,7 @@ textarea:focus {
 }
 
 .btn-primary {
-    background: var(--mimi-gradient);
+    background: var(--voro-gradient);
     color: white;
 }
 
@@ -780,7 +780,7 @@ textarea:focus {
 
 .image-preview:hover {
     transform: scale(1.1);
-    border-color: var(--mimi-primary);
+    border-color: var(--voro-primary);
 }
 
 /* Price Display */

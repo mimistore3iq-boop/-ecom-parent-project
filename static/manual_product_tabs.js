@@ -142,12 +142,16 @@
             const btn = e.target.closest('.mimi-tab-btn');
             if (!btn) return;
             e.preventDefault();
-            // Update hash so any external listeners stay in sync
+            
+            const targetId = btn.dataset.target;
             const slug = btn.dataset.slug || norm(btn.textContent);
+            
+            // Activate immediately
+            activate(targetId);
+            
+            // Update hash without triggering reload
             if (slug) {
-                location.hash = slug;
-            } else {
-                activate(btn.dataset.target);
+                history.replaceState(null, '', '#' + slug);
             }
         });
 

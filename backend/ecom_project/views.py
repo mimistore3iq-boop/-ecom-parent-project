@@ -12,8 +12,8 @@ def home_view(request):
     صفحة ترحيب للـ API
     """
     context = {
-        'title': 'MIMI STORE API',
-        'description': 'مرحباً بك في متجر MIMI STORE الإلكتروني',
+        'title': 'voro API',
+        'description': 'مرحباً بك في متجر voro الإلكتروني',
         'version': '1.0.0',
         'endpoints': {
             'products': '/api/products/',
@@ -48,7 +48,7 @@ def api_info(request):
     معلومات API
     """
     return Response({
-        'message': 'مرحباً بك في MIMI STORE API',
+        'message': 'مرحباً بك في voro API',
         'version': '1.0.0',
         'status': 'active',
         'endpoints': {

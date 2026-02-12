@@ -1,5 +1,5 @@
 
-// Custom Admin JavaScript for MIMI STORE
+// Custom Admin JavaScript for voro
 
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize tooltips

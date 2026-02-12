@@ -21,6 +21,7 @@ const Home = ({ user, setUser }) => {
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -278,7 +279,10 @@ const Home = ({ user, setUser }) => {
             {/* Search + Icons */}
             <div className="flex items-center gap-4">
               {/* Search icon (mobile) */}
-              <button className="p-2.5 text-gray-600 hover:text-indigo-600 transition-colors rounded-lg hover:bg-indigo-50 md:hidden">
+              <button 
+                onClick={() => setIsSearchOpen(!isSearchOpen)}
+                className={`p-2.5 transition-colors rounded-lg md:hidden ${isSearchOpen ? 'text-indigo-600 bg-indigo-50' : 'text-gray-600 hover:text-indigo-600 hover:bg-indigo-50'}`}
+              >
                 <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
@@ -356,21 +360,48 @@ const Home = ({ user, setUser }) => {
               </div>
 
               {/* Desktop search */}
-              <div className="hidden md:block w-72">
+              <div className="hidden md:block w-72 relative">
                 <div className="relative">
                   <input
                     type="text"
-                    placeholder="ابحث..."
+                    placeholder="ابحث عن منتج..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    className="w-full px-4 py-2.5 pr-11 bg-gray-50 border-none rounded-xl focus:ring-2 focus:ring-indigo-500 text-sm transition-all"
                   />
-                  <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
+                  <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
                     <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
                   </div>
                 </div>
+
+                {/* Desktop Search Results Dropdown */}
+                {searchTerm && (
+                  <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-2xl border border-gray-100 z-50 overflow-hidden max-h-96 overflow-y-auto animate-fadeIn">
+                    {filteredProducts.slice(0, 6).map(product => (
+                      <button
+                        key={product.id}
+                        onClick={() => {
+                          navigate(`/product/${product.id}`);
+                          setSearchTerm('');
+                        }}
+                        className="w-full text-right p-3 hover:bg-indigo-50 flex items-center gap-3 border-b border-gray-50 last:border-0 transition-colors"
+                      >
+                        <div className="w-12 h-12 shrink-0 bg-gray-50 rounded-lg overflow-hidden">
+                          <img src={product.image} alt="" className="w-full h-full object-contain" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="font-bold text-xs text-gray-800 truncate">{product.name}</div>
+                          <div className="text-indigo-600 font-extrabold text-sm">{formatCurrency(product.discounted_price || product.price)}</div>
+                        </div>
+                      </button>
+                    ))}
+                    {filteredProducts.length === 0 && (
+                      <div className="p-4 text-center text-gray-500 text-sm">لا توجد نتائج</div>
+                    )}
+                  </div>
+                )}
               </div>
 
               {/* User */}
@@ -389,6 +420,80 @@ const Home = ({ user, setUser }) => {
               )}
             </div>
           </div>
+          
+          {/* Mobile search bar */}
+          {isSearchOpen && (
+            <div className="md:hidden pb-4 px-2 animate-fadeIn">
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="ابحث عن منتج..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  autoFocus
+                  className="w-full px-4 py-3 pr-11 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-indigo-500 text-sm shadow-inner"
+                />
+                <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
+                  <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                </div>
+                {searchTerm && (
+                  <button 
+                    onClick={() => setSearchTerm('')}
+                    className="absolute inset-y-0 left-0 pl-3 flex items-center"
+                  >
+                    <svg className="h-4 w-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                    </svg>
+                  </button>
+                )}
+              </div>
+              
+              {/* Mobile Search Results */}
+              {searchTerm && (
+                <div className="mt-2 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden max-h-[60vh] overflow-y-auto">
+                  {filteredProducts.slice(0, 8).map(product => (
+                    <button
+                      key={product.id}
+                      onClick={() => {
+                        navigate(`/product/${product.id}`);
+                        setSearchTerm('');
+                        setIsSearchOpen(false);
+                      }}
+                      className="w-full text-right p-3 hover:bg-gray-50 flex items-center gap-3 border-b border-gray-50 last:border-0 active:bg-indigo-50"
+                    >
+                      <div className="w-14 h-14 shrink-0 bg-gray-50 rounded-xl overflow-hidden border border-gray-100">
+                        <img src={product.image} alt="" className="w-full h-full object-contain" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="font-bold text-sm text-gray-800 truncate">{product.name}</div>
+                        <div className="flex items-center gap-2 mt-1">
+                          <span className="text-sm text-indigo-600 font-extrabold">{formatCurrency(product.discounted_price || product.price)}</span>
+                          {product.discount_percentage > 0 && (
+                            <span className="text-[10px] text-gray-400 line-through">{formatCurrency(product.price)}</span>
+                          )}
+                        </div>
+                      </div>
+                      <svg className="h-4 w-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </button>
+                  ))}
+                  {filteredProducts.length === 0 && (
+                    <div className="p-8 text-center">
+                      <div className="text-gray-300 mb-2">
+                        <svg className="h-12 w-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                      </div>
+                      <p className="text-gray-500 text-sm font-medium">لا توجد منتجات تطابق بحثك</p>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </header>
       {/* Banner Slider */}
@@ -501,7 +606,13 @@ const Home = ({ user, setUser }) => {
             </svg>
             <span className="text-xs">الرئيسية</span>
           </button>
-          <button className="flex flex-col items-center py-2 text-gray-600">
+          <button 
+            onClick={() => {
+              setIsSearchOpen(true);
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+            className="flex flex-col items-center py-2 text-gray-600"
+          >
             <svg className="h-6 w-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>

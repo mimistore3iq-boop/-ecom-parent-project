@@ -7,8 +7,12 @@ export const ProductCard = ({ product, onAddToCart }) => {
   
   return (
     <div
-      className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 group cursor-pointer border border-gray-100 h-full flex flex-col relative"
+      className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 group cursor-pointer border border-gray-100 h-full flex flex-col relative transform hover:-translate-y-2 active:scale-95"
       onClick={() => navigate(`/product/${product.id}`)}
+      style={{ 
+        touchAction: 'pan-y',
+        animation: 'cardAppear 0.6s ease-out forwards'
+      }}
     >
       {/* Time Left Badge - Top Left */}
       {product.is_on_sale && product.time_left > 0 && (
@@ -146,6 +150,23 @@ const CategoryProductsSection = ({
   }
 
   return (
+    <>
+    <style>{`
+      @keyframes cardAppear {
+        from { opacity: 0; transform: translateY(20px) scale(0.95); }
+        to { opacity: 1; transform: translateY(0) scale(1); }
+      }
+      .hide-scrollbar::-webkit-scrollbar { display: none; }
+      .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      
+      .product-card-hover {
+        transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+      .horizontal-scroll-fix {
+        -webkit-overflow-scrolling: touch;
+        scroll-snap-type: x mandatory;
+      }
+    `}</style>
     <section className="py-8 bg-white border-b border-gray-100 vertical-scroll-fix">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Category Header */}
@@ -174,24 +195,23 @@ const CategoryProductsSection = ({
           {/* Scrollable Container */}
           <div 
             ref={gridRef}
-            className="flex overflow-x-auto gap-4 pb-6 snap-x snap-mandatory hide-scrollbar horizontal-scroll-fix"
+            className="flex overflow-x-auto gap-1 pb-6 hide-scrollbar horizontal-scroll-fix snap-x snap-mandatory"
             style={{ 
               WebkitOverflowScrolling: 'touch',
               scrollbarWidth: 'none',
               msOverflowStyle: 'none',
               overscrollBehaviorX: 'contain',
-              scrollPadding: '0 1rem',
-              scrollBehavior: 'smooth'
+              scrollBehavior: 'smooth',
+              touchAction: 'pan-x pan-y'
             }}
           >
             {products.map((product) => (
               <div
                 key={product.id}
-                className="flex-shrink-0 w-[46%] md:w-[31%] snap-center transition-all duration-500 hover:scale-[1.02]"
+                className="flex-shrink-0 w-[48%] sm:w-[32%] md:w-[24%] snap-start px-1"
                 style={{ 
                   contentVisibility: 'auto', 
-                  containIntrinsicSize: '300px 400px',
-                  willChange: 'transform'
+                  containIntrinsicSize: '200px 300px',
                 }}
               >
                 <ProductCard product={product} onAddToCart={onAddToCart} />
@@ -201,6 +221,7 @@ const CategoryProductsSection = ({
         </div>
       </div>
     </section>
+    </>
   );
 };
 

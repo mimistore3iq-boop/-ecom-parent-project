@@ -77,6 +77,12 @@ class ProductAdmin(admin.ModelAdmin):
         }),
     )
 
+    class Media:
+        js = ('manual_product_tabs.js',)
+        css = {
+            'all': ('custom_admin.css',)
+        }
+
 
 class ProductReviewAdmin(admin.ModelAdmin):
     list_display = ('product', 'user', 'rating', 'created_at')

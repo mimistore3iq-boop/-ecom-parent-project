@@ -212,7 +212,7 @@
     <div class="welcome-section">
         <div class="welcome-title">
             <i class="fas fa-crown"></i>
-            مرحباً بك في لوحة تحكم MIMI STORE
+            مرحباً بك في لوحة تحكم voro
         </div>
         <div class="welcome-subtitle">
             إدارة متجرك الإلكتروني بكل سهولة واحترافية
@@ -273,19 +273,19 @@
 
     <!-- Quick Actions -->
     <div class="quick-actions">
-        <a href="{% url 'admin:products_product_add' %}" class="action-btn">
+        <a href="{% url 'voro_admin:products_product_add' %}" class="action-btn">
             <i class="fas fa-plus"></i>
             إضافة منتج جديد
         </a>
-        <a href="{% url 'admin:products_category_changelist' %}" class="action-btn">
+        <a href="{% url 'voro_admin:products_category_changelist' %}" class="action-btn">
             <i class="fas fa-tags"></i>
             إدارة الأقسام
         </a>
-        <a href="{% url 'admin:orders_order_changelist' %}" class="action-btn">
+        <a href="{% url 'voro_admin:orders_order_changelist' %}" class="action-btn">
             <i class="fas fa-list-alt"></i>
             عرض الطلبات
         </a>
-        <a href="{% url 'admin:users_user_changelist' %}" class="action-btn">
+        <a href="{% url 'voro_admin:users_user_changelist' %}" class="action-btn">
             <i class="fas fa-users-cog"></i>
             إدارة المستخدمين
         </a>
@@ -378,7 +378,7 @@
                 </div>
             {% endfor %}
             <div style="margin-top:10px">
-                <a href="{% url 'admin:notifications_notification_changelist' %}" class="action-btn" style="display:inline-flex">عرض كل الإشعارات <i class="fas fa-arrow-left"></i></a>
+                <a href="{% url 'voro_admin:notifications_notification_changelist' %}" class="action-btn" style="display:inline-flex">عرض كل الإشعارات <i class="fas fa-arrow-left"></i></a>
             </div>
         {% else %}
             <div class="activity-item">

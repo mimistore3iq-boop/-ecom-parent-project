@@ -16,7 +16,7 @@ def add_category_view(request):
         if form.is_valid():
             form.save()
             messages.success(request, 'تمت إضافة الفئة بنجاح')
-            return redirect('admin-category-add-success')
+            return redirect('/admin/products/admin/category/add/success/')
     else:
         form = CategoryForm()
 

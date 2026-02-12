@@ -26,7 +26,8 @@ class Notification(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, null=True, blank=True, related_name='notifications', verbose_name="الطلب")
 
     def __str__(self):
-        return f"{self.title} - {self.recipient.username}"
+        recipient_name = self.recipient.username if self.recipient else "System"
+        return f"{self.title} - {recipient_name}"
 
     class Meta:
         verbose_name = "إشعار"

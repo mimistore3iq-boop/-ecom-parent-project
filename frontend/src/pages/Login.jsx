@@ -139,14 +139,14 @@ const Login = ({ setUser }) => {
       <div className="max-w-md w-full space-y-8">
         {/* Header */}
         <div className="text-center">
-          <div className="bg-gradient-to-r from-primary-500 to-secondary-500 text-white w-20 h-20 rounded-full flex items-center justify-center font-bold text-3xl mx-auto mb-4">
-            M
+          <div className="bg-gradient-to-r from-primary-500 to-secondary-500 text-white w-20 h-20 rounded-full flex items-center justify-center font-bold text-3xl mx-auto mb-4 shadow-xl">
+            V
           </div>
-          <h2 className="text-3xl font-bold text-gray-900 mb-2">
-            MIMI STORE
+          <h2 className="text-3xl font-extrabold gradient-text mb-2">
+            voro
           </h2>
-          <p className="text-gray-600">
-            {isLogin ? 'مرحباً بعودتك!' : 'إنشاء حساب جديد'}
+          <p className="text-gray-500 font-medium">
+            {isLogin ? 'مرحباً بعودتك إلى عالم التسوق!' : 'انضم إلينا وابدأ رحلة التسوق'}
           </p>
         </div>
 
@@ -338,7 +338,7 @@ const Login = ({ setUser }) => {
         {/* Features */}
         <div className="bg-white rounded-xl shadow-lg p-6">
           <h3 className="text-lg font-semibold text-gray-800 mb-4 text-center">
-            لماذا تختار MIMI STORE؟
+            لماذا تختار voro؟
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="text-center">
