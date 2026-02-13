@@ -77,32 +77,35 @@ const Categories = ({ user }) => {
   };
 
   const fetchProductsByCategory = async (categoryId) => {
+    if (!categoryId) return;
     try {
       setLoading(true);
+      setProducts([]); // Clear old products to avoid flicker
       console.log(`Fetching products for category ID: ${categoryId}`);
       
-      // Try using the new endpoint first
       const response = await api.get(`${endpoints.productsByCategory}${categoryId}/products/`);
       const data = response.data;
       const list = Array.isArray(data) ? data : (data?.results || []);
       
       console.log(`Found ${list.length} products for category ${categoryId}`);
 
-      // Normalize to match UI expectations
       const normalized = list.map((p) => {
         const discountPct = typeof p.discount_percentage === 'number' ? p.discount_percentage : (p.discount || 0);
+        const priceNum = Number(p.price || 0);
         return {
           ...p,
-          image: p.main_image_url || p.main_image || null,
+          id: p.id,
+          name: p.name || 'منتج بدون اسم',
+          image: p.main_image_url || p.main_image || p.image || null,
           stock: typeof p.stock_quantity === 'number' ? p.stock_quantity : (p.is_in_stock ? 1 : 0),
           discount: discountPct,
           discount_percentage: discountPct,
-          discounted_price: p.discounted_price || Math.round(p.price * (1 - discountPct / 100)),
+          price: priceNum,
+          discounted_price: p.discounted_price || Math.round(priceNum * (1 - discountPct / 100)),
         };
       });
 
       setProducts(normalized);
-      console.log('Normalized products:', normalized);
     } catch (error) {
       console.error('Error fetching products:', error);
       setProducts([]);

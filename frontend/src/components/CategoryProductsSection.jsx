@@ -10,8 +10,8 @@ export const ProductCard = ({ product, onAddToCart }) => {
       className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 group cursor-pointer border border-gray-100 h-full flex flex-col relative transform hover:-translate-y-2"
       onClick={() => navigate(`/product/${product.id}`)}
       style={{ 
-        touchAction: 'pan-y',
-        animation: 'cardAppear 0.6s ease-out forwards'
+        touchAction: 'auto',
+        animation: 'cardAppear 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards'
       }}
     >
       {/* Time Left Badge - Top Left */}
@@ -159,12 +159,18 @@ const CategoryProductsSection = ({
       .hide-scrollbar::-webkit-scrollbar { display: none; }
       .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
       
-      .product-card-hover {
-        transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-      }
       .horizontal-scroll-fix {
         -webkit-overflow-scrolling: touch;
         scroll-snap-type: x mandatory;
+        scroll-behavior: smooth;
+        touch-action: pan-x pan-y;
+      }
+      .snap-center-item {
+        scroll-snap-align: center;
+        transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+      .snap-center-item:active {
+        transform: scale(0.98);
       }
     `}</style>
     <section className="py-8 bg-white border-b border-gray-100 vertical-scroll-fix">
@@ -195,20 +201,17 @@ const CategoryProductsSection = ({
           {/* Scrollable Container */}
           <div 
             ref={gridRef}
-            className="flex overflow-x-auto gap-1 pb-6 hide-scrollbar horizontal-scroll-fix snap-x snap-mandatory"
+            className="flex overflow-x-auto gap-2 pb-6 hide-scrollbar horizontal-scroll-fix"
             style={{ 
-              WebkitOverflowScrolling: 'touch',
               scrollbarWidth: 'none',
               msOverflowStyle: 'none',
               overscrollBehaviorX: 'contain',
-              scrollBehavior: 'smooth',
-              touchAction: 'pan-x pan-y'
             }}
           >
             {products.map((product) => (
               <div
                 key={product.id}
-                className="flex-shrink-0 w-[50%] sm:w-[32%] md:w-[24%] snap-start px-0.5"
+                className="flex-shrink-0 w-[75%] sm:w-[45%] md:w-[30%] lg:w-[22%] snap-center-item px-1"
                 style={{ 
                   contentVisibility: 'auto', 
                   containIntrinsicSize: '200px 300px',

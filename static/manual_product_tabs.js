@@ -1,36 +1,42 @@
 
-/* 🚀 voro Admin Tabs: Super Robust Version for Jazzmin */
+/* 🚀 voro Admin Tabs: Super Robust & Error-Fixing Version */
 (function() {
     console.log("🚀 voro Tabs: Initializing...");
 
+    // 🛠️ FIX: منع انهيار المتصفح بسبب أخطاء Jazzmin الأصلية في سطر 303
+    // نقوم بتعطيل الوصول المباشر للعناصر غير الموجودة
+    try {
+        const originalGet = jQuery.fn.get;
+        jQuery.fn.get = function(index) {
+            const result = originalGet.apply(this, arguments);
+            if (index === 0 && !result && this.selector && this.selector.includes('small-text')) {
+                // نرجع عنصر وهمي لتجنب Crash
+                return { checked: false };
+            }
+            return result;
+        };
+    } catch(e) { console.log("voro: Safety patch failed, skipping."); }
+
     function initVoroTabs() {
-        // التحقق من الصفحة
         const path = window.location.pathname;
         if (!(path.includes('/products/product/') || path.includes('/products/banner/'))) return;
-        if (!(path.includes('/add/') || /\/\d+\/change\//.test(path))) return;
-
-        // استهداف النموذج الرئيسي في Jazzmin
+        
+        // استهداف الأدمن
         const mainForm = document.querySelector('#content-main form') || document.querySelector('#product_form');
-        if (!mainForm) {
-            console.log("🚀 voro Tabs: Form not found.");
-            return;
-        }
+        if (!mainForm) return;
 
         // جمع كافة الأقسام (Fieldsets و Inlines)
         const fieldsets = Array.from(mainForm.querySelectorAll('fieldset.module'));
         const inlines = Array.from(mainForm.querySelectorAll('.inline-group'));
         const panels = [...fieldsets, ...inlines].filter(p => {
-            // تصفية الأقسام الفارغة أو المخفية أصلاً
-            return p.offsetHeight > 0 || p.querySelector('h2, legend');
+            return p.querySelector('h2, legend') || p.offsetHeight > 0;
         });
 
         if (panels.length <= 1) return;
 
-        // إزالة أي حاوية تبويبات سابقة إذا وجدت
-        const oldNav = document.querySelector('.voro-tabs-nav');
-        if (oldNav) oldNav.remove();
+        // حذف القديم
+        document.querySelectorAll('.voro-tabs-nav').forEach(el => el.remove());
 
-        // إنشاء حاوية التبويبات
         const tabsNav = document.createElement('div');
         tabsNav.className = 'voro-tabs-nav';
         
@@ -40,34 +46,33 @@
             style.id = 'voro-tabs-style';
             style.innerHTML = `
                 .voro-tabs-nav {
-                    display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px;
-                    padding: 12px; background: #fff; border-radius: 12px;
-                    border: 1px solid #dee2e6; position: sticky; top: 0; z-index: 999;
-                    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+                    display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 25px;
+                    padding: 15px; background: #fff; border-radius: 12px;
+                    border: 1px solid #dee2e6; position: sticky; top: 0; z-index: 1000;
+                    box-shadow: 0 5px 20px rgba(0,0,0,0.08);
                 }
                 .voro-tab-btn {
-                    padding: 10px 18px; border-radius: 8px; border: 1px solid #e9ecef;
-                    background: #f8f9fa; color: #495057; font-weight: 600;
-                    cursor: pointer; transition: all 0.2s ease; font-size: 13px;
+                    padding: 12px 22px; border-radius: 10px; border: 1px solid #e2e8f0;
+                    background: #f8fafc; color: #64748b; font-weight: 700;
+                    cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                    font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px;
                 }
-                .voro-tab-btn:hover { background: #e9ecef; }
+                .voro-tab-btn:hover { background: #f1f5f9; color: #1e293b; transform: translateY(-1px); }
                 .voro-tab-btn.active {
-                    background: #6f42c1; color: white; border-color: #6f42c1;
-                    box-shadow: 0 4px 10px rgba(111, 66, 193, 0.3);
+                    background: #7c3aed; color: white; border-color: #7c3aed;
+                    box-shadow: 0 10px 15px -3px rgba(124, 58, 237, 0.3);
                 }
                 .voro-panel-hidden { display: none !important; }
-                .voro-panel-visible { display: block !important; animation: voroIn 0.3s ease; }
-                @keyframes voroIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+                .voro-panel-visible { display: block !important; animation: voroFadeIn 0.4s ease-out; }
+                @keyframes voroFadeIn { from { opacity: 0; transform: scale(0.98) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
             `;
             document.head.appendChild(style);
         }
 
         const buttons = [];
-
         panels.forEach((panel, index) => {
-            // استخراج العنوان بشكل صحيح
             const header = panel.querySelector('h2, legend');
-            let title = header ? header.innerText.trim() : `قسم ${index + 1}`;
+            let title = header ? header.innerText.trim() : `Section ${index + 1}`;
             title = title.replace(/^(إظهار|إخفاء|Show|Hide)\s+/i, '');
 
             const btn = document.createElement('button');
@@ -75,16 +80,25 @@
             btn.className = 'voro-tab-btn';
             btn.innerText = title;
             
-            btn.addEventListener('click', function(e) {
+            btn.onclick = function(e) {
                 e.preventDefault();
-                e.stopPropagation();
-                activateTab(index);
-            });
+                panels.forEach((p, i) => {
+                    if (i === index) {
+                        p.classList.remove('voro-panel-hidden');
+                        p.classList.add('voro-panel-visible');
+                        buttons[i].classList.add('active');
+                    } else {
+                        p.classList.remove('voro-panel-visible');
+                        p.classList.add('voro-panel-hidden');
+                        buttons[i].classList.remove('active');
+                    }
+                });
+                window.scrollTo({ top: mainForm.offsetTop - 100, behavior: 'smooth' });
+            };
 
             tabsNav.appendChild(btn);
             buttons.push(btn);
 
-            // الحالة الافتراضية
             if (index === 0) {
                 panel.classList.add('voro-panel-visible');
                 btn.classList.add('active');
@@ -93,35 +107,10 @@
             }
         });
 
-        function activateTab(idx) {
-            panels.forEach((p, i) => {
-                if (i === idx) {
-                    p.classList.remove('voro-panel-hidden');
-                    p.classList.add('voro-panel-visible');
-                    buttons[i].classList.add('active');
-                } else {
-                    p.classList.remove('voro-panel-visible');
-                    p.classList.add('voro-panel-hidden');
-                    buttons[i].classList.remove('active');
-                }
-            });
-            // التمرير لأعلى النموذج
-            const topPos = mainForm.getBoundingClientRect().top + window.pageYOffset - 100;
-            window.scrollTo({ top: topPos, behavior: 'smooth' });
-        }
-
-        // إدخال التبويبات قبل أول قسم
-        panels[0].parentNode.insertBefore(tabsNav, panels[0]);
-        console.log("🚀 voro Tabs: Ready!");
+        mainForm.insertBefore(tabsNav, panels[0]);
     }
 
-    // التنفيذ عند تحميل الصفحة أو تبديل المحتوى
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initVoroTabs);
-    } else {
-        initVoroTabs();
-    }
-
-    // إعادة التشغيل في حالة وجود AJAX (اختياري لبعض قوالب أدمن)
-    window.addEventListener('load', initVoroTabs);
+    // الانتظار قليلاً للتأكد من تحميل jQuery و Jazzmin
+    setTimeout(initVoroTabs, 300);
+    window.addEventListener('load', () => setTimeout(initVoroTabs, 800));
 })();
