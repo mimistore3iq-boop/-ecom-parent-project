@@ -332,17 +332,7 @@ const ProductDetail = ({ user }) => {
 
               {/* Countdown Timer */}
               {product.is_on_sale && product.discount_end && (
-                <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-3xl p-6 border border-green-100 shadow-sm relative overflow-hidden group">
-                  <div className="absolute top-0 right-0 w-24 h-24 bg-green-200/20 rounded-full -mr-12 -mt-12 transition-transform group-hover:scale-110 duration-700"></div>
-                  <div className="relative z-10">
-                    <div className="flex items-center justify-center gap-2 mb-4">
-                      <div className="w-8 h-0.5 bg-green-300 rounded-full"></div>
-                      <p className="text-green-800 font-bold text-sm sm:text-base uppercase tracking-wider">ينتهي العرض خلال</p>
-                      <div className="w-8 h-0.5 bg-green-300 rounded-full"></div>
-                    </div>
-                    <CountdownTimer expiryDate={product.discount_end} />
-                  </div>
-                </div>
+                <CountdownTimer targetDate={product.discount_end} />
               )}
             </div>
 
