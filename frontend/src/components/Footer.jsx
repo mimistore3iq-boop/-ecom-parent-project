@@ -35,7 +35,7 @@ const Footer = () => {
             <div className="space-y-2 text-gray-300">
               <a href="tel:+96407737698219" className="hover:text-white transition-colors block">📞 07737698219</a>
               <a href="https://wa.me/9647737698219" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors block">💬 واتساب</a>
-              <a href="https://t.me/mimi_store10" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors block">📱 تيليجرام</a>
+              <a href="https://t.me/voro_store" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors block">📱 تيليجرام</a>
             </div>
           </div>
         </div>

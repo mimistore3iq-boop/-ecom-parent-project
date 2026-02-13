@@ -7,7 +7,7 @@ export const ProductCard = ({ product, onAddToCart }) => {
   
   return (
     <div
-      className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 group cursor-pointer border border-gray-100 h-full flex flex-col relative transform hover:-translate-y-2 active:scale-95"
+      className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 group cursor-pointer border border-gray-100 h-full flex flex-col relative transform hover:-translate-y-2"
       onClick={() => navigate(`/product/${product.id}`)}
       style={{ 
         touchAction: 'pan-y',
@@ -208,7 +208,7 @@ const CategoryProductsSection = ({
             {products.map((product) => (
               <div
                 key={product.id}
-                className="flex-shrink-0 w-[48%] sm:w-[32%] md:w-[24%] snap-start px-1"
+                className="flex-shrink-0 w-[50%] sm:w-[32%] md:w-[24%] snap-start px-0.5"
                 style={{ 
                   contentVisibility: 'auto', 
                   containIntrinsicSize: '200px 300px',

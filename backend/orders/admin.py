@@ -31,7 +31,7 @@ class OrderItemInline(admin.TabularInline):
 # Base Order Admin Class
 class BaseOrderAdmin(admin.ModelAdmin):
     list_display = (
-        'order_number_display', 'customer_display', 'status_display',
+        'order_number_display', 'customer_display', 'customer_address_copy', 'status_display',
         'total_display', 'created_at_display'
     )
     list_filter = (

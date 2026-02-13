@@ -18,12 +18,12 @@ const messaging = firebase.messaging();
 messaging.onBackgroundMessage(function(payload) {
   console.log('[firebase-messaging-sw.js] Received background message ', payload);
   
-  const notificationTitle = payload.notification.title || 'MIMI STORE';
+  const notificationTitle = payload.notification.title || 'voro';
   const notificationOptions = {
     body: payload.notification.body || 'لديك إشعار جديد',
     icon: '/logo192.png',
     badge: '/logo192.png',
-    tag: 'mimi-store-notification',
+    tag: 'voro-notification',
     requireInteraction: true,
     data: payload.data || {},
     actions: [

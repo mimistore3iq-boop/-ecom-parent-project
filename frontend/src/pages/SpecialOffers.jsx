@@ -3,10 +3,10 @@ import { Link, useNavigate } from 'react-router-dom';
 import { api, endpoints } from '../api';
 import { formatCurrency } from '../utils/currency';
 import Footer from '../components/Footer';
-import CategoryProductsSection from '../components/CategoryProductsSection';
+import CategoryProductsSection, { ProductCard } from '../components/CategoryProductsSection';
 
 const SpecialOffers = ({ user }) => {
-  const ProductCard = CategoryProductsSection.ProductCard;
+  // const ProductCard = CategoryProductsSection.ProductCard;
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [cart, setCart] = useState([]);

@@ -280,7 +280,12 @@ const Home = ({ user, setUser }) => {
             <div className="flex items-center gap-4">
               {/* Search icon (mobile) */}
               <button 
-                onClick={() => setIsSearchOpen(!isSearchOpen)}
+                onClick={() => {
+                  setIsSearchOpen(!isSearchOpen);
+                  if (!isSearchOpen) {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }
+                }}
                 className={`p-2.5 transition-colors rounded-lg md:hidden ${isSearchOpen ? 'text-indigo-600 bg-indigo-50' : 'text-gray-600 hover:text-indigo-600 hover:bg-indigo-50'}`}
               >
                 <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -555,88 +560,8 @@ const Home = ({ user, setUser }) => {
       </div>
 
       {/* Footer */}
-      <footer className="bg-gray-800 text-white py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div>
-              <h3 className="text-xl font-bold mb-4">voro</h3>
-              <p className="text-gray-300">
-                متجرك الإلكتروني المفضل للحصول على أفضل المنتجات بأسعار مميزة
-              </p>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-4">روابط سريعة</h4>
-              <ul className="space-y-2 text-gray-300">
-                <li><a href="#" className="hover:text-white transition-colors">الرئيسية</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">المنتجات</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">من نحن</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">اتصل بنا</a></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-4">خدمة العملاء</h4>
-              <ul className="space-y-2 text-gray-300">
-                <li><a href="#" className="hover:text-white transition-colors">سياسة الإرجاع</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">الشحن والتوصيل</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">الأسئلة الشائعة</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">الدعم الفني</a></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-4">تواصل معنا</h4>
-              <div className="space-y-2 text-gray-300">
-                <a href="tel:+96407737698219" className="hover:text-white transition-colors block">📞 07737698219</a>
-                <a href="https://wa.me/9647737698219" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors block">💬 واتساب</a>
-                <a href="https://t.me/mimi_store10" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors block">📱 تيليجرام</a>
-              </div>
-            </div>
-          </div>
-          <div className="border-t border-gray-700 mt-8 pt-8 text-center text-gray-300">
-            <p>&copy; 2025 voro. جميع الحقوق محفوظة.</p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
 
-      {/* Bottom Navigation (Mobile) */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 md:hidden">
-        <div className="grid grid-cols-4 gap-1">
-          <button className="flex flex-col items-center py-2 text-primary-600">
-            <svg className="h-6 w-6 mb-1" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
-            </svg>
-            <span className="text-xs">الرئيسية</span>
-          </button>
-          <button 
-            onClick={() => {
-              setIsSearchOpen(true);
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            }}
-            className="flex flex-col items-center py-2 text-gray-600"
-          >
-            <svg className="h-6 w-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-            <span className="text-xs">البحث</span>
-          </button>
-          <button className="flex flex-col items-center py-2 text-gray-600 relative">
-            <svg className="h-6 w-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m0 0h8" />
-            </svg>
-            {getCartItemCount() > 0 && (
-              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
-                {getCartItemCount()}
-              </span>
-            )}
-            <span className="text-xs">السلة</span>
-          </button>
-          <button className="flex flex-col items-center py-2 text-gray-600">
-            <svg className="h-6 w-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-            </svg>
-            <span className="text-xs">الحساب</span>
-          </button>
-        </div>
-      </div>
       {/* Bottom Navigation */}
       <BottomNav />
     </div>
