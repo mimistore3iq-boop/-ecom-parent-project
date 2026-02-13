@@ -17,6 +17,7 @@ class Category(models.Model):
         related_name='children', verbose_name='القسم الأب'
     )
     is_active = models.BooleanField('نشط', default=True)
+    featured_on_homepage = models.BooleanField('تمييز في الواجهة الرئيسية', default=False)
     display_order = models.PositiveIntegerField('ترتيب العرض', default=0, help_text='الأقسام ذات الترتيب الأقل تظهر أولاً')
     created_at = models.DateTimeField('تاريخ الإنشاء', auto_now_add=True)
     updated_at = models.DateTimeField('تاريخ التحديث', auto_now=True)

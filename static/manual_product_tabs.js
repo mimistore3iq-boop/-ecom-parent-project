@@ -1,20 +1,35 @@
 /* Product form tabs: convert fieldsets (and inline groups) into clickable tabs */
 (function () {
+    console.log("🛠️ Mimi Tabs: Initializing...");
+    
     function initMimiTabs() {
         // Run on Django admin product and banner add/change pages
         const productPathOk = /\/admin\/products\/product\//.test(window.location.pathname);
         const bannerPathOk = /\/admin\/products\/banner\//.test(window.location.pathname);
         const appOk = document.body.classList.contains('app-products');
-        if (!(productPathOk || bannerPathOk || appOk)) return;
+        
+        if (!(productPathOk || bannerPathOk || appOk)) {
+            console.log("🛠️ Mimi Tabs: Path not matching, skipping.");
+            return;
+        }
 
         const form = document.querySelector('form');
         if (!form) return;
 
-        // Collect panels: fieldsets and inline groups (e.g., reviews)
+        // Collect panels: fieldsets and inline groups
         const fieldsets = Array.from(form.querySelectorAll('fieldset'));
         const inlines = Array.from(document.querySelectorAll('.inline-group, .inline-related'));
-        const panels = fieldsets.concat(inlines).filter(Boolean);
-        if (!panels.length) return;
+        const panels = fieldsets.concat(inlines).filter(p => {
+            // Skip panels that don't have visible form fields or rows
+            return p.querySelector('div, p, table, .form-row, .field, .form-horizontal, .inline-related');
+        });
+        
+        if (!panels.length) {
+            console.log("🛠️ Mimi Tabs: No panels found.");
+            return;
+        }
+
+        console.log(`🛠️ Mimi Tabs: Found ${panels.length} panels.`);
 
         // Helper: get panel title text
         function getPanelTitle(panel) {
@@ -29,6 +44,7 @@
         function norm(text) {
             return (text || '')
                 .toLowerCase()
+                .trim()
                 .replace(/\s+/g, '-')
                 .replace(/[^\u0600-\u06FFa-z0-9\-]/g, '') // keep Arabic, Latin, digits, hyphen
                 .replace(/-+/g, '-')
@@ -50,20 +66,17 @@
         // Styles
         const style = document.createElement('style');
         style.textContent = `
-      .mimi-tabs-nav { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 15px; }
-      .mimi-tab-btn { border: 1px solid #e0e0e0; background: #fff; color: #333; padding: 6px 10px; border-radius: 18px; cursor: pointer; font-weight: 600; transition: all .2s ease; }
-      .mimi-tab-btn:hover { transform: translateY(-1px); box-shadow: 0 2px 8px rgba(0,0,0,.08); }
-      .mimi-tab-btn.active { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; border-color: transparent; }
-      .mimi-tab-panel { display: none; }
-      .mimi-tab-panel.active { display: block; }
-
-      /* Ensure no panel is shown by default */
-      fieldset, .inline-group, .inline-related {
-        display: none !important;
-      }
-      fieldset.active, .inline-group.active, .inline-related.active {
-        display: block !important;
-      }
+      .mimi-tabs-nav { display: flex; flex-wrap: wrap; gap: 8px; margin: 15px 0 20px; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+      .mimi-tab-btn { border: 1px solid #e0e0e0; background: #f8f9fa; color: #555; padding: 8px 16px; border-radius: 20px; cursor: pointer; font-weight: 600; transition: all .2s ease; font-size: 14px; }
+      .mimi-tab-btn:hover { background: #e9ecef; transform: translateY(-1px); box-shadow: 0 2px 8px rgba(0,0,0,.08); }
+      .mimi-tab-btn.active { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; border-color: transparent; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3); }
+      
+      /* Class to hide panels - only active if script runs successfully */
+      .mimi-tabs-enabled .mimi-tab-panel { display: none !important; }
+      .mimi-tabs-enabled .mimi-tab-panel.active { display: block !important; }
+      
+      /* Hide original legends if they are redundant */
+      .mimi-tabs-enabled fieldset legend { opacity: 0.6; font-size: 0.8em; }
     `;
         document.head.appendChild(style);
 
@@ -72,13 +85,10 @@
         const panelById = new Map();
         const slugToPanelId = new Map();
 
-        // Try to reuse existing nav links
+        // Try to reuse existing nav links if any
         const existingNavLinks = Array.from(document.querySelectorAll('.nav-link[href^="#"], a[href^="#"][role="tab"]'));
 
         panels.forEach((panel, idx) => {
-            // Skip truly empty panels
-            if (!panel.querySelector('div, p, table, .form-row, .field, .form-horizontal, .inline-related')) return;
-
             const title = getPanelTitle(panel);
             const panelId = 'mimi-tab-' + idx;
             const slug = norm(title);
@@ -88,35 +98,20 @@
             panelById.set(panelId, panel);
             slugToPanelId.set(slug, panelId);
 
-            // Reuse existing nav-link if its hash matches the slug
-            let btn = null;
-            const matching = existingNavLinks.find(a => {
-                const hash = (a.getAttribute('href') || '').replace('#', '').trim().replace(/-tab$/i, '');
-                return norm(hash) === slug;
-            });
-            if (matching) {
-                btn = document.createElement('button');
-                btn.type = 'button';
-                btn.className = 'mimi-tab-btn';
-                btn.textContent = matching.textContent.trim();
-                tabsNav.appendChild(btn);
-            } else {
-                btn = document.createElement('button');
-                btn.type = 'button';
-                btn.className = 'mimi-tab-btn';
-                btn.textContent = title;
-                tabsNav.appendChild(btn);
-            }
-
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'mimi-tab-btn';
+            btn.textContent = title;
             btn.dataset.target = panelId;
             btn.dataset.slug = slug;
+            tabsNav.appendChild(btn);
             buttonById.set(panelId, btn);
 
             // Make legend clickable too
             const legend = panel.querySelector('legend, h2');
             if (legend) {
                 legend.style.cursor = 'pointer';
-                legend.addEventListener('click', () => activate(panelId));
+                legend.title = "انقر للتبديل للوضع الكامل";
             }
         });
 
@@ -131,41 +126,40 @@
             const pnl = panelById.get(panelId);
             if (btn) btn.classList.add('active');
             if (pnl) pnl.classList.add('active');
+            
             if (btn) {
                 const slug = btn.dataset.slug || norm(btn.textContent);
-                history.replaceState(null, '', '#' + slug);
+                // Update hash without scrolling
+                if (history.replaceState) {
+                    history.replaceState(null, '', '#' + slug + '-tab');
+                } else {
+                    location.hash = slug + '-tab';
+                }
             }
         }
 
-        // Event delegation for clicks on buttons
+        // Click event listener
         tabsNav.addEventListener('click', function (e) {
             const btn = e.target.closest('.mimi-tab-btn');
             if (!btn) return;
             e.preventDefault();
-            
-            const targetId = btn.dataset.target;
-            const slug = btn.dataset.slug || norm(btn.textContent);
-            
-            // Activate immediately
-            activate(targetId);
-            
-            // Update hash without triggering reload
-            if (slug) {
-                history.replaceState(null, '', '#' + slug);
-            }
+            activate(btn.dataset.target);
         });
 
         // Function to activate tab by hash
         function activateByHash(hashValue) {
-            const clean = decodeURIComponent((hashValue || '').replace('#', '')).trim().replace(/-tab$/i, '');
+            if (!hashValue) return false;
+            const clean = decodeURIComponent(hashValue.replace('#', '')).trim().replace(/-tab$/i, '');
             const slug = norm(clean);
+            
             const targetId = slugToPanelId.get(slug);
             if (targetId) {
                 activate(targetId);
                 return true;
             }
-            // Fallback by button text
-            const match = tabButtons.find(b => (b.dataset.slug || norm(b.textContent)) === slug);
+            
+            // Fallback: search buttons for a match in text or slug
+            const match = tabButtons.find(b => b.dataset.slug === slug || norm(b.textContent) === slug);
             if (match) {
                 activate(match.dataset.target);
                 return true;
@@ -173,25 +167,24 @@
             return false;
         }
 
-        // Don't activate any tab by default
-        // Only activate when user clicks on a tab
-
-        // React to hash changes (e.g., clicking existing anchor links)
+        // React to hash changes
         window.addEventListener('hashchange', function () {
             activateByHash(location.hash);
         });
 
-        // Activate the first tab by default if no hash
+        // Enable the tab mode by adding class to body
+        document.body.classList.add('mimi-tabs-enabled');
+
+        // Initial activation: check hash or use first tab
         if (!activateByHash(location.hash)) {
             const firstId = panels[0].dataset.mimiTabId;
             if (firstId) activate(firstId);
         }
 
-        // Ignore built-in collapse since tabs control visibility
-        panels.forEach(p => p.classList.remove('collapse'));
+        console.log("🛠️ Mimi Tabs: Initialized successfully.");
     }
 
-    // Initialize immediately if DOM is already loaded, otherwise wait
+    // Initialize
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', initMimiTabs);
     } else {

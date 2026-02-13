@@ -3,9 +3,10 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { api, endpoints } from '../api';
 import { formatCurrency } from '../utils/currency';
 import Footer from '../components/Footer';
-import { ProductCard } from '../components/CategoryProductsSection';
+import CategoryProductsSection from '../components/CategoryProductsSection';
 
 const Categories = ({ user }) => {
+  const ProductCard = CategoryProductsSection.ProductCard;
   const [categories, setCategories] = useState([]);
   const [products, setProducts] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(null);
