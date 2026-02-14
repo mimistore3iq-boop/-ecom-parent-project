@@ -1,5 +1,5 @@
 
-// Unified Product Form JavaScript for MIMI STORE
+// Unified Product Form JavaScript for voro
 // Ensure switchToTab is available immediately
 window.switchToTab = function(tabId) {
     if (!tabId) return;

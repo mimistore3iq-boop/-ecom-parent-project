@@ -1,5 +1,4 @@
-import { useEffect, useState } from 'react';
-import * as axios from 'axios';
+import { useEffect, useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { api, endpoints } from '../api';
 import BottomNav from '../components/BottomNav';
@@ -9,7 +8,7 @@ import Checkout from '../components/CheckoutNew';
 import TopBar from '../components/TopBar';
 import BannerSlider from '../components/BannerSlider';
 import CategorySlider from '../components/CategorySlider';
-import CategoryProductsSection from '../components/CategoryProductsSection';
+import CategoryProductsSection, { ProductCard } from '../components/CategoryProductsSection';
 import { formatCurrency } from '../utils/currency';
 
 const Home = ({ user, setUser }) => {
@@ -67,22 +66,19 @@ const Home = ({ user, setUser }) => {
       // Normalize to match UI expectations
       const normalized = list.map((p) => {
         const finalImage = p.image || p.main_image_url || p.main_image || null;
-        // Log image details for first 3 products
-        if (list.indexOf(p) < 3) {
-          console.log(`🖼️ منتج: ${p.name}`, {
-            'id': p.id,
-            'p.image': p.image ? '✅' : '❌',
-            'p.main_image_url': p.main_image_url ? '✅' : '❌',
-            'p.main_image': p.main_image ? '✅' : '❌',
-            'النهائي': finalImage ? '✅' : '❌',
-            'URL': finalImage
-          });
-        }
+        const priceNum = Number(p.price || 0);
+        const discountPriceNum = p.discount_price ? Number(p.discount_price) : null;
+        
         return {
           ...p,
           image: finalImage,
+          price: priceNum,
+          discount_price: discountPriceNum,
+          discounted_price: p.discounted_price ? Number(p.discounted_price) : (discountPriceNum || priceNum),
           stock: typeof p.stock_quantity === 'number' ? p.stock_quantity : (p.is_in_stock ? 1 : 0),
           discount: typeof p.discount_percentage === 'number' ? p.discount_percentage : 0,
+          time_left: p.time_left || 0,
+          is_on_sale: p.is_on_sale || false
         };
       });
       
@@ -278,18 +274,21 @@ const Home = ({ user, setUser }) => {
             </div>
 
             {/* Search + Icons */}
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 md:gap-4">
               {/* Search icon (mobile) */}
               <button 
                 onClick={() => {
                   setIsSearchOpen(!isSearchOpen);
                   if (!isSearchOpen) {
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                    setTimeout(() => {
+                      const searchInput = document.getElementById('mobile-search-input');
+                      if (searchInput) searchInput.focus();
+                    }, 100);
                   }
                 }}
-                className={`p-2.5 transition-colors rounded-lg md:hidden ${isSearchOpen ? 'text-indigo-600 bg-indigo-50' : 'text-gray-600 hover:text-indigo-600 hover:bg-indigo-50'}`}
+                className={`p-2 transition-colors rounded-lg md:hidden ${isSearchOpen ? 'text-indigo-600 bg-indigo-50' : 'text-gray-600 hover:text-indigo-600 hover:bg-indigo-50'}`}
               >
-                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
               </button>
@@ -433,10 +432,10 @@ const Home = ({ user, setUser }) => {
               <div className="relative">
                 <input
                   type="text"
+                  id="mobile-search-input"
                   placeholder="ابحث عن منتج..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  autoFocus
                   className="w-full px-4 py-3 pr-11 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-indigo-500 text-sm shadow-inner"
                 />
                 <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
@@ -458,8 +457,9 @@ const Home = ({ user, setUser }) => {
               
               {/* Mobile Search Results */}
               {searchTerm && (
-                <div className="mt-2 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden max-h-[60vh] overflow-y-auto">
-                  {filteredProducts.slice(0, 8).map(product => (
+                <div className="mt-2 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden max-h-[60vh] overflow-y-auto z-50">
+                  <div className="bg-indigo-50 px-4 py-2 text-[10px] font-bold text-indigo-600 uppercase tracking-wider">نتائج البحث</div>
+                  {filteredProducts.slice(0, 10).map(product => (
                     <button
                       key={product.id}
                       onClick={() => {
@@ -467,33 +467,27 @@ const Home = ({ user, setUser }) => {
                         setSearchTerm('');
                         setIsSearchOpen(false);
                       }}
-                      className="w-full text-right p-3 hover:bg-gray-50 flex items-center gap-3 border-b border-gray-50 last:border-0 active:bg-indigo-50"
+                      className="w-full text-right p-3 hover:bg-indigo-50/50 flex items-center gap-3 border-b border-gray-50 last:border-0 active:bg-indigo-100 transition-colors"
                     >
-                      <div className="w-14 h-14 shrink-0 bg-gray-50 rounded-xl overflow-hidden border border-gray-100">
+                      <div className="w-12 h-12 shrink-0 bg-white rounded-xl overflow-hidden border border-gray-100 p-1">
                         <img src={product.image} alt="" className="w-full h-full object-contain" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="font-bold text-sm text-gray-800 truncate">{product.name}</div>
-                        <div className="flex items-center gap-2 mt-1">
-                          <span className="text-sm text-indigo-600 font-extrabold">{formatCurrency(product.discounted_price || product.price)}</span>
-                          {product.discount_percentage > 0 && (
-                            <span className="text-[10px] text-gray-400 line-through">{formatCurrency(product.price)}</span>
-                          )}
+                        <div className="font-bold text-[13px] text-gray-800 truncate">{product.name}</div>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          <span className="text-xs text-indigo-600 font-bold">{formatCurrency(product.discounted_price || product.price)}</span>
                         </div>
                       </div>
-                      <svg className="h-4 w-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                      </svg>
+                      <div className="text-gray-300">
+                        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </div>
                     </button>
                   ))}
                   {filteredProducts.length === 0 && (
-                    <div className="p-8 text-center">
-                      <div className="text-gray-300 mb-2">
-                        <svg className="h-12 w-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                        </svg>
-                      </div>
-                      <p className="text-gray-500 text-sm font-medium">لا توجد منتجات تطابق بحثك</p>
+                    <div className="p-8 text-center bg-gray-50">
+                      <p className="text-gray-400 text-xs">لا توجد منتجات تطابق بحثك</p>
                     </div>
                   )}
                 </div>
@@ -531,9 +525,9 @@ const Home = ({ user, setUser }) => {
                 </div>
               </div>
               
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6 px-2">
                 {filteredProducts.map(product => (
-                  <CategoryProductsSection.ProductCard 
+                  <ProductCard 
                     key={product.id} 
                     product={product} 
                     onAddToCart={addToCart} 

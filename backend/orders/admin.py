@@ -74,25 +74,36 @@ class BaseOrderAdmin(admin.ModelAdmin):
     actions = ['mark_as_confirmed', 'mark_as_preparing', 'mark_as_shipped', 'mark_as_delivered', 'mark_as_cancelled']
     
     def customer_name_copy(self, obj):
+        name = obj.customer_name or "بدون اسم"
         return format_html(
-            '<strong>{}</strong> <a href="javascript:void(0)" onclick="navigator.clipboard.writeText(\'{}\'); alert(\'تم نسخ الاسم\')" style="background: #e9ecef; padding: 4px 8px; border-radius: 4px; color: #4c6ef5; text-decoration: none; margin-right: 10px; border: 1px solid #dee2e6;" title="نسخ الاسم">📋 نسخ الاسم</a>',
-            obj.customer_name, obj.customer_name
+            '<div style="display: flex; align-items: center; gap: 8px;">'
+            '<strong>{}</strong>'
+            '<button type="button" onclick="navigator.clipboard.writeText(\'{}\'); this.innerText=\'✅\'; setTimeout(()=>this.innerText=\'نسخ\', 2000)" style="background: #4c6ef5; color: white; border: none; padding: 2px 8px; border-radius: 4px; cursor: pointer; font-size: 11px;">نسخ</button>'
+            '</div>',
+            name, name
         )
     customer_name_copy.short_description = '👤 اسم العميل'
 
     def customer_phone_copy(self, obj):
+        phone = obj.customer_phone or "بدون رقم"
         return format_html(
-            '<span style="direction: ltr; display: inline-block;">{}</span> <a href="javascript:void(0)" onclick="navigator.clipboard.writeText(\'{}\'); alert(\'تم نسخ الرقم\')" style="background: #e9ecef; padding: 4px 8px; border-radius: 4px; color: #4c6ef5; text-decoration: none; margin-right: 10px; border: 1px solid #dee2e6;" title="نسخ الرقم">📋 نسخ الرقم</a>',
-            obj.customer_phone, obj.customer_phone
+            '<div style="display: flex; align-items: center; gap: 8px;">'
+            '<span style="direction: ltr;">{}</span>'
+            '<button type="button" onclick="navigator.clipboard.writeText(\'{}\'); this.innerText=\'✅\'; setTimeout(()=>this.innerText=\'نسخ\', 2000)" style="background: #12b886; color: white; border: none; padding: 2px 8px; border-radius: 4px; cursor: pointer; font-size: 11px;">نسخ</button>'
+            '</div>',
+            phone, phone
         )
     customer_phone_copy.short_description = '📱 رقم الهاتف'
 
     def customer_address_copy(self, obj):
-        address = obj.customer_address or ""
+        address = obj.customer_address or "بدون عنوان"
         governorate = obj.governorate or ""
         full_address = f"{governorate} - {address}" if governorate else address
         return format_html(
-            '<span>{}</span> <a href="javascript:void(0)" onclick="navigator.clipboard.writeText(\'{}\'); alert(\'تم نسخ العنوان\')" style="background: #e9ecef; padding: 4px 8px; border-radius: 4px; color: #4c6ef5; text-decoration: none; margin-right: 10px; border: 1px solid #dee2e6;" title="نسخ العنوان">📋 نسخ العنوان</a>',
+            '<div style="display: flex; align-items: center; gap: 8px;">'
+            '<span>{}</span>'
+            '<button type="button" onclick="navigator.clipboard.writeText(\'{}\'); this.innerText=\'✅\'; setTimeout(()=>this.innerText=\'نسخ\', 2000)" style="background: #fd7e14; color: white; border: none; padding: 2px 8px; border-radius: 4px; cursor: pointer; font-size: 11px;">نسخ</button>'
+            '</div>',
             full_address, full_address
         )
     customer_address_copy.short_description = '📍 العنوان'

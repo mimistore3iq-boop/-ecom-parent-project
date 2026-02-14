@@ -316,13 +316,20 @@ const Categories = ({ user }) => {
                 </button>
               </div>
             ) : (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 px-2">
                 {products.map((product) => (
-                  <ProductCard 
-                    key={product.id} 
-                    product={product} 
-                    onAddToCart={addToCart} 
-                  />
+                  <div key={product.id} className="h-full">
+                    {ProductCard ? (
+                      <ProductCard 
+                        product={product} 
+                        onAddToCart={addToCart} 
+                      />
+                    ) : (
+                      <div className="p-4 border rounded-xl bg-white text-center text-xs">
+                        {product.name}
+                      </div>
+                    )}
+                  </div>
                 ))}
               </div>
             )}
