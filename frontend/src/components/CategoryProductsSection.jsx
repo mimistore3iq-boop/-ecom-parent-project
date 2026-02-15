@@ -123,11 +123,17 @@ const CategoryProductsSection = ({
         -webkit-overflow-scrolling: touch;
         scroll-snap-type: x mandatory;
         scroll-behavior: smooth;
-        touch-action: pan-y; /* Allow vertical scrolling, container handles horizontal */
+        touch-action: pan-x pan-y; /* تفعيل السحب الأفقي والعمودي معاً */
+        display: flex;
+        gap: 12px;
+        padding-bottom: 15px;
       }
       .snap-center-item {
         scroll-snap-align: start;
-        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        transition: all 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+      }
+      .snap-center-item:active {
+        transform: scale(0.98);
       }
       .horizontal-scroll-fix::-webkit-scrollbar {
         display: none;
@@ -153,7 +159,7 @@ const CategoryProductsSection = ({
         <div className="relative">
           <div 
             ref={gridRef}
-            className="flex overflow-x-auto gap-3 pb-4 hide-scrollbar horizontal-scroll-fix"
+            className="flex overflow-x-auto gap-3 pb-4 hide-scrollbar horizontal-scroll-fix px-1"
             style={{ 
               scrollbarWidth: 'none',
               msOverflowStyle: 'none',
@@ -163,7 +169,7 @@ const CategoryProductsSection = ({
             {products.map((product) => (
               <div
                 key={product.id}
-                className="flex-shrink-0 w-[46%] sm:w-[40%] md:w-[28%] lg:w-[20%] snap-center-item"
+                className="flex-shrink-0 w-[47%] sm:w-[40%] md:w-[28%] lg:w-[20%] snap-center-item"
               >
                 <ProductCard product={product} onAddToCart={onAddToCart} />
               </div>
