@@ -41,10 +41,18 @@ export const ProductCard = ({ product, onAddToCart }) => {
           </div>
         )}
 
+        {/* Stock Count Badge */}
+        {product.stock > 0 && (
+          <div className="absolute bottom-2 right-2 bg-white/90 text-gray-800 text-[9px] font-bold px-2 py-1 rounded-md z-20 shadow-sm backdrop-blur-sm flex items-center gap-1 border border-gray-100">
+            <span className="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
+            متبقي {product.stock}
+          </div>
+        )}
+
         {/* Out of Stock Overlay */}
         {product.stock === 0 && (
-          <div className="absolute inset-0 bg-white/80 backdrop-blur-[2px] flex items-center justify-center z-20">
-            <span className="text-red-600 font-extrabold text-[12px] bg-white/95 px-3 py-1.5 rounded-xl shadow-lg border border-red-100 uppercase tracking-wider">نفد المخزون</span>
+          <div className="absolute inset-0 bg-black/10 backdrop-blur-[1px] flex items-center justify-center z-20">
+            <span className="text-white font-extrabold text-[12px] bg-red-600/90 px-3 py-1.5 rounded-xl shadow-lg border border-red-500 uppercase tracking-wider">نفد المخزون</span>
           </div>
         )}
       </div>
