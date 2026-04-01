@@ -10,7 +10,7 @@ class Category(models.Model):
     """Product category model"""
     name = models.CharField('اسم القسم', max_length=100, unique=True)
     description = models.TextField('الوصف', blank=True)
-    image = models.ImageField('صورة القسم', upload_to='categories/', blank=True, null=True)
+    image = models.ImageField('صورة القسم', upload_to='', blank=True, null=True)
     image_url = models.URLField('رابط صورة القسم (الخارجي)', blank=True, null=True)
     parent = models.ForeignKey(
         'self', on_delete=models.CASCADE, null=True, blank=True,

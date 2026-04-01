@@ -30,7 +30,7 @@ def upload_image_to_voro(request):
 
         # Generate unique filename
         ext = os.path.splitext(image_file.name)[1]
-        filename = f"uploads/{uuid.uuid4()}{ext}"
+        filename = f"{uuid.uuid4()}{ext}"
         
         # Save file using default_storage (configured to R2)
         path = default_storage.save(filename, ContentFile(image_file.read()))
@@ -59,9 +59,14 @@ def run_migration_view(request):
     # نستخدم StringIO لالتقاط مخرجات الأمر (stdout)
     out = io.StringIO()
     try:
+        # 1. تهجير الصور من ImgBB إلى R2
         call_command('migrate_images_to_r2', stdout=out)
+        
+        # 2. إصلاح المسارات بإزالة uploads/
+        call_command('fix_image_paths', stdout=out)
+        
         result = out.getvalue()
-        return HttpResponse(f"<h1>voro Image Migration Result</h1><pre>{result}</pre>", content_type="text/html")
+        return HttpResponse(f"<h1>voro Image Migration & Path Fix Result</h1><pre>{result}</pre>", content_type="text/html")
     except Exception as e:
         return HttpResponse(f"<h1>Error during migration</h1><pre>{str(e)}</pre>", status=500)
 
