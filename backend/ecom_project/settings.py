@@ -226,6 +226,7 @@ AWS_STORAGE_BUCKET_NAME = config('AWS_STORAGE_BUCKET_NAME', default='voro-media'
 AWS_S3_ENDPOINT_URL = config('AWS_S3_ENDPOINT_URL', default='https://b58338bbc4950d178ec867a9c5ea4d32.r2.cloudflarestorage.com')
 AWS_S3_CUSTOM_DOMAIN = config('AWS_S3_CUSTOM_DOMAIN', default='pub-01ea36f78ed64270815d000e4f125565.r2.dev')
 
+AWS_LOCATION = ''
 AWS_S3_FILE_OVERWRITE = False
 AWS_DEFAULT_ACL = None
 AWS_QUERYSTRING_AUTH = False
