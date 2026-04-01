@@ -8,6 +8,9 @@ from .serializers_coupons import CouponSerializer, CouponUsageSerializer
 from django.conf import settings
 import requests
 
+from django.views.decorators.csrf import csrf_exempt
+
+@csrf_exempt
 @api_view(['POST'])
 @permission_classes([IsAdminUser])
 def upload_image_to_voro(request):
