@@ -1,36 +1,42 @@
 
 /* 🚀 voro Super Fix: Resolving JS errors and enabling Tabs */
-(function() {
-    // 1. إصلاح خطأ Checked/Undefined في Jazzmin ui-builder.js بشكل استباقي
-    const fixJazzminUndefined = () => {
-        const idsToFix = [
-            'body-small-text', 'footer-small-text', 'sidebar-nav-small-text', 
-            'jazzmin-theme-chooser', 'theme-condition', 'navbar-small-text', 
-            'brand-small-text', 'actions-fixed', 'layout-boxed', 'footer-fixed',
-            'navbar-fixed', 'no-navbar-border', 'sidebar-nav-flat-style',
-            'sidebar-nav-legacy-style', 'sidebar-nav-compact', 'sidebar-nav-child-indent',
-            'main-sidebar-disable-hover-focus-auto-expand', 'sidebar-fixed'
-        ];
-        
-        idsToFix.forEach(id => {
-            if (!document.getElementById(id)) {
-                const dummy = document.createElement('input');
-                dummy.id = id;
-                dummy.type = 'checkbox';
-                dummy.style.display = 'none';
-                dummy.className = 'voro-dummy-fix';
-                document.body.appendChild(dummy);
-            }
-        });
-        
-        // منع انهيار window.ui_changes
-        window.ui_changes = window.ui_changes || {'button_classes': {}};
-    };
+document.addEventListener('DOMContentLoaded', function() {
+    (function() {
+        // 1. إصلاح خطأ Checked/Undefined في Jazzmin ui-builder.js بشكل استباقي
+        const fixJazzminUndefined = () => {
+            const idsToFix = [
+                'body-small-text', 'footer-small-text', 'sidebar-nav-small-text', 
+                'jazzmin-theme-chooser', 'theme-condition', 'navbar-small-text', 
+                'brand-small-text', 'actions-fixed', 'layout-boxed', 'footer-fixed',
+                'navbar-fixed', 'no-navbar-border', 'sidebar-nav-flat-style',
+                'sidebar-nav-legacy-style', 'sidebar-nav-compact', 'sidebar-nav-child-indent',
+                'main-sidebar-disable-hover-focus-auto-expand', 'sidebar-fixed'
+            ];
+            
+            idsToFix.forEach(id => {
+                if (!document.getElementById(id)) {
+                    const dummy = document.createElement('input');
+                    dummy.id = id;
+                    dummy.type = 'checkbox';
+                    dummy.style.display = 'none';
+                    dummy.className = 'voro-dummy-fix';
+                    
+                    // إصلاح خطأ appendChild على null (السطر 22)
+                    const parent = document.body || document.documentElement;
+                    if (parent) {
+                        parent.appendChild(dummy);
+                    }
+                }
+            });
+            
+            // منع انهيار window.ui_changes
+            window.ui_changes = window.ui_changes || {'button_classes': {}};
+        };
 
-    // تنفيذ فوري وعند تحميل الصفحة
-    fixJazzminUndefined();
-    
-    // 2. سكربت التبويبات (Tabs) المطور
+        // تنفيذ فوري وعند تحميل الصفحة
+        fixJazzminUndefined();
+        
+        // 2. سكربت التبويبات (Tabs) المطور
     function initVoroTabs() {
         const path = window.location.pathname;
         // إضافة دعم لواجهة الطلبات (orders) والكوبونات (coupon)
@@ -176,4 +182,5 @@
     // محاكاة العناصر المفقودة لخطأ 303 و 265
     setInterval(fixJazzminUndefined, 1000);
 
-})();
+    })();
+});

@@ -57,9 +57,29 @@ class ImgBBUploadWidget(forms.TextInput):
             const formData = new FormData();
             formData.append('image', file);
             
+            // Get CSRF token from cookies
+            const getCookie = (name) => {{
+                let cookieValue = null;
+                if (document.cookie && document.cookie !== '') {{
+                    const cookies = document.cookie.split(';');
+                    for (let i = 0; i < cookies.length; i++) {{
+                        const cookie = cookies[i].trim();
+                        if (cookie.substring(0, name.length + 1) === (name + '=')) {{
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }}
+                    }}
+                }}
+                return cookieValue;
+            }};
+            const csrftoken = getCookie('csrftoken');
+            
             fetch('/api/products/upload-image/', {{
                 method: 'POST',
-                body: formData
+                body: formData,
+                headers: {{
+                    'X-CSRFToken': csrftoken || ''
+                }}
             }})
             .then(response => response.json())
             .then(data => {{
@@ -80,8 +100,6 @@ class ImgBBUploadWidget(forms.TextInput):
         }}
         </script>
         '''
-        
-        return mark_safe(html + upload_html)
         
         return mark_safe(html + upload_html)
     
