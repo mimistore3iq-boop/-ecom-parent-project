@@ -27,14 +27,14 @@ class ProductAdminForm(forms.ModelForm):
         model = Product
         fields = '__all__'
         widgets = {
-            'main_image': ImgBBUploadWidget(attrs={'placeholder': 'رابط الصورة الرئيسية من ImgBB'}),
-            'image_2': ImgBBUploadWidget(attrs={'placeholder': 'رابط الصورة الثانية من ImgBB'}),
-            'image_3': ImgBBUploadWidget(attrs={'placeholder': 'رابط الصورة الثالثة من ImgBB'}),
-            'image_4': ImgBBUploadWidget(attrs={'placeholder': 'رابط الصورة الرابعة من ImgBB'}),
-            'image_5': ImgBBUploadWidget(attrs={'placeholder': 'رابط الصورة الخامسة من ImgBB'}),
-            'image_6': ImgBBUploadWidget(attrs={'placeholder': 'رابط الصورة السادسة من ImgBB'}),
-            'image_7': ImgBBUploadWidget(attrs={'placeholder': 'رابط الصورة السابعة من ImgBB'}),
-            'image_8': ImgBBUploadWidget(attrs={'placeholder': 'رابط الصورة الثامنة من ImgBB'}),
+            'main_image': ImgBBUploadWidget(attrs={'placeholder': 'رابط الصورة الرئيسية من voro'}),
+            'image_2': ImgBBUploadWidget(attrs={'placeholder': 'رابط الصورة الثانية من voro'}),
+            'image_3': ImgBBUploadWidget(attrs={'placeholder': 'رابط الصورة الثالثة من voro'}),
+            'image_4': ImgBBUploadWidget(attrs={'placeholder': 'رابط الصورة الرابعة من voro'}),
+            'image_5': ImgBBUploadWidget(attrs={'placeholder': 'رابط الصورة الخامسة من voro'}),
+            'image_6': ImgBBUploadWidget(attrs={'placeholder': 'رابط الصورة السادسة من voro'}),
+            'image_7': ImgBBUploadWidget(attrs={'placeholder': 'رابط الصورة السابعة من voro'}),
+            'image_8': ImgBBUploadWidget(attrs={'placeholder': 'رابط الصورة الثامنة من voro'}),
         }
 
 
@@ -104,7 +104,7 @@ class BannerAdminForm(forms.ModelForm):
         model = Banner
         fields = '__all__'
         widgets = {
-            'image_url': ImgBBUploadWidget(attrs={'placeholder': 'رفع صورة الإعلان عبر ImgBB'}),
+            'image_url': ImgBBUploadWidget(attrs={'placeholder': 'رفع صورة الإعلان عبر voro'}),
         }
 
 
@@ -122,7 +122,7 @@ class BannerAdmin(admin.ModelAdmin):
         }),
         ('الصور والروابط', {
             'fields': ('image_url',),
-            'description': '⚠️ استخدم الزر "رفع عبر ImgBB" لرفع صورة الإعلان. لا تستخدم الحقل الآخر (image).'
+            'description': '⚠️ استخدم الزر "رفع عبر voro" لرفع صورة الإعلان. لا تستخدم الحقل الآخر (image).'
         }),
         ('ربط المنتج', {
             'fields': ('product', 'link_url'),

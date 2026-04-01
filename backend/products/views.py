@@ -9,67 +9,38 @@ from django.conf import settings
 import requests
 
 @api_view(['POST'])
-@permission_classes([AllowAny])
-def upload_image_to_imgbb(request):
+@permission_classes([IsAdminUser])
+def upload_image_to_voro(request):
+    """
+    Upload image directly to Cloudflare R2
+    """
     if 'image' not in request.FILES:
         return Response({'error': 'No image file provided'}, status=400)
 
     image_file = request.FILES['image']
-    api_key = settings.IMGBB_API_KEY
-
-    if not api_key:
-        return Response({'error': 'ImgBB API key is not configured'}, status=500)
-
+    
     try:
-        # Use base64 encoding for the image
-        import base64
-        import io
-        
-        # Read image file and encode to base64
-        image_data = image_file.read()
-        encoded_image = base64.b64encode(image_data).decode('utf-8')
-        
-        # Prepare payload
-        payload = {
-            'key': api_key,
-            'image': encoded_image,
-            'name': image_file.name,
-            'expiration': 3600  # 1 hour
-        }
-        
-        # Make request
-        response = requests.post(
-            'https://api.imgbb.com/1/upload',
-            data=payload
-        )
-        
-        # Check response
-        print(f"ImgBB response status: {response.status_code}")
-        print(f"ImgBB response: {response.text}")
-        
-        response.raise_for_status()
-        result = response.json()
+        from django.core.files.storage import default_storage
+        from django.core.files.base import ContentFile
+        import uuid
+        import os
 
-        if result.get('data') and result['data'].get('url'):
-            return Response({
-                'url': result['data']['url'],
-                'thumb_url': result['data'].get('thumb', {}).get('url'),
-                'delete_url': result['data'].get('delete_url')
-            })
-        else:
-            error_message = result.get('error', {}).get('message', 'Unknown error from ImgBB')
-            return Response({'error': error_message}, status=500)
+        # Generate unique filename
+        ext = os.path.splitext(image_file.name)[1]
+        filename = f"uploads/{uuid.uuid4()}{ext}"
+        
+        # Save file using default_storage (configured to R2)
+        path = default_storage.save(filename, ContentFile(image_file.read()))
+        url = default_storage.url(path)
 
-    except requests.exceptions.HTTPError as e:
-        print(f"HTTP Error: {e}")
-        print(f"Response body: {e.response.text if e.response else 'No response'}")
-        return Response({'error': f'HTTP error from ImgBB: {e}'}, status=e.response.status_code if e.response else 500)
-    except requests.exceptions.RequestException as e:
-        print(f"Request Error: {e}")
-        return Response({'error': f'Failed to connect to ImgBB: {e}'}, status=500)
+        return Response({
+            'url': url,
+            'path': path
+        })
+
     except Exception as e:
-        print(f"Unexpected Error: {e}")
-        return Response({'error': f'An unexpected error occurred: {e}'}, status=500)
+        print(f"❌ Error uploading to R2: {str(e)}")
+        return Response({'error': f'Failed to upload to R2: {str(e)}'}, status=500)
 
 @api_view(['GET'])
 @permission_classes([AllowAny])

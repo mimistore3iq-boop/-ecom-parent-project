@@ -83,15 +83,15 @@ class Product(models.Model):
     stock_quantity = models.PositiveIntegerField('الكمية المتوفرة', default=0)
     low_stock_threshold = models.PositiveIntegerField('حد التنبيه للمخزون', default=10)
     
-    # Images (store direct URLs from ImgBB)
-    main_image = models.URLField('رابط الصورة الرئيسية (ImgBB)', blank=True, null=True)
-    image_2 = models.URLField('رابط الصورة الثانية (ImgBB)', blank=True, null=True)
-    image_3 = models.URLField('رابط الصورة الثالثة (ImgBB)', blank=True, null=True)
-    image_4 = models.URLField('رابط الصورة الرابعة (ImgBB)', blank=True, null=True)
-    image_5 = models.URLField('رابط الصورة الخامسة (ImgBB)', blank=True, null=True)
-    image_6 = models.URLField('رابط الصورة السادسة (ImgBB)', blank=True, null=True)
-    image_7 = models.URLField('رابط الصورة السابعة (ImgBB)', blank=True, null=True)
-    image_8 = models.URLField('رابط الصورة الثامنة (ImgBB)', blank=True, null=True)
+    # Images (store direct URLs from voro Cloud Storage / R2)
+    main_image = models.URLField('رابط الصورة الرئيسية (voro)', blank=True, null=True)
+    image_2 = models.URLField('رابط الصورة الثانية (voro)', blank=True, null=True)
+    image_3 = models.URLField('رابط الصورة الثالثة (voro)', blank=True, null=True)
+    image_4 = models.URLField('رابط الصورة الرابعة (voro)', blank=True, null=True)
+    image_5 = models.URLField('رابط الصورة الخامسة (voro)', blank=True, null=True)
+    image_6 = models.URLField('رابط الصورة السادسة (voro)', blank=True, null=True)
+    image_7 = models.URLField('رابط الصورة السابعة (voro)', blank=True, null=True)
+    image_8 = models.URLField('رابط الصورة الثامنة (voro)', blank=True, null=True)
     
     # Product details
     brand = models.CharField('العلامة التجارية', max_length=100, blank=True)
@@ -306,7 +306,7 @@ class Banner(models.Model):
     title = models.CharField('عنوان الإعلان', max_length=200)
     description = models.TextField('وصف الإعلان', blank=True)
     image = models.ImageField('صورة الإعلان (قديمة - استخدم image_url بدلاً منها)', upload_to='banners/', blank=True, null=True)
-    image_url = models.URLField('رابط صورة الإعلان من ImgBB', blank=True, null=True)
+    image_url = models.URLField('رابط صورة الإعلان من voro', blank=True, null=True)
     product = models.ForeignKey(
         Product,
         on_delete=models.CASCADE,
@@ -338,7 +338,7 @@ class Banner(models.Model):
         return self.link_url or "#"
 
     def get_image_url(self):
-        """Get the image URL for the banner - prefer external URL (ImgBB) over local file"""
+        """Get the image URL for the banner - prefer external URL (R2) over local file"""
         if self.image_url:
             print(f"Banner image URL (external): {self.image_url}")
             return self.image_url
