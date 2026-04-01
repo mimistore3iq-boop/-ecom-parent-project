@@ -252,7 +252,7 @@ const ProductDetail = ({ user }) => {
                         console.error('Failed to load image:', currentSrc);
                         
                         // محاولة إصلاح المسار إذا كان رابط R2 ويحتوي على بادئات خاطئة
-                        if (currentSrc.includes('pub-') && !e.target.dataset.triedFix) {
+                        if ((currentSrc.includes('pub-') || currentSrc.includes('media.voroiq.com')) && !e.target.dataset.triedFix) {
                           e.target.dataset.triedFix = 'true';
                           const fixedSrc = currentSrc.replace(/\/uploads\//g, '/');
                           if (fixedSrc !== currentSrc) {

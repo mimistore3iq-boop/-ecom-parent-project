@@ -224,7 +224,7 @@ AWS_ACCESS_KEY_ID = config('AWS_ACCESS_KEY_ID', default='cfat_qv2Bj1XDPbAKkpHrpE
 AWS_SECRET_ACCESS_KEY = config('AWS_SECRET_ACCESS_KEY', default='8c2ab05d4496a5e329e988528a9bb9803d5d56017c55c1d707d0079490ef6485')
 AWS_STORAGE_BUCKET_NAME = config('AWS_STORAGE_BUCKET_NAME', default='voro-media')
 AWS_S3_ENDPOINT_URL = config('AWS_S3_ENDPOINT_URL', default='https://b58338bbc4950d178ec867a9c5ea4d32.r2.cloudflarestorage.com')
-AWS_S3_CUSTOM_DOMAIN = config('AWS_S3_CUSTOM_DOMAIN', default='pub-01ea36f78ed64270815d000e4f125565.r2.dev')
+AWS_S3_CUSTOM_DOMAIN = config('AWS_S3_CUSTOM_DOMAIN', default='media.voroiq.com')
 
 AWS_LOCATION = ''
 AWS_S3_FILE_OVERWRITE = False
