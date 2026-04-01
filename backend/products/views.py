@@ -42,6 +42,26 @@ def upload_image_to_voro(request):
         print(f"❌ Error uploading to R2: {str(e)}")
         return Response({'error': f'Failed to upload to R2: {str(e)}'}, status=500)
 
+from django.core.management import call_command
+from django.http import HttpResponse
+import io
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def run_migration_view(request):
+    """
+    Run the migration command from a web request
+    URL: /api/products/run-migration-secret-123/
+    """
+    # نستخدم StringIO لالتقاط مخرجات الأمر (stdout)
+    out = io.StringIO()
+    try:
+        call_command('migrate_images_to_r2', stdout=out)
+        result = out.getvalue()
+        return HttpResponse(f"<h1>voro Image Migration Result</h1><pre>{result}</pre>", content_type="text/html")
+    except Exception as e:
+        return HttpResponse(f"<h1>Error during migration</h1><pre>{str(e)}</pre>", status=500)
+
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def product_list(request):
