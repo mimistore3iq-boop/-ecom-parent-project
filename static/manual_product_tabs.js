@@ -147,11 +147,12 @@
         initVoroTabs();
     }
     
-    // محاكاة العناصر المفقودة لخطأ 303
+    // محاكاة العناصر المفقودة لخطأ 303 و 265
     setInterval(() => {
         if (window.location.pathname.includes('/admin/')) {
-            ['body-small-text', 'footer-small-text', 'sidebar-nav-small-text', 'jazzmin-theme-chooser', 'theme-condition'].forEach(id => {
-                if (!document.getElementById(id)) {
+            ['body-small-text', 'footer-small-text', 'sidebar-nav-small-text', 'jazzmin-theme-chooser', 'theme-condition', 'navbar-small-text', 'brand-small-text'].forEach(id => {
+                const el = document.getElementById(id);
+                if (!el) {
                     const dummy = document.createElement('input');
                     dummy.id = id;
                     dummy.type = 'checkbox';

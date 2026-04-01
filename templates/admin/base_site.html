@@ -181,8 +181,6 @@
 
 {% block extrastyle %}
     {{ block.super }}
-    <script src="{% static 'custom_admin.js' %}"></script>
-    <script src="{% static 'manual_product_tabs.js' %}"></script>
 {% endblock %}
 
 {% block footer %}
@@ -236,4 +234,8 @@
     // Add smooth scrolling
     document.documentElement.style.scrollBehavior = 'smooth';
 </script>
+
+<!-- Load Custom JS after libraries -->
+<script src="{% static 'custom_admin.js' %}"></script>
+<script src="{% static 'manual_product_tabs.js' %}"></script>
 {% endblock %}
