@@ -19,6 +19,8 @@ firebase-admin==6.5.0
 
 # Static files
 whitenoise==6.10.0
+django-storages[s3]==1.14.4
+boto3==1.34.0
 
 # Production server
 gunicorn==21.2.0

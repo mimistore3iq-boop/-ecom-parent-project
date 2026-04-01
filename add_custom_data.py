@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-إضافة أقسام ومنتجات مخصصة لمتجر MIMI STORE
+إضافة أقسام ومنتجات مخصصة لمتجر voro
 """
 
 import os
@@ -271,7 +271,7 @@ def create_products_for_categories():
 
 def main():
     """الدالة الرئيسية"""
-    print("🚀 بدء إضافة أقسام ومنتجات جديدة لمتجر MIMI STORE...")
+    print("🚀 بدء إضافة أقسام ومنتجات جديدة لمتجر voro...")
     print("=" * 60)
     
     try:

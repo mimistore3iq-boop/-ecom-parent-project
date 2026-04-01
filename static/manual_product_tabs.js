@@ -7,8 +7,8 @@
     // 2. سكربت التبويبات (Tabs) المطور - يدعم Jazzmin والتبويبات المخصصة
     function initVoroTabs() {
         const path = window.location.pathname;
-        // إضافة دعم لواجهة الطلبات (orders)
-        if (!(path.includes('/product/') || path.includes('/category/') || path.includes('/banner/') || path.includes('/orders/'))) return;
+        // إضافة دعم لواجهة الطلبات (orders) والكوبونات (coupon)
+        if (!(path.includes('/product/') || path.includes('/category/') || path.includes('/banner/') || path.includes('/orders/') || path.includes('/coupon/'))) return;
         
         // دعم أزرار التبويبات في Jazzmin (الموجودة في الكود الذي أرسلته)
         const jazzminTabs = document.querySelectorAll('#jazzy-tabs .nav-link, .nav-tabs .nav-link');

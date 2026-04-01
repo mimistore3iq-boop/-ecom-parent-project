@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# MIMI STORE - Quick Start Script
-echo "🚀 بدء تشغيل MIMI STORE..."
+# voro - Quick Start Script
+echo "🚀 بدء تشغيل voro..."
 
 # Check if virtual environment exists
 if [ ! -d "venv" ]; then
@@ -61,7 +61,7 @@ FRONTEND_PID=$!
 # Wait for servers to start
 sleep 5
 
-echo "✅ تم تشغيل MIMI STORE بنجاح!"
+echo "✅ تم تشغيل voro بنجاح!"
 echo ""
 echo "🔗 الروابط:"
 echo "   Frontend: http://localhost:3000"

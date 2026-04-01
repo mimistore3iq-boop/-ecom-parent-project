@@ -8,6 +8,7 @@
     <meta name="description" content="voro - متجرك الإلكتروني المفضل" />
     <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
     <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+    <base href="/" />
     
     <!-- Fix for Instagram In-App Browser and Other Browsers -->
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
@@ -47,10 +48,18 @@
       // Detect Instagram In-App Browser and alert user
       (function() {
         const isInstagram = /Instagram/.test(navigator.userAgent);
-        if (isInstagram) {
-          console.log('Instagram In-App Browser Detected');
-          // Store this in sessionStorage for React to use
+        const isFB = /FBAN|FBAV/.test(navigator.userAgent);
+        
+        if (isInstagram || isFB) {
+          console.log('In-App Browser Detected');
           window.isInstagramBrowser = true;
+          
+          // Clear cache for in-app browsers to prevent white screen
+          if ('caches' in window) {
+            caches.keys().then(function(names) {
+              for (let name of names) caches.delete(name);
+            });
+          }
         }
       })();
     </script>

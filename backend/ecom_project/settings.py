@@ -33,6 +33,7 @@ THIRD_PARTY_APPS = [
     'rest_framework_simplejwt',
     'corsheaders',
     'whitenoise',
+    'storages',
 ]
 
 LOCAL_APPS = [
@@ -218,14 +219,24 @@ if not DEBUG:
     STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # Media files
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+# Using Cloudflare R2 for Storage
+AWS_ACCESS_KEY_ID = config('AWS_ACCESS_KEY_ID', default='cfat_qv2Bj1XDPbAKkpHrpEZKfBqcGlGIaQ2QFzD4iygK54046679')
+AWS_SECRET_ACCESS_KEY = config('AWS_SECRET_ACCESS_KEY', default='8c2ab05d4496a5e329e988528a9bb9803d5d56017c55c1d707d0079490ef6485')
+AWS_STORAGE_BUCKET_NAME = config('AWS_STORAGE_BUCKET_NAME', default='voro-media')
+AWS_S3_ENDPOINT_URL = config('AWS_S3_ENDPOINT_URL', default='https://b58338bbc4950d178ec867a9c5ea4d32.r2.cloudflarestorage.com')
+AWS_S3_CUSTOM_DOMAIN = config('AWS_S3_CUSTOM_DOMAIN', default='pub-01ea36f78ed64270815d000e4f125565.r2.dev')
 
-# Ensure media files are served correctly in production
-if not DEBUG:
-    # Use WhiteNoise for serving media files in production
-    WHITENOISE_MEDIA = True
-    WHITENOISE_MEDIA_PREFIX = 'media'
+AWS_S3_FILE_OVERWRITE = False
+AWS_DEFAULT_ACL = None
+AWS_QUERYSTRING_AUTH = False
+AWS_S3_SIGNATURE_VERSION = 's3v4'
+AWS_S3_REGION_NAME = 'auto'
+
+# Storage class selection
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+
+MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/"
+MEDIA_ROOT = BASE_DIR / 'media'
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
@@ -314,16 +325,16 @@ CORS_ALLOW_HEADERS = [
     'x-requested-with',
 ]
 
-# Using ImgBB for image hosting; no server-side SDK required
+# ImgBB Configuration removed, using R2
 
 # Firebase Configuration
 FIREBASE_CREDENTIALS_PATH = config('FIREBASE_CREDENTIALS_PATH', default=str(BASE_DIR / 'firebase' / 'ecomproject-a8173-38763797948f.json'))
 FIREBASE_PROJECT_ID = config('FIREBASE_PROJECT_ID', default='ecomproject-a8173')
 
-# ImgBB Configuration
-IMGBB_API_KEY = config('IMGBB_API_KEY', default='a2cebbc3daff0b042082a5d5d7a3b80d')
+# IMGBB_API_KEY removed
 
 # Security Settings
+SECURE_CROSS_ORIGIN_OPENER_POLICY = None
 if not DEBUG:
     SECURE_BROWSER_XSS_FILTER = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
