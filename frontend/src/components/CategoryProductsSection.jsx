@@ -26,12 +26,16 @@ export const ProductCard = ({ product, onAddToCart }) => {
       )}
 
       {/* Product Image Wrapper */}
-      <div className="relative h-44 sm:h-56 md:h-64 bg-white overflow-hidden shrink-0 border-b border-gray-50">
+      <div className={`relative h-44 sm:h-56 md:h-64 bg-white overflow-hidden shrink-0 border-b border-gray-50 transition-opacity duration-300 ${product.stock === 0 ? 'opacity-40' : 'opacity-100'}`}>
         <img
-          src={product.image || product.main_image_url}
+          src={product.image || product.main_image_url || '/placeholder-product.png'}
           alt={product.name}
           className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-700 p-3"
           loading="lazy"
+          onError={(e) => {
+            e.target.onerror = null;
+            e.target.src = 'https://media.voroiq.com/placeholder-product.png';
+          }}
         />
 
         {/* Discount Badge */}
@@ -43,16 +47,16 @@ export const ProductCard = ({ product, onAddToCart }) => {
 
         {/* Stock Count Badge */}
         {product.stock > 0 && (
-          <div className="absolute bottom-2 right-2 bg-white/90 text-gray-800 text-[9px] font-bold px-2 py-1 rounded-md z-20 shadow-sm backdrop-blur-sm flex items-center gap-1 border border-gray-100">
-            <span className="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
+          <div className="absolute bottom-2 right-2 bg-indigo-600 text-white text-[10px] font-bold px-3 py-1.5 rounded-full z-20 shadow-lg flex items-center gap-1.5 border border-white/20">
+            <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
             متبقي {product.stock}
           </div>
         )}
 
         {/* Out of Stock Overlay */}
         {product.stock === 0 && (
-          <div className="absolute inset-0 bg-black/10 backdrop-blur-[1px] flex items-center justify-center z-20">
-            <span className="text-white font-extrabold text-[12px] bg-red-600/90 px-3 py-1.5 rounded-xl shadow-lg border border-red-500 uppercase tracking-wider">نفد المخزون</span>
+          <div className="absolute inset-0 bg-black/5 backdrop-blur-[0.5px] flex items-center justify-center z-20">
+            <span className="text-white font-extrabold text-[12px] bg-gray-800/90 px-3 py-1.5 rounded-xl shadow-lg border border-gray-700 uppercase tracking-wider">نفد المخزون</span>
           </div>
         )}
       </div>
@@ -90,9 +94,9 @@ export const ProductCard = ({ product, onAddToCart }) => {
               e.stopPropagation();
               navigate(`/product/${product.id}`);
             }}
-            className="flex-1 py-2 rounded-xl font-bold transition-all text-[11px] flex items-center justify-center gap-1 bg-gray-50 text-gray-700 border border-gray-200 hover:bg-gray-100 active:scale-95 shadow-sm"
+            className="flex-1 py-2.5 rounded-xl font-bold transition-all text-[11px] flex items-center justify-center gap-1 bg-gray-50 text-gray-700 border border-gray-200 hover:bg-gray-100 active:scale-95 shadow-sm"
           >
-            <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
             </svg>
@@ -106,13 +110,13 @@ export const ProductCard = ({ product, onAddToCart }) => {
               if (product.stock > 0) onAddToCart(product);
             }}
             disabled={product.stock === 0}
-            className={`flex-[1.5] py-2 rounded-xl font-bold transition-all text-[11px] flex items-center justify-center gap-1 shadow-md ${
+            className={`flex-[1.5] py-2.5 rounded-xl font-bold transition-all text-[11px] flex items-center justify-center gap-1 shadow-md ${
               product.stock > 0
                 ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:shadow-indigo-200 active:scale-95'
                 : 'bg-gray-100 text-gray-400 cursor-not-allowed'
             }`}
           >
-            <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m0 0h8" />
             </svg>
             <span>السلة</span>
@@ -185,17 +189,18 @@ const CategoryProductsSection = ({
         <div className="relative">
           <div 
             ref={gridRef}
-            className="flex overflow-x-auto gap-3 pb-4 hide-scrollbar horizontal-scroll-fix px-1"
+            className="flex overflow-x-auto gap-3 pb-6 hide-scrollbar horizontal-scroll-fix px-1"
             style={{ 
               scrollbarWidth: 'none',
               msOverflowStyle: 'none',
-              WebkitOverflowScrolling: 'touch'
+              WebkitOverflowScrolling: 'touch',
+              scrollSnapType: 'x mandatory'
             }}
           >
             {products.map((product) => (
               <div
                 key={product.id}
-                className="flex-shrink-0 w-[48.5%] sm:w-[40%] md:w-[28%] lg:w-[20%] snap-center-item"
+                className="flex-shrink-0 w-[46.5%] sm:w-[45%] md:w-[30%] lg:w-[22%] snap-start transition-transform duration-300 active:scale-95"
               >
                 <ProductCard product={product} onAddToCart={onAddToCart} />
               </div>
