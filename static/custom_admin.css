@@ -1170,4 +1170,12 @@ textarea:focus {
         margin: 0 !important;
         padding: 0 !important;
     }
-}
+}  
+/* FINAL RESPONSIVE OVERRIDE */  
+@media (max-width: 767.98px) {  
+  .main-sidebar { display: none !important; }  
+  .sidebar-open .main-sidebar { display: block !important; width: 80% !important; right: 0 !important; transform: translateX(0) !important; visibility: visible !important; }  
+  .content-wrapper { margin-left: 0 !important; margin-right: 0 !important; padding: 10px !important; width: 100% !important; }  
+  .row { display: flex !important; flex-direction: column !important; }  
+  .col-lg-3, .col-6, .col-md-3, .col-sm-6 { width: 100% !important; max-width: 100% !important; flex: 0 0 100% !important; }  
+} 

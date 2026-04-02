@@ -26,7 +26,26 @@ onDocumentReady(function() {
     // Initialize all custom features
     addNotificationStyles();
     initializeAnimations();
-    initializeTooltips();
+    
+    // Wait for full load to initialize tooltips (Ensures jQuery/Popper are ready)
+    window.addEventListener('load', function() {
+        if (window.jQuery && typeof $.fn.tooltip !== 'undefined') {
+            initializeTooltips();
+        } else {
+            console.log('Waiting for jQuery/Popper to be ready...');
+            // Retry once after a short delay
+            setTimeout(() => {
+                if (window.jQuery && typeof $.fn.tooltip !== 'undefined') initializeTooltips();
+            }, 1000);
+        }
+        
+        // Auto-close Sidebar on Mobile at load
+        if (window.innerWidth < 768) {
+            document.body.classList.remove('sidebar-open');
+            document.body.classList.add('sidebar-collapse');
+        }
+    });
+
     initializeConfirmations();
     initializeDashboardWidgets();
     initializeSearchEnhancements();
