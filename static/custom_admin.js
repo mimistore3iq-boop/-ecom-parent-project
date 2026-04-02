@@ -28,12 +28,65 @@ onDocumentReady(function() {
     enhanceSidebarToggle();
     initializeDarkMode();
     initializePerformanceMonitoring();
+    initializeMobileSidebar();
 
     console.log('✅ voro Admin Panel Loaded Successfully!');
 });
 
 
 // ===== FEATURE INITIALIZERS =====
+
+// Mobile Sidebar Overlay System
+function initializeMobileSidebar() {
+    if (window.innerWidth > 991) return;
+
+    const sidebar = document.querySelector('.main-sidebar');
+    if (!sidebar) return;
+
+    // 1. Add Backdrop
+    const backdrop = document.createElement('div');
+    backdrop.className = 'voro-sidebar-backdrop';
+    document.body.appendChild(backdrop);
+
+    // 2. Add Close Button inside sidebar
+    const closeBtn = document.createElement('div');
+    closeBtn.className = 'voro-sidebar-close';
+    closeBtn.innerHTML = '<i class="fas fa-times"></i>';
+    sidebar.appendChild(closeBtn);
+
+    // 3. Find or Create Hamburger Button
+    let toggleBtn = document.querySelector('[data-widget="pushmenu"]');
+    if (!toggleBtn) {
+        toggleBtn = document.createElement('button');
+        toggleBtn.className = 'btn btn-link text-white p-2 mr-2';
+        toggleBtn.innerHTML = '<i class="fas fa-bars fa-lg"></i>';
+        const navbar = document.querySelector('.main-header .navbar-nav') || document.querySelector('.navbar');
+        if (navbar) navbar.prepend(toggleBtn);
+    }
+
+    // 4. Toggle Logic
+    const toggleSidebar = () => {
+        document.body.classList.toggle('sidebar-open');
+    };
+
+    toggleBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        toggleSidebar();
+    });
+
+    backdrop.addEventListener('click', toggleSidebar);
+    closeBtn.addEventListener('click', toggleSidebar);
+
+    // Close on navigation link click (mobile)
+    sidebar.querySelectorAll('.nav-link').forEach(link => {
+        link.addEventListener('click', () => {
+            if (document.body.classList.contains('sidebar-open')) {
+                toggleSidebar();
+            }
+        });
+    });
+}
 
 // Animation System
 function initializeAnimations() {

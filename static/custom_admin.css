@@ -453,6 +453,69 @@ body {
         width: 90% !important;
         margin: 20px auto !important;
     }
+
+    /* Professional Sidebar Overlay for Mobile */
+    .main-sidebar {
+        width: 75% !important;
+        height: 100vh !important;
+        position: fixed !important;
+        top: 0 !important;
+        right: -75% !important; /* Start hidden on the right for RTL */
+        left: auto !important;
+        z-index: 1050 !important;
+        transition: right 0.3s ease-in-out !important;
+        box-shadow: -5px 0 15px rgba(0,0,0,0.2) !important;
+        display: block !important;
+    }
+
+    [dir="ltr"] .main-sidebar {
+        right: auto !important;
+        left: -75% !important;
+        transition: left 0.3s ease-in-out !important;
+    }
+
+    .sidebar-open .main-sidebar {
+        right: 0 !important;
+    }
+
+    [dir="ltr"] .sidebar-open .main-sidebar {
+        left: 0 !important;
+    }
+
+    /* Backdrop when sidebar is open */
+    .voro-sidebar-backdrop {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        background: rgba(0,0,0,0.5) !important;
+        backdrop-filter: blur(2px) !important;
+        z-index: 1040 !important;
+        display: none;
+    }
+
+    .sidebar-open .voro-sidebar-backdrop {
+        display: block !important;
+    }
+
+    /* Close button in sidebar */
+    .voro-sidebar-close {
+        position: absolute !important;
+        top: 15px !important;
+        left: 15px !important;
+        width: 35px !important;
+        height: 35px !important;
+        background: rgba(255,255,255,0.1) !important;
+        border-radius: 50% !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        color: white !important;
+        font-size: 20px !important;
+        cursor: pointer !important;
+        z-index: 1060 !important;
+    }
 }
 
 @media (max-width: 768px) {
