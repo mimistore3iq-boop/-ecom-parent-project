@@ -91,7 +91,14 @@ function initializeMobileSidebar() {
 
     // 4. Toggle Logic
     const toggleSidebar = () => {
-        document.body.classList.toggle('sidebar-open');
+        if (document.body.classList.contains('sidebar-open')) {
+            document.body.classList.remove('sidebar-open');
+            document.body.classList.add('sidebar-collapse');
+        } else {
+            document.body.classList.add('sidebar-open');
+            document.body.classList.remove('sidebar-collapse');
+        }
+        
         // Toggle icon between bars and times if using floating button
         if (floatingBtn) {
             const icon = floatingBtn.querySelector('i');

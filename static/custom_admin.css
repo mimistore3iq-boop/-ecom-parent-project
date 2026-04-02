@@ -505,24 +505,27 @@ body {
         width: 100% !important;
     }
 
-    /* Professional Sidebar Overlay for Mobile - RE-FIXED */
+    /* Professional Sidebar Overlay for Mobile - RE-FIXED - COMPLETELY HIDE BY DEFAULT */
     .main-sidebar {
         width: 280px !important;
         height: 100vh !important;
         position: fixed !important;
         top: 0 !important;
-        right: -280px !important; 
+        right: -300px !important; /* Start completely off-screen */
         left: auto !important;
         z-index: 1050 !important;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        transform: translateX(300px) !important; /* Move it completely for RTL */
         box-shadow: -5px 0 25px rgba(0,0,0,0.3) !important;
-        display: none !important; /* Force hide by default on mobile */
+        display: none !important; 
         visibility: hidden !important; 
     }
 
+    /* When sidebar is open */
     .sidebar-open .main-sidebar {
         display: block !important;
         visibility: visible !important;
+        transform: translateX(0) !important;
         right: 0 !important;
     }
 
