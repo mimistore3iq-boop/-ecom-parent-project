@@ -546,6 +546,7 @@ JAZZMIN_SETTINGS = {
 
     # RTL support
     "html_direction": "rtl",
+    "viewport": True,
 }
 
 JAZZMIN_UI_TWEAKS = {
