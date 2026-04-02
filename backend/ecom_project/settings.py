@@ -539,7 +539,7 @@ JAZZMIN_SETTINGS = {
 
     # Use modals instead of popups
     "use_google_fonts_cdn": True,
-    "show_ui_builder": True,
+    "show_ui_builder": False,
 
     # Language chooser
     "language_chooser": False,

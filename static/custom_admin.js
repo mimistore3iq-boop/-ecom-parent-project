@@ -190,10 +190,14 @@ function initializeAnimations() {
 
 // Enhanced Tooltips
 function initializeTooltips() {
-    if (typeof $ !== 'undefined' && $.fn.tooltip) {
-        $('[data-toggle="tooltip"]').tooltip();
-    } else {
-        console.warn('Popper.js or jQuery not found, tooltips disabled.');
+    try {
+        if (typeof $ !== 'undefined' && $.fn.tooltip) {
+            $('[data-toggle="tooltip"]').tooltip();
+        } else {
+            console.warn('Popper.js or jQuery not found, tooltips disabled.');
+        }
+    } catch (e) {
+        console.error('Error initializing tooltips:', e);
     }
 }
 
