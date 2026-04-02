@@ -68,11 +68,22 @@ function initializeMobileSidebar() {
 
     // 3. Create Floating Hamburger Button for Mobile
     let floatingBtn = document.querySelector('.voro-mobile-hamburger');
-    if (!floatingBtn && window.innerWidth <= 768) {
+    if (!floatingBtn) {
         floatingBtn = document.createElement('div');
         floatingBtn.className = 'voro-mobile-hamburger';
         floatingBtn.innerHTML = '<i class="fas fa-bars"></i>';
         document.body.appendChild(floatingBtn);
+        
+        // Only show if mobile
+        const updateVisibility = () => {
+            if (window.innerWidth <= 768) {
+                floatingBtn.style.display = 'flex';
+            } else {
+                floatingBtn.style.display = 'none';
+            }
+        };
+        window.addEventListener('resize', updateVisibility);
+        updateVisibility();
     }
 
     // 4. Toggle Logic
