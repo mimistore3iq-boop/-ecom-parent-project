@@ -220,8 +220,8 @@ if not DEBUG:
 
 # Media files
 # Using Cloudflare R2 for Storage
-AWS_ACCESS_KEY_ID = config('AWS_ACCESS_KEY_ID', default='cfat_qv2Bj1XDPbAKkpHrpEZKfBqcGlGIaQ2QFzD4iygK54046679')
-AWS_SECRET_ACCESS_KEY = config('AWS_SECRET_ACCESS_KEY', default='8c2ab05d4496a5e329e988528a9bb9803d5d56017c55c1d707d0079490ef6485')
+AWS_ACCESS_KEY_ID = config('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = config('AWS_SECRET_ACCESS_KEY')
 AWS_STORAGE_BUCKET_NAME = config('AWS_STORAGE_BUCKET_NAME', default='voro-media')
 AWS_S3_ENDPOINT_URL = config('AWS_S3_ENDPOINT_URL', default='https://b58338bbc4950d178ec867a9c5ea4d32.r2.cloudflarestorage.com')
 AWS_S3_CUSTOM_DOMAIN = config('AWS_S3_CUSTOM_DOMAIN', default='media.voroiq.com')
@@ -234,7 +234,18 @@ AWS_S3_SIGNATURE_VERSION = 's3v4'
 AWS_S3_REGION_NAME = config('AWS_S3_REGION_NAME', default='eeur')
 
 # Storage class selection
+STORAGES = {
+    "default": {
+        "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+    },
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.ManifestStaticFilesStorage",
+    },
+}
+
+# Keep for compatibility with older Django versions/apps
 DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.ManifestStaticFilesStorage'
 
 MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/"
 MEDIA_ROOT = BASE_DIR / 'media'
