@@ -16,28 +16,25 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="mobile-web-app-capable" content="yes" />
     
-    <!-- Prevent Instagram Browser from caching -->
+    <!-- Prevent In-App Browsers from caching -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
-    
-    <!-- Arabic Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@200;300;400;500;700;800;900&display=swap" rel="stylesheet">
     
     <title>voro - متجر voro الإلكتروني</title>
     <style>
       /* Ensure root element takes full height */
       html, body, #root {
         width: 100%;
-        height: 100%;
+        min-height: 100vh;
+        min-height: -webkit-fill-available;
         margin: 0;
         padding: 0;
+        overflow-x: hidden;
       }
       body {
         font-family: 'Cairo', 'Tajawal', sans-serif;
+        background-color: #f9fafb;
       }
     </style>
   </head>
@@ -45,16 +42,29 @@
     <noscript>يجب تفعيل JavaScript لتشغيل هذا التطبيق.</noscript>
     <div id="root"></div>
     <script>
-      // Detect Instagram In-App Browser and alert user
+      // Force reload on resource failure
+      window.addEventListener('error', function(e) {
+        if (e.target.tagName === 'SCRIPT' || e.target.tagName === 'LINK') {
+          console.warn('Resource failed to load, reloading page...');
+          // Check if we already reloaded recently to avoid infinite loop
+          const lastReload = sessionStorage.getItem('last_resource_reload');
+          const now = Date.now();
+          if (!lastReload || (now - lastReload > 30000)) {
+            sessionStorage.setItem('last_resource_reload', now);
+            window.location.reload(true);
+          }
+        }
+      }, true);
+
+      // Detect In-App Browser and fix viewport height
       (function() {
         const isInstagram = /Instagram/.test(navigator.userAgent);
         const isFB = /FBAN|FBAV/.test(navigator.userAgent);
         
         if (isInstagram || isFB) {
           console.log('In-App Browser Detected');
-          window.isInstagramBrowser = true;
           
-          // Clear cache for in-app browsers to prevent white screen
+          // Clear caches to prevent WSOD
           if ('caches' in window) {
             caches.keys().then(function(names) {
               for (let name of names) caches.delete(name);
