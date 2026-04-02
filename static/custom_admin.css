@@ -446,8 +446,23 @@ body {
     }
 
     .main-header {
+        margin-right: 0 !important;
         margin-left: 0 !important;
         width: 100% !important;
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        padding: 5px 15px !important;
+    }
+
+    /* Hide standard navbar links on mobile dashboard header to save space */
+    .main-header .navbar-nav:not(.ml-auto) {
+        display: none !important;
+    }
+
+    .main-header .ml-auto {
+        margin-right: auto !important;
+        margin-left: 0 !important;
     }
 
     /* Fix login page */
@@ -490,19 +505,46 @@ body {
         width: 100% !important;
     }
 
-    /* Professional Sidebar Overlay for Mobile */
+    /* Professional Sidebar Overlay for Mobile - RE-FIXED */
     .main-sidebar {
         width: 280px !important;
         height: 100vh !important;
         position: fixed !important;
         top: 0 !important;
-        right: -280px !important; /* Start hidden on the right for RTL */
+        right: -280px !important; 
         left: auto !important;
         z-index: 1050 !important;
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
         box-shadow: -5px 0 25px rgba(0,0,0,0.3) !important;
-        display: block !important;
+        display: none !important; /* Force hide by default on mobile */
         visibility: hidden !important; 
+    }
+
+    .sidebar-open .main-sidebar {
+        display: block !important;
+        visibility: visible !important;
+        right: 0 !important;
+    }
+
+    /* Target specifically the login page to remove sidebar/header */
+    .login-page .main-sidebar, 
+    .login-page .main-header,
+    .login-page .nav-global,
+    .login-page .navbar,
+    .login-page .voro-mobile-hamburger {
+        display: none !important;
+    }
+
+    .login-page .content-wrapper,
+    .login-page .wrapper {
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
+        background: transparent !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        min-height: 100vh !important;
     }
 
     /* Hide sidebar completely on very small screens unless opened */
@@ -522,10 +564,10 @@ body {
         .voro-mobile-hamburger {
             display: flex !important;
             position: fixed !important;
-            top: 20px !important;
-            right: 20px !important;
-            width: 50px !important;
-            height: 50px !important;
+            top: 15px !important;
+            right: 15px !important;
+            width: 45px !important;
+            height: 45px !important;
             background: var(--voro-gradient) !important;
             color: white !important;
             border-radius: 50% !important;

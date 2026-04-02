@@ -76,9 +76,10 @@ function initializeMobileSidebar() {
         floatingBtn.innerHTML = '<i class="fas fa-bars"></i>';
         document.body.appendChild(floatingBtn);
         
-        // Only show if mobile
+        // Only show if mobile AND not login page
         const updateVisibility = () => {
-            if (window.innerWidth <= 768) {
+            const isLoginPage = document.body.classList.contains('login-page');
+            if (window.innerWidth <= 768 && !isLoginPage) {
                 floatingBtn.style.display = 'flex';
             } else {
                 floatingBtn.style.display = 'none';
