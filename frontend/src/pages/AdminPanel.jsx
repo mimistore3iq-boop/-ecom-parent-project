@@ -529,53 +529,55 @@ const AdminPanel = ({ user, setUser }) => {
       {/* Header */}
       <header className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-4 space-x-reverse">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 py-4 md:h-16">
               <Link to="/" className="flex items-center space-x-2 space-x-reverse">
-                <div className="bg-gradient-to-r from-primary-500 to-secondary-500 text-white w-10 h-10 rounded-lg flex items-center justify-center font-bold text-xl">
+                <div className="bg-gradient-to-r from-primary-500 to-secondary-500 text-white w-10 h-10 rounded-lg flex items-center justify-center font-bold text-xl flex-shrink-0">
                   V
                 </div>
-                <h1 className="text-2xl font-bold bg-gradient-to-r from-primary-600 to-secondary-600 bg-clip-text text-transparent">
+                <h1 className="text-xl md:text-2xl font-bold bg-gradient-to-r from-primary-600 to-secondary-600 bg-clip-text text-transparent truncate">
                   voro - لوحة الإدارة
                 </h1>
               </Link>
-            </div>
 
-            <div className="flex items-center space-x-4 space-x-reverse">
-              <span className="text-gray-700">مرحباً، {user?.phone}</span>
-              <Link
-                to="/"
-                className="text-primary-600 hover:text-primary-700 transition-colors"
-              >
-                المتجر
-              </Link>
-              <button
-                onClick={() => setActiveTab('notifications')}
-                className="relative text-gray-600 hover:text-gray-900 transition-colors"
-              >
-                <span className="text-xl">🔔</span>
-                {unreadCount > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                    {unreadCount}
-                  </span>
-                )}
-              </button>
-              <button
-                onClick={logout}
-                className="text-red-600 hover:text-red-700 transition-colors"
-              >
-                تسجيل خروج
-              </button>
+              <div className="flex items-center justify-between md:justify-end space-x-4 space-x-reverse border-t md:border-t-0 pt-4 md:pt-0">
+                <div className="flex items-center space-x-3 space-x-reverse">
+                  <span className="text-gray-700 text-sm hidden sm:inline">مرحباً، {user?.phone}</span>
+                  <Link
+                    to="/"
+                    className="text-primary-600 hover:text-primary-700 transition-colors text-sm font-medium"
+                  >
+                    المتجر
+                  </Link>
+                </div>
+                <div className="flex items-center space-x-3 space-x-reverse">
+                  <button
+                    onClick={() => setActiveTab('notifications')}
+                    className="relative text-gray-600 hover:text-gray-900 transition-colors p-1"
+                  >
+                    <span className="text-xl">🔔</span>
+                    {unreadCount > 0 && (
+                      <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] rounded-full h-4 w-4 flex items-center justify-center font-bold">
+                        {unreadCount}
+                      </span>
+                    )}
+                  </button>
+                  <button
+                    onClick={logout}
+                    className="text-red-600 hover:text-red-700 transition-colors text-sm font-medium border border-red-100 px-3 py-1 rounded-lg hover:bg-red-50"
+                  >
+                    تسجيل خروج
+                  </button>
+                </div>
+              </div>
             </div>
-          </div>
         </div>
       </header>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Tabs */}
         <div className="mb-8">
-          <div className="border-b border-gray-200">
-            <nav className="-mb-px flex space-x-8 space-x-reverse">
+          <div className="border-b border-gray-200 overflow-x-auto scrollbar-hide">
+            <nav className="-mb-px flex space-x-8 space-x-reverse min-w-max">
               {[
                 { id: 'products', name: 'المنتجات', icon: '📦' },
                 { id: 'categories', name: 'الأقسام', icon: '📂' },
@@ -601,11 +603,11 @@ const AdminPanel = ({ user, setUser }) => {
         {/* Products Tab */}
         {activeTab === 'products' && (
           <div>
-            <div className="flex justify-between items-center mb-6">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
               <h2 className="text-2xl font-bold text-gray-900">إدارة المنتجات</h2>
               <button
                 onClick={() => openModal('product')}
-                className="btn-primary"
+                className="w-full sm:w-auto btn-primary"
               >
                 + إضافة منتج جديد
               </button>
@@ -619,31 +621,31 @@ const AdminPanel = ({ user, setUser }) => {
               <>
                 {/* Action buttons for selected items */}
                 {selectedProducts.size > 0 && (
-                  <div className="mb-4 p-4 bg-blue-50 rounded-lg border border-blue-200 flex justify-between items-center">
+                  <div className="mb-4 p-4 bg-blue-50 rounded-lg border border-blue-200 flex flex-col md:flex-row justify-between items-center gap-4">
                     <span className="text-blue-900 font-semibold">
                       تم تحديد {selectedProducts.size} منتج
                     </span>
-                    <div className="space-x-2 space-x-reverse">
+                    <div className="flex items-center gap-2 w-full md:w-auto">
                       <select
                         value={homepageAction}
                         onChange={(e) => setHomepageAction(e.target.value)}
-                        className="px-3 py-2 border border-blue-300 rounded-md text-sm"
+                        className="flex-1 md:flex-none px-3 py-2 border border-blue-300 rounded-md text-sm bg-white"
                       >
-                        <option value="show">إظهار في الصفحة الرئيسية</option>
-                        <option value="hide">إخفاء من الصفحة الرئيسية</option>
+                        <option value="show">إظهار في الرئيسية</option>
+                        <option value="hide">إخفاء من الرئيسية</option>
                       </select>
                       <button
                         onClick={handleExecuteHomepageAction}
                         disabled={loading}
-                        className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+                        className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 font-bold"
                       >
-                        ✓ نفذ
+                        نفذ
                       </button>
                     </div>
                   </div>
                 )}
 
-                <div className="bg-white rounded-lg shadow overflow-hidden">
+                <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-x-auto">
                   <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-900 text-white">
                       <tr>
