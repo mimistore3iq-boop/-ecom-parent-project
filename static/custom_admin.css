@@ -456,17 +456,68 @@ body {
 
     /* Professional Sidebar Overlay for Mobile */
     .main-sidebar {
-        width: 75% !important;
+        width: 280px !important;
         height: 100vh !important;
         position: fixed !important;
         top: 0 !important;
-        right: -75% !important; /* Start hidden on the right for RTL */
+        right: -280px !important; /* Start hidden on the right for RTL */
         left: auto !important;
         z-index: 1050 !important;
-        transition: all 0.3s ease-in-out !important;
-        box-shadow: -5px 0 15px rgba(0,0,0,0.2) !important;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        box-shadow: -5px 0 25px rgba(0,0,0,0.3) !important;
         display: block !important;
-        visibility: hidden !important; /* Ensure it's hidden by default on mobile */
+        visibility: hidden !important; 
+    }
+
+    /* Hide sidebar completely on very small screens unless opened */
+    @media (max-width: 768px) {
+        .main-sidebar {
+            right: -280px !important;
+            display: none !important;
+        }
+        
+        .sidebar-open .main-sidebar {
+            display: block !important;
+            right: 0 !important;
+            visibility: visible !important;
+        }
+
+        /* Floating Hamburger Menu */
+        .voro-mobile-hamburger {
+            display: flex !important;
+            position: fixed !important;
+            top: 20px !important;
+            right: 20px !important;
+            width: 50px !important;
+            height: 50px !important;
+            background: var(--voro-gradient) !important;
+            color: white !important;
+            border-radius: 50% !important;
+            align-items: center !important;
+            justify-content: center !important;
+            z-index: 1060 !important;
+            box-shadow: 0 4px 15px rgba(111, 66, 193, 0.4) !important;
+            cursor: pointer !important;
+            border: 2px solid white !important;
+            transition: var(--voro-transition) !important;
+        }
+
+        .voro-mobile-hamburger:hover {
+            transform: scale(1.1) rotate(90deg) !important;
+        }
+
+        /* Ensure content is not squeezed */
+        .content-wrapper, .main-header, .main-footer {
+            margin-right: 0 !important;
+            margin-left: 0 !important;
+            width: 100% !important;
+            max-width: 100vw !important;
+        }
+
+        /* Hide default pushmenu on mobile if we use our floating one */
+        [data-widget="pushmenu"] {
+            display: none !important;
+        }
     }
 
     .sidebar-open .main-sidebar {
@@ -481,10 +532,11 @@ body {
         left: 0 !important;
         width: 100vw !important;
         height: 100vh !important;
-        background: rgba(0,0,0,0.5) !important;
-        backdrop-filter: blur(2px) !important;
+        background: rgba(0,0,0,0.6) !important;
+        backdrop-filter: blur(4px) !important;
         z-index: 1040 !important;
         display: none;
+        transition: all 0.3s ease !important;
     }
 
     .sidebar-open .voro-sidebar-backdrop {
@@ -496,18 +548,38 @@ body {
         position: absolute !important;
         top: 15px !important;
         left: 15px !important;
-        width: 35px !important;
-        height: 35px !important;
-        background: rgba(255,255,255,0.1) !important;
+        width: 40px !important;
+        height: 40px !important;
+        background: rgba(255,255,255,0.2) !important;
         border-radius: 50% !important;
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
         color: white !important;
-        font-size: 20px !important;
+        font-size: 22px !important;
         cursor: pointer !important;
         z-index: 1060 !important;
+        transition: all 0.3s ease !important;
     }
+
+    .voro-sidebar-close:hover {
+        background: rgba(255,255,255,0.3) !important;
+        transform: rotate(90deg) !important;
+    }
+}
+
+/* Ensure statistics and grids don't overlap */
+.row, .stats-grid {
+    width: 100% !important;
+    margin: 0 !important;
+    display: flex !important;
+    flex-wrap: wrap !important;
+}
+
+.stat-card, .info-box, .card {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-bottom: 15px !important;
 }
 
 @media (max-width: 768px) {

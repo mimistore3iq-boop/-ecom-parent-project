@@ -50,36 +50,64 @@ function initializeMobileSidebar() {
     if (!sidebar) return;
 
     // 1. Add Backdrop
-    const backdrop = document.createElement('div');
-    backdrop.className = 'voro-sidebar-backdrop';
-    document.body.appendChild(backdrop);
+    let backdrop = document.querySelector('.voro-sidebar-backdrop');
+    if (!backdrop) {
+        backdrop = document.createElement('div');
+        backdrop.className = 'voro-sidebar-backdrop';
+        document.body.appendChild(backdrop);
+    }
 
     // 2. Add Close Button inside sidebar
-    const closeBtn = document.createElement('div');
-    closeBtn.className = 'voro-sidebar-close';
-    closeBtn.innerHTML = '<i class="fas fa-times"></i>';
-    sidebar.appendChild(closeBtn);
+    let closeBtn = sidebar.querySelector('.voro-sidebar-close');
+    if (!closeBtn) {
+        closeBtn = document.createElement('div');
+        closeBtn.className = 'voro-sidebar-close';
+        closeBtn.innerHTML = '<i class="fas fa-times"></i>';
+        sidebar.appendChild(closeBtn);
+    }
 
-    // 3. Find or Create Hamburger Button
-    let toggleBtn = document.querySelector('[data-widget="pushmenu"]');
-    if (!toggleBtn) {
-        toggleBtn = document.createElement('button');
-        toggleBtn.className = 'btn btn-link text-white p-2 mr-2';
-        toggleBtn.innerHTML = '<i class="fas fa-bars fa-lg"></i>';
-        const navbar = document.querySelector('.main-header .navbar-nav') || document.querySelector('.navbar');
-        if (navbar) navbar.prepend(toggleBtn);
+    // 3. Create Floating Hamburger Button for Mobile
+    let floatingBtn = document.querySelector('.voro-mobile-hamburger');
+    if (!floatingBtn && window.innerWidth <= 768) {
+        floatingBtn = document.createElement('div');
+        floatingBtn.className = 'voro-mobile-hamburger';
+        floatingBtn.innerHTML = '<i class="fas fa-bars"></i>';
+        document.body.appendChild(floatingBtn);
     }
 
     // 4. Toggle Logic
     const toggleSidebar = () => {
         document.body.classList.toggle('sidebar-open');
+        // Toggle icon between bars and times if using floating button
+        if (floatingBtn) {
+            const icon = floatingBtn.querySelector('i');
+            if (document.body.classList.contains('sidebar-open')) {
+                icon.className = 'fas fa-times';
+            } else {
+                icon.className = 'fas fa-bars';
+            }
+        }
     };
 
-    toggleBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        toggleSidebar();
-    });
+    if (floatingBtn) {
+        floatingBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            toggleSidebar();
+        });
+    }
+
+    // Existing pushmenu toggle (if any)
+    let toggleBtn = document.querySelector('[data-widget="pushmenu"]');
+    if (toggleBtn) {
+        toggleBtn.addEventListener('click', (e) => {
+            if (window.innerWidth <= 991) {
+                e.preventDefault();
+                e.stopPropagation();
+                toggleSidebar();
+            }
+        });
+    }
 
     backdrop.addEventListener('click', toggleSidebar);
     closeBtn.addEventListener('click', toggleSidebar);

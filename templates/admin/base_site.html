@@ -58,7 +58,27 @@
 
 {% block extrahead %}
     {{ block.super }}
+    <!-- In-App Browser & SEO Meta Tags -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta property="og:title" content="voro Admin Panel | لوحة تحكم">
+    <meta property="og:description" content="Manage your store with ease on any device.">
+    <meta property="og:image" content="https://media.voroiq.com/logo.png">
+    <meta property="og:url" content="https://ecom-parent-project.onrender.com/admin/">
+    <meta property="og:type" content="website">
+    <meta name="theme-color" content="#667eea">
+
+    <!-- Disable Service Worker Cache if any -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                for(let registration of registrations) {
+                    registration.unregister();
+                }
+            }).catch(function(err) {
+                console.log('Service Worker registration failed: ', err);
+            });
+        }
+    </script>
     <link rel="stylesheet" type="text/css" href="{% static 'custom_admin.css' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700&display=swap" rel="stylesheet">
