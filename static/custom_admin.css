@@ -374,10 +374,22 @@ body {
 
 /* Responsive Design Improvements */
 @media (max-width: 991.98px) {
+    html, body {
+        overflow-x: hidden !important;
+        width: 100% !important;
+        position: relative !important;
+    }
+
     body {
         font-size: 13px !important;
     }
     
+    .wrapper {
+        width: 100% !important;
+        max-width: 100vw !important;
+        overflow-x: hidden !important;
+    }
+
     .content-wrapper {
         padding: 10px 5px !important;
         margin-left: 0 !important;
@@ -387,77 +399,97 @@ body {
         overflow-x: hidden !important;
     }
 
+    /* Force all containers to be flexible */
+    .container, .container-fluid {
+        width: 100% !important;
+        max-width: 100% !important;
+        padding-left: 5px !important;
+        padding-right: 5px !important;
+    }
+
     /* Fix for Dashboard tiles/cards on mobile */
     .row {
         display: flex !important;
         flex-wrap: wrap !important;
         margin-right: -5px !important;
         margin-left: -5px !important;
+        width: auto !important;
     }
 
-    .col-lg-3, .col-md-6, .col-sm-6, .col-12 {
+    [class*="col-"] {
         padding-right: 5px !important;
         padding-left: 5px !important;
         flex: 0 0 100% !important;
         max-width: 100% !important;
     }
 
-    /* Small boxes on mobile should stack correctly */
-    .small-box {
-        margin-bottom: 15px !important;
+    /* Table responsiveness - CRITICAL */
+    .table-responsive, .dataTables_wrapper {
+        display: block !important;
         width: 100% !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
     }
 
-    .info-box {
-        margin-bottom: 15px !important;
+    table {
         width: 100% !important;
-    }
-
-    /* Table responsiveness */
-    .table-responsive {
-        border: 0 !important;
-        margin-bottom: 1rem !important;
-        overflow-y: hidden !important;
-        width: 100% !important;
-    }
-
-    /* Ensure forms don't overflow */
-    .card-body, .box-body {
-        padding: 10px !important;
+        min-width: 600px !important; /* Allow internal scrolling for tables */
     }
 
     /* Jazzmin specific fixes */
     #content-main {
         width: 100% !important;
         padding: 0 !important;
+        margin: 0 !important;
     }
-    
-    .container-fluid {
-        padding-right: 5px !important;
-        padding-left: 5px !important;
+
+    .main-header {
+        margin-left: 0 !important;
+        width: 100% !important;
+    }
+
+    /* Fix login page */
+    .login-box {
+        width: 90% !important;
+        margin: 20px auto !important;
     }
 }
 
 @media (max-width: 768px) {
     .navbar-brand {
-        font-size: 1.1rem !important;
+        font-size: 1rem !important;
+        padding: 5px 10px !important;
     }
     
     .brand-text {
-        font-size: 1rem !important;
+        font-size: 0.9rem !important;
     }
 
-    /* Adjust padding for mobile devices */
     .content-header {
         padding: 10px !important;
         margin-bottom: 10px !important;
     }
+
+    /* Stack form rows on mobile */
+    .form-row {
+        flex-direction: column !important;
+    }
+    
+    .form-row > div {
+        width: 100% !important;
+        margin-bottom: 10px !important;
+    }
 }
 
-/* Ensure no fixed widths on main containers */
-.wrapper, .content-wrapper, .main-header, .main-footer, .content {
+/* Global Reset for unresponsive elements */
+.wrapper, .content-wrapper, .main-header, .main-footer, .content, .container-fluid {
     width: auto !important;
+}
+
+/* Ensure images don't break layout */
+img {
     max-width: 100% !important;
+    height: auto !important;
 }
 
 /* Animation Classes */
