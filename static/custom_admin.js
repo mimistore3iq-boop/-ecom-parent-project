@@ -15,10 +15,12 @@ onDocumentReady(function() {
     // Fix for mobile responsiveness: Ensure Viewport Meta Tag exists
     ensureViewportMeta();
 
-    // Force collapse on mobile initially
+    // Force collapse on mobile initially and remove classes that push content
     if (window.innerWidth <= 991) {
         document.body.classList.add('sidebar-collapse');
         document.body.classList.remove('sidebar-open');
+        document.body.classList.remove('sidebar-mini');
+        document.body.classList.remove('sidebar-mini-md');
     }
 
     // Initialize all custom features

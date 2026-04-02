@@ -386,16 +386,18 @@ body {
     
     .wrapper {
         width: 100% !important;
-        max-width: 100vw !important;
+        max-width: 100% !important;
         overflow-x: hidden !important;
+        margin: 0 !important;
+        padding: 0 !important;
     }
 
     .content-wrapper {
-        padding: 10px 5px !important;
+        padding: 5px !important;
         margin-left: 0 !important;
         margin-right: 0 !important;
         width: 100% !important;
-        max-width: 100vw !important;
+        max-width: 100% !important;
         overflow-x: hidden !important;
     }
 
@@ -465,18 +467,27 @@ body {
     }
 
     /* Stack stats on mobile */
-    .stats-grid, .row {
-        display: block !important;
+    .stats-grid, .row, .dashboard-container {
+        display: flex !important;
+        flex-direction: column !important;
         width: 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
     }
     
-    .stat-card, .info-box, .card, [class*="col-"] {
+    .stat-card, .info-box, .card, [class*="col-"], .dashboard-widget {
         width: 100% !important;
         max-width: 100% !important;
         margin-left: 0 !important;
         margin-right: 0 !important;
         margin-bottom: 15px !important;
         flex: none !important;
+        display: block !important;
+    }
+
+    .card-body {
+        padding: 10px !important;
+        width: 100% !important;
     }
 
     /* Professional Sidebar Overlay for Mobile */
@@ -531,13 +542,38 @@ body {
             transform: scale(1.1) rotate(90deg) !important;
         }
 
-        /* Ensure content is not squeezed */
-        .content-wrapper, .main-header, .main-footer {
-            margin-right: 0 !important;
-            margin-left: 0 !important;
-            width: 100% !important;
-            max-width: 100vw !important;
-        }
+    /* Ensure content is not squeezed - FORCE REMOVE ALL MARGINS AND PADDING THAT CAUSE ISSUES */
+    html, body {
+        overflow-x: hidden !important;
+        width: 100% !important;
+        position: relative !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    .wrapper, 
+    .content-wrapper, 
+    .main-header, 
+    .main-footer,
+    .main-sidebar {
+        margin-right: 0 !important;
+        margin-left: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        overflow-x: hidden !important;
+    }
+
+    /* Target specific Jazzmin/AdminLTE classes that cause squeezing in RTL */
+    .sidebar-mini.sidebar-collapse .content-wrapper,
+    .sidebar-mini.sidebar-collapse .main-footer,
+    .sidebar-mini.sidebar-collapse .main-header,
+    .sidebar-mini-md.sidebar-collapse .content-wrapper,
+    .sidebar-mini-md.sidebar-collapse .main-footer,
+    .sidebar-mini-md.sidebar-collapse .main-header {
+        margin-right: 0 !important;
+        margin-left: 0 !important;
+    }
 
         /* Hide default pushmenu on mobile if we use our floating one */
         [data-widget="pushmenu"] {
@@ -633,9 +669,9 @@ body {
     }
 }
 
-/* Global Reset for unresponsive elements */
+/* Global Reset for unresponsive elements - ensure they fill width on mobile */
 .wrapper, .content-wrapper, .main-header, .main-footer, .content, .container-fluid {
-    width: auto !important;
+    width: 100% !important;
 }
 
 /* Ensure images don't break layout */
