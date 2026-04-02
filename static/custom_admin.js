@@ -12,6 +12,9 @@ function onDocumentReady(fn) {
 onDocumentReady(function() {
     console.log('🛍️ voro Admin Panel Initializing...');
 
+    // Fix for mobile responsiveness: Ensure Viewport Meta Tag exists
+    ensureViewportMeta();
+
     // Initialize all custom features
     addNotificationStyles();
     initializeAnimations();
@@ -320,4 +323,19 @@ function initializeImgbbUploader() {
             return cookieValue;
         }
     }, 500);
+}
+
+/**
+ * Ensures the viewport meta tag is present and correct for mobile responsiveness
+ * This fixes the issue where Django Admin/Jazzmin might be squeezed on mobile devices
+ */
+function ensureViewportMeta() {
+    let meta = document.querySelector('meta[name="viewport"]');
+    if (!meta) {
+        meta = document.createElement('meta');
+        meta.name = "viewport";
+        document.getElementsByTagName('head')[0].appendChild(meta);
+    }
+    meta.content = "width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes";
+    console.log('📱 Viewport meta tag ensured for mobile responsiveness');
 }

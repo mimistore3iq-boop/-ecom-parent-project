@@ -569,7 +569,7 @@ JAZZMIN_UI_TWEAKS = {
     "sidebar_disable_expand": False,
     "sidebar_nav_child_indent": False,
     "theme": "litera",
-    "dark_mode_theme": "darkly",
+    "default_theme_mode": "auto",
     "theme_condition": "none",
     "button_classes": {
         "primary": "btn-primary",
