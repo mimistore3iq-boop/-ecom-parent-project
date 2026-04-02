@@ -372,25 +372,92 @@ body {
     content: "→" !important;
 }
 
-/* Responsive Design */
-@media (max-width: 768px) {
+/* Responsive Design Improvements */
+@media (max-width: 991.98px) {
+    body {
+        font-size: 13px !important;
+    }
+    
     .content-wrapper {
+        padding: 10px 5px !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        width: 100% !important;
+        max-width: 100vw !important;
+        overflow-x: hidden !important;
+    }
+
+    /* Fix for Dashboard tiles/cards on mobile */
+    .row {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        margin-right: -5px !important;
+        margin-left: -5px !important;
+    }
+
+    .col-lg-3, .col-md-6, .col-sm-6, .col-12 {
+        padding-right: 5px !important;
+        padding-left: 5px !important;
+        flex: 0 0 100% !important;
+        max-width: 100% !important;
+    }
+
+    /* Small boxes on mobile should stack correctly */
+    .small-box {
+        margin-bottom: 15px !important;
+        width: 100% !important;
+    }
+
+    .info-box {
+        margin-bottom: 15px !important;
+        width: 100% !important;
+    }
+
+    /* Table responsiveness */
+    .table-responsive {
+        border: 0 !important;
+        margin-bottom: 1rem !important;
+        overflow-y: hidden !important;
+        width: 100% !important;
+    }
+
+    /* Ensure forms don't overflow */
+    .card-body, .box-body {
         padding: 10px !important;
     }
 
+    /* Jazzmin specific fixes */
+    #content-main {
+        width: 100% !important;
+        padding: 0 !important;
+    }
+    
+    .container-fluid {
+        padding-right: 5px !important;
+        padding-left: 5px !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .navbar-brand {
+        font-size: 1.1rem !important;
+    }
+    
+    .brand-text {
+        font-size: 1rem !important;
+    }
+
+    /* Adjust padding for mobile devices */
     .content-header {
-        padding: 15px !important;
+        padding: 10px !important;
+        margin-bottom: 10px !important;
     }
+}
 
-    .card-body,
-    .box-body {
-        padding: 15px !important;
-    }
-
-    .btn {
-        padding: 8px 16px !important;
-        font-size: 12px !important;
-    }
+/* Ensure no fixed widths on main containers */
+.wrapper, .content-wrapper, .main-header, .main-footer, .content {
+    width: auto !important;
+    max-width: 100% !important;
 }
 
 /* Animation Classes */
