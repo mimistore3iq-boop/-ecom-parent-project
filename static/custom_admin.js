@@ -15,6 +15,12 @@ onDocumentReady(function() {
     // Fix for mobile responsiveness: Ensure Viewport Meta Tag exists
     ensureViewportMeta();
 
+    // Force collapse on mobile initially
+    if (window.innerWidth <= 991) {
+        document.body.classList.add('sidebar-collapse');
+        document.body.classList.remove('sidebar-open');
+    }
+
     // Initialize all custom features
     addNotificationStyles();
     initializeAnimations();

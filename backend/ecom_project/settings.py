@@ -458,7 +458,7 @@ JAZZMIN_SETTINGS = {
     "show_sidebar": True,
 
     # Whether to aut expand the menu
-    "navigation_expanded": True,
+    "navigation_expanded": False,
 
     # Hide these apps when generating side menu
     "hide_apps": [],
@@ -561,13 +561,14 @@ JAZZMIN_UI_TWEAKS = {
     "layout_boxed": False,
     "footer_fixed": False,
     "sidebar_fixed": True,
+    "sidebar_collapse": True,
     "sidebar": "sidebar-dark-purple",
-    "sidebar_nav_small_text": False,
-    "sidebar_nav_flat_style": False,
+    "sidebar_nav_small_text": True,
+    "sidebar_nav_flat_style": True,
     "sidebar_nav_legacy_style": False,
-    "sidebar_nav_compact_style": False,
+    "sidebar_nav_compact_style": True,
     "sidebar_disable_expand": False,
-    "sidebar_nav_child_indent": False,
+    "sidebar_nav_child_indent": True,
     "theme": "litera",
     "default_theme_mode": "auto",
     "theme_condition": "none",

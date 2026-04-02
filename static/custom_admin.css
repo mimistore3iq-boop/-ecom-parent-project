@@ -463,23 +463,15 @@ body {
         right: -75% !important; /* Start hidden on the right for RTL */
         left: auto !important;
         z-index: 1050 !important;
-        transition: right 0.3s ease-in-out !important;
+        transition: all 0.3s ease-in-out !important;
         box-shadow: -5px 0 15px rgba(0,0,0,0.2) !important;
         display: block !important;
-    }
-
-    [dir="ltr"] .main-sidebar {
-        right: auto !important;
-        left: -75% !important;
-        transition: left 0.3s ease-in-out !important;
+        visibility: hidden !important; /* Ensure it's hidden by default on mobile */
     }
 
     .sidebar-open .main-sidebar {
         right: 0 !important;
-    }
-
-    [dir="ltr"] .sidebar-open .main-sidebar {
-        left: 0 !important;
+        visibility: visible !important;
     }
 
     /* Backdrop when sidebar is open */
