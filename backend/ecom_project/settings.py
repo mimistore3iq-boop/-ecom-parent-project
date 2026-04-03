@@ -552,7 +552,7 @@ JAZZMIN_UI_TWEAKS = {
     "custom_css": "custom_admin_v2.css",
     "custom_js": "custom_admin.js",
     # Use external CDN for static files in production
-    "use_external_cdn": False,
+    "use_external_cdn": True,
     "external_cdn": {
         "fontawesome": "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css",
         "adminlte": {
