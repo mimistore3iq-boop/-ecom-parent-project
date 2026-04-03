@@ -145,6 +145,7 @@ if not DEBUG:
     STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
     # WhiteNoise settings
     WHITENOISE_USE_FINDERS = True
+    WHITENOISE_MANIFEST_STRICT = False
     WHITENOISE_COMPRESSION_ENABLED = True
     WHITENOISE_SKIP_COMPRESS_EXTENSIONS = [
         '.jpg', '.jpeg', '.png', '.gif', '.webp', '.zip', '.gz', '.tgz', '.bz2', '.xz',
@@ -180,8 +181,8 @@ STATICFILES_FINDERS = [
 # Static files storage
 if not DEBUG:
     # In production, we need to set STATIC_ROOT and run collectstatic
-    # Use ManifestStaticFilesStorage for better caching
-    STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.ManifestStaticFilesStorage'
+    # Use WhiteNoise via line 145
+    pass
 else:
     STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
 
@@ -190,7 +191,6 @@ STATIC_URL = '/static/'
 
 # Ensure static files are served in production
 if not DEBUG:
-    STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.ManifestStaticFilesStorage'
     # Make sure all static files are collected
     STATIC_ROOT = BASE_DIR / 'staticfiles'
     # Ensure static files are properly served
@@ -208,13 +208,11 @@ if not DEBUG:
     # Use external CDN for static files in production
     # Note: JAZZMIN_SETTINGS will be updated later in the file
     # Make sure static files are collected during deployment
-    STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.ManifestStaticFilesStorage'
     # Ensure static files are collected during deployment
     STATIC_ROOT = BASE_DIR / 'staticfiles'
     # Ensure static files are served correctly in production
     STATIC_URL = '/static/'
     # Make sure static files are collected during deployment
-    STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.ManifestStaticFilesStorage'
     # Ensure static files are collected during deployment
     STATIC_ROOT = BASE_DIR / 'staticfiles'
 
