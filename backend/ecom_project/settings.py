@@ -47,11 +47,12 @@ LOCAL_APPS = [
 INSTALLED_APPS = ['jazzmin'] + DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
 MIDDLEWARE = [
+    'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'corsheaders.middleware.CorsMiddleware',
-    'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -137,26 +138,35 @@ CURRENCY_CODE = 'IQD'
 
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = '/static/'
-
-# In production, static files will be collected to this directory
-if not DEBUG:
-    STATIC_ROOT = BASE_DIR / 'staticfiles'
-    # Use WhiteNoise for serving static files in production
-    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-    # WhiteNoise settings
-    WHITENOISE_USE_FINDERS = True
-    WHITENOISE_MANIFEST_STRICT = False
-    WHITENOISE_COMPRESSION_ENABLED = True
-    WHITENOISE_SKIP_COMPRESS_EXTENSIONS = [
-        '.jpg', '.jpeg', '.png', '.gif', '.webp', '.zip', '.gz', '.tgz', '.bz2', '.xz',
-    ]
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 STATICFILES_DIRS = [
     BASE_DIR / 'static',
     BASE_DIR.parent / 'static',
 ]
 
-# Additional static files for Jazzmin
+STATICFILES_FINDERS = [
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+]
+
+# WhiteNoise Configuration
+WHITENOISE_USE_FINDERS = True
+WHITENOISE_MANIFEST_STRICT = False
+WHITENOISE_COMPRESSION_ENABLED = True
+WHITENOISE_SKIP_COMPRESS_EXTENSIONS = [
+    '.jpg', '.jpeg', '.png', '.gif', '.webp', '.zip', '.gz', '.tgz', '.bz2', '.xz',
+]
+
+# Use WhiteNoise for static files in production
+if not DEBUG:
+    # Use simple CompressedStaticFilesStorage to avoid 0-byte issues with manifest
+    # While manifest is good for cache-busting, we use manual versioning for now
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
+else:
+    STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
+
+# Jazzmin localized assets
 JAZZMIN_STATIC = {
     'vendor': {
         'css': {
@@ -171,50 +181,6 @@ JAZZMIN_STATIC = {
         }
     }
 }
-
-# Static files finders
-STATICFILES_FINDERS = [
-    'django.contrib.staticfiles.finders.FileSystemFinder',
-    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-]
-
-# Static files storage
-if not DEBUG:
-    # In production, we need to set STATIC_ROOT and run collectstatic
-    # Use WhiteNoise via line 145
-    pass
-else:
-    STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
-
-# Make sure static files are served properly
-STATIC_URL = '/static/'
-
-# Ensure static files are served in production
-if not DEBUG:
-    # Make sure all static files are collected
-    STATIC_ROOT = BASE_DIR / 'staticfiles'
-    # Ensure static files are properly served
-    STATIC_URL = '/static/'
-    # Make sure static files are collected during deployment
-    STATICFILES_DIRS = [
-        BASE_DIR / 'static',
-        BASE_DIR.parent / 'static',
-    ]
-    # Ensure static files are served correctly in production
-    STATICFILES_FINDERS = [
-        'django.contrib.staticfiles.finders.FileSystemFinder',
-        'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-    ]
-    # Use external CDN for static files in production
-    # Note: JAZZMIN_SETTINGS will be updated later in the file
-    # Make sure static files are collected during deployment
-    # Ensure static files are collected during deployment
-    STATIC_ROOT = BASE_DIR / 'staticfiles'
-    # Ensure static files are served correctly in production
-    STATIC_URL = '/static/'
-    # Make sure static files are collected during deployment
-    # Ensure static files are collected during deployment
-    STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # Media files
 # Using Cloudflare R2 for Storage
@@ -241,12 +207,8 @@ STORAGES = {
     },
 }
 
-# WhiteNoise settings
-WHITENOISE_MANIFEST_STRICT = False
-
 # Keep for compatibility with older Django versions/apps
 DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 
 MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/"
 MEDIA_ROOT = BASE_DIR / 'media'
@@ -587,10 +549,10 @@ JAZZMIN_UI_TWEAKS = {
         "success": "btn-success"
     },
     "actions_sticky_top": True,
-    "custom_css": "custom_admin.css",
+    "custom_css": "custom_admin_v2.css",
     "custom_js": "custom_admin.js",
     # Use external CDN for static files in production
-    "use_external_cdn": True,
+    "use_external_cdn": False,
     "external_cdn": {
         "fontawesome": "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css",
         "adminlte": {

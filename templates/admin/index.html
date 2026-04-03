@@ -5,14 +5,29 @@
 
 {% block extrahead %}
     {{ block.super }}
-    <link rel="stylesheet" type="text/css" href="{% static 'custom_admin.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'custom_admin_v2.css' %}?v=2.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         .dashboard-stats {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 15px;
             margin-bottom: 30px;
+        }
+        
+        @media (max-width: 768px) {
+            .dashboard-stats {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+            
+            .stat-card {
+                padding: 15px !important;
+            }
+            
+            .stat-number {
+                font-size: 1.8rem !important;
+            }
         }
         
         .stat-card {

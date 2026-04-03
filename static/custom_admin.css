@@ -1,0 +1,1181 @@
+/* ===== voro Admin Custom Styles ===== */
+
+/* Import Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap');
+
+/* Root Variables */
+:root {
+    --voro-primary: #6f42c1;
+    --voro-secondary: #20c997;
+    --voro-accent: #fd7e14;
+    --voro-dark: #343a40;
+    --voro-light: #f8f9fa;
+    --voro-gradient: linear-gradient(135deg, #6f42c1 0%, #20c997 100%);
+    --voro-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --voro-border-radius: 8px;
+    --voro-transition: all 0.3s ease;
+}
+
+/* Global Styles */
+* {
+    font-family: 'Cairo', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+}
+
+body {
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%) !important;
+    font-size: 14px !important;
+    line-height: 1.6 !important;
+}
+
+/* Header Styles */
+.navbar-dark {
+    background: var(--voro-gradient) !important;
+    box-shadow: var(--voro-shadow) !important;
+    border: none !important;
+}
+
+.navbar-brand {
+    font-weight: 700 !important;
+    font-size: 1.5rem !important;
+    color: white !important;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3) !important;
+}
+
+.navbar-nav .nav-link {
+    color: rgba(255, 255, 255, 0.9) !important;
+    font-weight: 500 !important;
+    transition: var(--voro-transition) !important;
+    border-radius: 20px !important;
+    margin: 0 5px !important;
+    padding: 8px 15px !important;
+}
+
+.navbar-nav .nav-link:hover {
+    background: rgba(255, 255, 255, 0.2) !important;
+    color: white !important;
+    transform: translateY(-2px) !important;
+}
+
+/* Sidebar Styles */
+.main-sidebar {
+    background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%) !important;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1) !important;
+}
+
+.sidebar-dark-purple .nav-sidebar>.nav-item>.nav-link {
+    color: rgba(255, 255, 255, 0.9) !important;
+    border-radius: var(--voro-border-radius) !important;
+    margin: 2px 8px !important;
+    transition: var(--voro-transition) !important;
+    font-weight: 500 !important;
+}
+
+.sidebar-dark-purple .nav-sidebar>.nav-item>.nav-link:hover,
+.sidebar-dark-purple .nav-sidebar>.nav-item>.nav-link.active {
+    background: var(--voro-gradient) !important;
+    color: white !important;
+    transform: translateX(5px) !important;
+    box-shadow: var(--voro-shadow) !important;
+}
+
+.sidebar-dark-purple .nav-sidebar>.nav-item>.nav-link>.nav-icon {
+    margin-left: 10px !important;
+    font-size: 1.1rem !important;
+}
+
+/* Brand Logo Area */
+.brand-link {
+    background: rgba(0, 0, 0, 0.1) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+    padding: 15px !important;
+}
+
+.brand-text {
+    font-weight: 700 !important;
+    font-size: 1.3rem !important;
+    color: white !important;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Content Area */
+.content-wrapper {
+    background: transparent !important;
+    padding: 20px !important;
+}
+
+.content-header {
+    background: white !important;
+    border-radius: var(--voro-border-radius) !important;
+    box-shadow: var(--voro-shadow) !important;
+    margin-bottom: 20px !important;
+    padding: 20px !important;
+}
+
+.content-header h1 {
+    color: var(--voro-primary) !important;
+    font-weight: 700 !important;
+    margin: 0 !important;
+}
+
+/* Cards and Boxes */
+.card,
+.box {
+    border: none !important;
+    border-radius: var(--voro-border-radius) !important;
+    box-shadow: var(--voro-shadow) !important;
+    transition: var(--voro-transition) !important;
+    overflow: hidden !important;
+}
+
+.card:hover,
+.box:hover {
+    transform: translateY(-5px) !important;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15) !important;
+}
+
+.card-header,
+.box-header {
+    background: var(--voro-gradient) !important;
+    color: white !important;
+    font-weight: 600 !important;
+    border: none !important;
+    padding: 15px 20px !important;
+}
+
+.card-body,
+.box-body {
+    padding: 20px !important;
+}
+
+/* Dashboard Cards */
+.info-box {
+    border-radius: var(--voro-border-radius) !important;
+    box-shadow: var(--voro-shadow) !important;
+    transition: var(--voro-transition) !important;
+    border: none !important;
+    overflow: hidden !important;
+}
+
+.info-box:hover {
+    transform: translateY(-3px) !important;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15) !important;
+}
+
+.info-box-icon {
+    border-radius: var(--voro-border-radius) 0 0 var(--voro-border-radius) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+.info-box-content {
+    padding: 15px !important;
+}
+
+.info-box-text {
+    font-weight: 600 !important;
+    color: var(--voro-dark) !important;
+}
+
+.info-box-number {
+    font-weight: 700 !important;
+    font-size: 1.8rem !important;
+    color: var(--voro-primary) !important;
+}
+
+/* Buttons */
+.btn {
+    border-radius: 25px !important;
+    font-weight: 600 !important;
+    padding: 10px 20px !important;
+    transition: var(--voro-transition) !important;
+    border: none !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+}
+
+.btn-primary {
+    background: var(--voro-gradient) !important;
+    box-shadow: var(--voro-shadow) !important;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 20px rgba(111, 66, 193, 0.4) !important;
+}
+
+.btn-success {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%) !important;
+}
+
+.btn-warning {
+    background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%) !important;
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, #dc3545 0%, #e83e8c 100%) !important;
+}
+
+/* Tables */
+.table {
+    background: white !important;
+    border-radius: var(--voro-border-radius) !important;
+    overflow: hidden !important;
+    box-shadow: var(--voro-shadow) !important;
+}
+
+.table thead th {
+    background: var(--voro-gradient) !important;
+    color: white !important;
+    font-weight: 600 !important;
+    border: none !important;
+    padding: 15px !important;
+    text-align: center !important;
+}
+
+.table tbody tr {
+    transition: var(--voro-transition) !important;
+}
+
+.table tbody tr:hover {
+    background: rgba(111, 66, 193, 0.05) !important;
+    transform: scale(1.01) !important;
+}
+
+.table tbody td {
+    padding: 12px 15px !important;
+    border-color: rgba(0, 0, 0, 0.05) !important;
+    text-align: center !important;
+}
+
+/* Forms */
+.form-control {
+    border: 2px solid #e9ecef !important;
+    border-radius: var(--voro-border-radius) !important;
+    padding: 12px 15px !important;
+    transition: var(--voro-transition) !important;
+    font-size: 14px !important;
+}
+
+.form-control:focus {
+    border-color: var(--voro-primary) !important;
+    box-shadow: 0 0 0 0.2rem rgba(111, 66, 193, 0.25) !important;
+    transform: translateY(-2px) !important;
+}
+
+.form-group label {
+    font-weight: 600 !important;
+    color: var(--voro-dark) !important;
+    margin-bottom: 8px !important;
+}
+
+/* Pagination */
+.pagination {
+    justify-content: center !important;
+}
+
+.page-link {
+    border: none !important;
+    border-radius: 50% !important;
+    width: 40px !important;
+    height: 40px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin: 0 3px !important;
+    transition: var(--voro-transition) !important;
+    font-weight: 600 !important;
+}
+
+.page-link:hover,
+.page-item.active .page-link {
+    background: var(--voro-gradient) !important;
+    color: white !important;
+    transform: scale(1.1) !important;
+}
+
+/* Breadcrumb */
+.breadcrumb {
+    background: transparent !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+.breadcrumb-item {
+    font-weight: 500 !important;
+}
+
+.breadcrumb-item.active {
+    color: var(--voro-primary) !important;
+    font-weight: 600 !important;
+}
+
+.breadcrumb-item+.breadcrumb-item::before {
+    content: "←" !important;
+    color: var(--voro-primary) !important;
+    font-weight: bold !important;
+}
+
+/* Footer */
+.main-footer {
+    background: white !important;
+    border-top: 3px solid var(--voro-primary) !important;
+    color: var(--voro-dark) !important;
+    font-weight: 500 !important;
+    text-align: center !important;
+    padding: 15px !important;
+}
+
+/* Login Page */
+.login-page {
+    background: var(--voro-gradient) !important;
+}
+
+.login-box {
+    background: white !important;
+    border-radius: var(--voro-border-radius) !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2) !important;
+    overflow: hidden !important;
+}
+
+.login-logo {
+    background: var(--voro-gradient) !important;
+    color: white !important;
+    padding: 30px !important;
+    text-align: center !important;
+}
+
+.login-logo a {
+    color: white !important;
+    font-weight: 700 !important;
+    font-size: 2rem !important;
+    text-decoration: none !important;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3) !important;
+}
+
+.login-card-body {
+    padding: 30px !important;
+}
+
+/* RTL Support */
+[dir="rtl"] .sidebar-dark-purple .nav-sidebar>.nav-item>.nav-link:hover,
+[dir="rtl"] .sidebar-dark-purple .nav-sidebar>.nav-item>.nav-link.active {
+    transform: translateX(-5px) !important;
+}
+
+[dir="rtl"] .sidebar-dark-purple .nav-sidebar>.nav-item>.nav-link>.nav-icon {
+    margin-right: 10px !important;
+    margin-left: 0 !important;
+}
+
+[dir="rtl"] .breadcrumb-item+.breadcrumb-item::before {
+    content: "→" !important;
+}
+
+/* Responsive Design Improvements */
+@media (max-width: 991.98px) {
+    html, body {
+        overflow-x: hidden !important;
+        width: 100% !important;
+        position: relative !important;
+    }
+
+    body {
+        font-size: 13px !important;
+    }
+    
+    .wrapper {
+        width: 100% !important;
+        max-width: 100% !important;
+        overflow-x: hidden !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    .content-wrapper {
+        padding: 5px !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        overflow-x: hidden !important;
+    }
+
+    /* Force all containers to be flexible */
+    .container, .container-fluid {
+        width: 100% !important;
+        max-width: 100% !important;
+        padding-left: 5px !important;
+        padding-right: 5px !important;
+    }
+
+    /* Fix for Dashboard tiles/cards on mobile */
+    .row {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        margin-right: -5px !important;
+        margin-left: -5px !important;
+        width: auto !important;
+    }
+
+    [class*="col-"] {
+        padding-right: 5px !important;
+        padding-left: 5px !important;
+        flex: 0 0 100% !important;
+        max-width: 100% !important;
+    }
+
+    /* Table responsiveness - CRITICAL */
+    .table-responsive, .dataTables_wrapper {
+        display: block !important;
+        width: 100% !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+    }
+
+    table {
+        width: 100% !important;
+        min-width: 600px !important; /* Allow internal scrolling for tables */
+    }
+
+    /* Jazzmin specific fixes */
+    #content-main {
+        width: 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    .main-header {
+        margin-right: 0 !important;
+        margin-left: 0 !important;
+        width: 100% !important;
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        padding: 5px 15px !important;
+    }
+
+    /* Hide standard navbar links on mobile dashboard header to save space */
+    .main-header .navbar-nav:not(.ml-auto) {
+        display: none !important;
+    }
+
+    .main-header .ml-auto {
+        margin-right: auto !important;
+        margin-left: 0 !important;
+    }
+
+    /* Fix login page */
+    .login-box, .login-container {
+        width: 95% !important;
+        max-width: 380px !important;
+        margin: 10px auto !important;
+        padding: 0 !important;
+    }
+    
+    .login-form {
+        padding: 20px 15px !important;
+    }
+    
+    .login-header {
+        padding: 25px 15px !important;
+    }
+
+    /* Stack stats on mobile */
+    .stats-grid, .row, .dashboard-container {
+        display: flex !important;
+        flex-direction: column !important;
+        width: 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+    
+    .stat-card, .info-box, .card, [class*="col-"], .dashboard-widget {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        margin-bottom: 15px !important;
+        flex: none !important;
+        display: block !important;
+    }
+
+    .card-body {
+        padding: 10px !important;
+        width: 100% !important;
+    }
+
+    /* Professional Sidebar Overlay for Mobile - RE-FIXED - COMPLETELY HIDE BY DEFAULT */
+    .main-sidebar {
+        width: 280px !important;
+        height: 100vh !important;
+        position: fixed !important;
+        top: 0 !important;
+        right: -300px !important; /* Start completely off-screen */
+        left: auto !important;
+        z-index: 1050 !important;
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        transform: translateX(300px) !important; /* Move it completely for RTL */
+        box-shadow: -5px 0 25px rgba(0,0,0,0.3) !important;
+        display: none !important; 
+        visibility: hidden !important; 
+    }
+
+    /* When sidebar is open */
+    .sidebar-open .main-sidebar {
+        display: block !important;
+        visibility: visible !important;
+        transform: translateX(0) !important;
+        right: 0 !important;
+    }
+
+    /* Target specifically the login page to remove sidebar/header */
+    .login-page .main-sidebar, 
+    .login-page .main-header,
+    .login-page .nav-global,
+    .login-page .navbar,
+    .login-page .voro-mobile-hamburger {
+        display: none !important;
+    }
+
+    .login-page .content-wrapper,
+    .login-page .wrapper {
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
+        background: transparent !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        min-height: 100vh !important;
+    }
+
+    /* Hide sidebar completely on very small screens unless opened */
+    @media (max-width: 768px) {
+        .main-sidebar {
+            right: -280px !important;
+            display: none !important;
+        }
+        
+        .sidebar-open .main-sidebar {
+            display: block !important;
+            right: 0 !important;
+            visibility: visible !important;
+        }
+
+        /* Floating Hamburger Menu */
+        .voro-mobile-hamburger {
+            display: flex !important;
+            position: fixed !important;
+            top: 15px !important;
+            right: 15px !important;
+            width: 45px !important;
+            height: 45px !important;
+            background: var(--voro-gradient) !important;
+            color: white !important;
+            border-radius: 50% !important;
+            align-items: center !important;
+            justify-content: center !important;
+            z-index: 1060 !important;
+            box-shadow: 0 4px 15px rgba(111, 66, 193, 0.4) !important;
+            cursor: pointer !important;
+            border: 2px solid white !important;
+            transition: var(--voro-transition) !important;
+        }
+
+        .voro-mobile-hamburger:hover {
+            transform: scale(1.1) rotate(90deg) !important;
+        }
+
+    /* Ensure content is not squeezed - FORCE REMOVE ALL MARGINS AND PADDING THAT CAUSE ISSUES */
+    html, body {
+        overflow-x: hidden !important;
+        width: 100% !important;
+        position: relative !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    .wrapper, 
+    .content-wrapper, 
+    .main-header, 
+    .main-footer,
+    .main-sidebar {
+        margin-right: 0 !important;
+        margin-left: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        overflow-x: hidden !important;
+    }
+
+    /* Target specific Jazzmin/AdminLTE classes that cause squeezing in RTL */
+    .sidebar-mini.sidebar-collapse .content-wrapper,
+    .sidebar-mini.sidebar-collapse .main-footer,
+    .sidebar-mini.sidebar-collapse .main-header,
+    .sidebar-mini-md.sidebar-collapse .content-wrapper,
+    .sidebar-mini-md.sidebar-collapse .main-footer,
+    .sidebar-mini-md.sidebar-collapse .main-header {
+        margin-right: 0 !important;
+        margin-left: 0 !important;
+    }
+
+        /* Hide default pushmenu on mobile if we use our floating one */
+        [data-widget="pushmenu"] {
+            display: none !important;
+        }
+    }
+
+    .sidebar-open .main-sidebar {
+        right: 0 !important;
+        visibility: visible !important;
+    }
+
+    /* Backdrop when sidebar is open */
+    .voro-sidebar-backdrop {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        background: rgba(0,0,0,0.6) !important;
+        backdrop-filter: blur(4px) !important;
+        z-index: 1040 !important;
+        display: none;
+        transition: all 0.3s ease !important;
+    }
+
+    .sidebar-open .voro-sidebar-backdrop {
+        display: block !important;
+    }
+
+    /* Close button in sidebar */
+    .voro-sidebar-close {
+        position: absolute !important;
+        top: 15px !important;
+        left: 15px !important;
+        width: 40px !important;
+        height: 40px !important;
+        background: rgba(255,255,255,0.2) !important;
+        border-radius: 50% !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        color: white !important;
+        font-size: 22px !important;
+        cursor: pointer !important;
+        z-index: 1060 !important;
+        transition: all 0.3s ease !important;
+    }
+
+    .voro-sidebar-close:hover {
+        background: rgba(255,255,255,0.3) !important;
+        transform: rotate(90deg) !important;
+    }
+}
+
+/* Ensure statistics and grids don't overlap */
+.row, .stats-grid {
+    width: 100% !important;
+    margin: 0 !important;
+    display: flex !important;
+    flex-wrap: wrap !important;
+}
+
+.stat-card, .info-box, .card {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-bottom: 15px !important;
+}
+
+@media (max-width: 768px) {
+    .navbar-brand {
+        font-size: 1rem !important;
+        padding: 5px 10px !important;
+    }
+    
+    .brand-text {
+        font-size: 0.9rem !important;
+    }
+
+    .content-header {
+        padding: 10px !important;
+        margin-bottom: 10px !important;
+    }
+
+    /* Stack form rows on mobile */
+    .form-row {
+        flex-direction: column !important;
+    }
+    
+    .form-row > div {
+        width: 100% !important;
+        margin-bottom: 10px !important;
+    }
+}
+
+/* Global Reset for unresponsive elements - ensure they fill width on mobile */
+.wrapper, .content-wrapper, .main-header, .main-footer, .content, .container-fluid {
+    width: 100% !important;
+}
+
+/* Ensure images don't break layout */
+img {
+    max-width: 100% !important;
+    height: auto !important;
+}
+
+/* Animation Classes */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in-up {
+    animation: fadeInUp 0.6s ease-out !important;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 8px !important;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1 !important;
+    border-radius: 10px !important;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--voro-gradient) !important;
+    border-radius: 10px !important;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--voro-primary) !important;
+}
+
+/* Success Messages */
+.alert-success {
+    background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%) !important;
+    border: none !important;
+    border-radius: var(--voro-border-radius) !important;
+    color: #155724 !important;
+    font-weight: 500 !important;
+}
+
+.alert-error,
+.alert-danger {
+    background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%) !important;
+    border: none !important;
+    border-radius: var(--voro-border-radius) !important;
+    color: #721c24 !important;
+    font-weight: 500 !important;
+}
+
+.alert-warning {
+    background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%) !important;
+    border: none !important;
+    border-radius: var(--voro-border-radius) !important;
+    color: #856404 !important;
+    font-weight: 500 !important;
+}
+
+/* Loading Spinner */
+.loading-spinner {
+    display: inline-block !important;
+    width: 20px !important;
+    height: 20px !important;
+    border: 3px solid rgba(255, 255, 255, .3) !important;
+    border-radius: 50% !important;
+    border-top-color: #fff !important;
+    animation: spin 1s ease-in-out infinite !important;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg) !important;
+    }
+}
+
+/* Custom Dashboard Widgets */
+.dashboard-widget {
+    background: white !important;
+    border-radius: var(--voro-border-radius) !important;
+    box-shadow: var(--voro-shadow) !important;
+    padding: 20px !important;
+    margin-bottom: 20px !important;
+    transition: var(--voro-transition) !important;
+}
+
+.dashboard-widget:hover {
+    transform: translateY(-3px) !important;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15) !important;
+}
+
+.widget-header {
+    display: flex !important;
+    align-items: center !important;
+    margin-bottom: 15px !important;
+}
+
+.widget-icon {
+    width: 50px !important;
+    height: 50px !important;
+    border-radius: 50% !important;
+    background: var(--voro-gradient) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    color: white !important;
+    font-size: 1.5rem !important;
+    margin-left: 15px !important;
+}
+
+.widget-title {
+    font-size: 1.2rem !important;
+    font-weight: 600 !important;
+    color: var(--voro-dark) !important;
+    margin: 0 !important;
+}
+
+.widget-value {
+    font-size: 2rem !important;
+    font-weight: 700 !important;
+    color: var(--voro-primary) !important;
+    text-align: center !important;
+}
+
+/* Dashboard Specific Styles */
+.dashboard-container {
+    padding: 20px;
+    background: #f8f9fa;
+    min-height: calc(100vh - 120px);
+}
+
+.welcome-banner {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 30px;
+    border-radius: 15px;
+    margin-bottom: 30px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.welcome-banner::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+    animation: rotate 20s linear infinite;
+}
+
+@keyframes rotate {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.stat-card {
+    background: white;
+    padding: 25px;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: var(--voro-gradient);
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+.stat-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    margin-bottom: 15px;
+}
+
+.stat-number {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #2c3e50;
+    margin-bottom: 5px;
+}
+
+.stat-label {
+    color: #6c757d;
+    font-weight: 500;
+}
+
+/* Enhanced Table Styles */
+.results {
+    background: white;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+}
+
+.results table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.results th {
+    background: var(--voro-gradient);
+    color: white;
+    padding: 15px;
+    font-weight: 600;
+    text-align: center;
+    border: none;
+}
+
+.results td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #f8f9fa;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.results tr:hover td {
+    background: #f8f9fa;
+}
+
+/* Enhanced Form Styles */
+.form-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.form-row>div {
+    flex: 1;
+    min-width: 200px;
+}
+
+.form-group label {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 8px;
+    display: block;
+}
+
+.form-control,
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+select,
+textarea {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background: white;
+}
+
+.form-control:focus,
+input:focus,
+select:focus,
+textarea:focus {
+    outline: none;
+    border-color: var(--voro-primary);
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+/* Enhanced Button Styles */
+.btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.btn-primary {
+    background: var(--voro-gradient);
+    color: white;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+    color: white;
+}
+
+.btn-success {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, #dc3545 0%, #e83e8c 100%);
+    color: white;
+}
+
+.btn-warning {
+    background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+    color: #212529;
+}
+
+.btn-info {
+    background: linear-gradient(135deg, #17a2b8 0%, #6f42c1 100%);
+    color: white;
+}
+
+/* Status Badges */
+.status-badge {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.status-pending {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.status-processing {
+    background: #cce5ff;
+    color: #004085;
+}
+
+.status-completed {
+    background: #d4edda;
+    color: #155724;
+}
+
+.status-cancelled {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+/* Image Previews */
+.image-preview {
+    width: 60px;
+    height: 60px;
+    border-radius: 8px;
+    object-fit: cover;
+    border: 2px solid #e9ecef;
+    transition: all 0.3s ease;
+}
+
+.image-preview:hover {
+    transform: scale(1.1);
+    border-color: var(--voro-primary);
+}
+
+/* Price Display */
+.price-display {
+    font-weight: 700;
+    color: #28a745;
+    font-size: 1.1rem;
+}
+
+.price-original {
+    text-decoration: line-through;
+    color: #6c757d;
+    font-size: 0.9rem;
+    margin-right: 8px;
+}
+
+/* Rating Display */
+.rating-stars {
+    color: #ffc107;
+    font-size: 1.1rem;
+}
+
+.rating-number {
+    color: #6c757d;
+    font-size: 0.9rem;
+    margin-right: 5px;
+}
+
+/* Stock Status */
+.stock-high {
+    color: #28a745;
+    font-weight: 600;
+}
+
+.stock-medium {
+    color: #ffc107;
+    font-weight: 600;
+}
+
+.stock-low {
+    color: #dc3545;
+    font-weight: 600;
+}
+
+/* Print Styles */
+@media print {
+
+    .main-sidebar,
+    .navbar,
+    .main-footer {
+        display: none !important;
+    }
+
+    .content-wrapper {
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+}  
+/* FINAL RESPONSIVE OVERRIDE */  
+@media (max-width: 767.98px) {  
+  .main-sidebar { display: none !important; }  
+  .sidebar-open .main-sidebar { display: block !important; width: 80% !important; right: 0 !important; transform: translateX(0) !important; visibility: visible !important; }  
+  .content-wrapper { margin-left: 0 !important; margin-right: 0 !important; padding: 10px !important; width: 100% !important; }  
+  .row { display: flex !important; flex-direction: column !important; }  
+  .col-lg-3, .col-6, .col-md-3, .col-sm-6 { width: 100% !important; max-width: 100% !important; flex: 0 0 100% !important; }  
+} 
