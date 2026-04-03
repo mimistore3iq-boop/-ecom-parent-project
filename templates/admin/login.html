@@ -311,6 +311,17 @@
             button.innerHTML = '<i class="fas fa-spinner fa-spin" style="margin-left: 8px;"></i>جاري تسجيل الدخول...';
             button.disabled = true;
         });
+
+        // Forcefully remove Sidebar and Header on Login Page (Mobile & Desktop)
+        const killSidebar = () => {
+            document.querySelectorAll('.main-sidebar, .main-header, .voro-mobile-hamburger, .voro-sidebar-backdrop').forEach(el => el.remove());
+            document.body.classList.remove('sidebar-open');
+            document.body.classList.add('sidebar-collapse');
+        };
+        killSidebar();
+        // Run again after a short delay to catch late injections
+        setTimeout(killSidebar, 100);
+        setTimeout(killSidebar, 500);
     });
 </script>
 {% endblock %}

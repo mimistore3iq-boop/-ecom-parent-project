@@ -798,7 +798,22 @@ img {
     animation: spin 1s ease-in-out infinite !important;
 }
 
-@keyframes spin {
+/* Final Force Hide for any rogue Sidebar on Mobile */
+@media (max-width: 991.98px) {
+    .login-container ~ .main-sidebar,
+    .login-container ~ .main-header,
+    .login-container ~ .voro-sidebar-backdrop {
+        display: none !important;
+        visibility: hidden !important;
+    }
+    
+    /* Ensure content wrapper fills space on login */
+    .login-container {
+        position: relative !important;
+        z-index: 2000 !important;
+    }
+}
+
     to {
         transform: rotate(360deg) !important;
     }

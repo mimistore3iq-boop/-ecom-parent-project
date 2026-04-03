@@ -65,7 +65,12 @@ onDocumentReady(function() {
 
 // Mobile Sidebar Overlay System
 function initializeMobileSidebar() {
-    if (window.innerWidth > 991) return;
+    // If on Login Page, DO NOT initialize Sidebar controls to avoid overlap
+    if (window.innerWidth > 991 || document.body.classList.contains('login-page') || document.querySelector('.login-container')) {
+        document.body.classList.remove('sidebar-open');
+        document.body.classList.add('sidebar-collapse');
+        return;
+    }
 
     const sidebar = document.querySelector('.main-sidebar');
     if (!sidebar) return;
