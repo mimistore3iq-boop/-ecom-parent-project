@@ -327,6 +327,12 @@ CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_ALL_HEADERS = True
 CORS_ALLOW_METHODS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS']
 
+# Cookie settings for stability in in-app browsers
+SESSION_COOKIE_SAMESITE = 'Lax'
+CSRF_COOKIE_SAMESITE = 'Lax'
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+
 # Additional CORS headers
 CORS_ALLOW_HEADERS = [
     'accept',
@@ -538,7 +544,8 @@ JAZZMIN_SETTINGS = {
     "related_modal_active": False,
 
     # Use modals instead of popups
-    "use_google_fonts_cdn": True,
+    "use_google_fonts_cdn": False,
+    "use_external_cdn": False,
     "show_ui_builder": False,
 
     # Language chooser
