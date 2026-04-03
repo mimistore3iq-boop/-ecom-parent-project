@@ -552,19 +552,7 @@ JAZZMIN_UI_TWEAKS = {
     "custom_css": "custom_admin_v2.css",
     "custom_js": "custom_admin.js",
     # Use external CDN for static files in production
-    "use_external_cdn": True,
-    "external_cdn": {
-        "fontawesome": "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css",
-        "adminlte": {
-            "css": "https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css",
-            "js": "https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.min.js",
-        },
-        "bootstrap": {
-            "css": "https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css",
-            "js": "https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.min.js",
-        },
-        "jquery": "https://code.jquery.com/jquery-3.6.0.min.js",
-    }
+    "use_external_cdn": False,
 }
 
 # ==========================
