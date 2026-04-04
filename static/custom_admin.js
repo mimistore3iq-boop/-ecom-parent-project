@@ -29,13 +29,15 @@ onDocumentReady(function() {
     
     // Wait for full load to initialize tooltips (Ensures jQuery/Popper are ready)
     window.addEventListener('load', function() {
-        if (window.jQuery && typeof $.fn.tooltip !== 'undefined') {
+        const jQuery = window.jQuery;
+        if (jQuery && typeof jQuery.fn.tooltip !== 'undefined') {
             initializeTooltips();
         } else {
             console.log('Waiting for jQuery/Popper to be ready...');
             // Retry once after a short delay
             setTimeout(() => {
-                if (window.jQuery && typeof $.fn.tooltip !== 'undefined') initializeTooltips();
+                const jQueryRetry = window.jQuery;
+                if (jQueryRetry && typeof jQueryRetry.fn.tooltip !== 'undefined') initializeTooltips();
             }, 1000);
         }
         
@@ -196,8 +198,9 @@ function initializeAnimations() {
 // Enhanced Tooltips
 function initializeTooltips() {
     try {
-        if (window.jQuery && typeof window.jQuery.fn.tooltip !== 'undefined') {
-            window.jQuery('[data-toggle="tooltip"]').tooltip();
+        const jQuery = window.jQuery;
+        if (jQuery && typeof jQuery.fn.tooltip !== 'undefined') {
+            jQuery('[data-toggle="tooltip"]').tooltip();
         } else {
             console.warn('Popper.js or jQuery not found, tooltips disabled.');
         }

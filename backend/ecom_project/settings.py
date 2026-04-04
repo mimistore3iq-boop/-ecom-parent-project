@@ -158,30 +158,6 @@ WHITENOISE_SKIP_COMPRESS_EXTENSIONS = [
     '.jpg', '.jpeg', '.png', '.gif', '.webp', '.zip', '.gz', '.tgz', '.bz2', '.xz',
 ]
 
-# Use WhiteNoise for static files in production
-if not DEBUG:
-    # Use simple CompressedStaticFilesStorage to avoid 0-byte issues with manifest
-    # While manifest is good for cache-busting, we use manual versioning for now
-    STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
-else:
-    STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
-
-# Jazzmin localized assets
-JAZZMIN_STATIC = {
-    'vendor': {
-        'css': {
-            'all.min.css': 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css',
-            'adminlte.min.css': 'https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css',
-            'bootstrap.min.css': 'https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css',
-        },
-        'js': {
-            'jquery.min.js': 'https://code.jquery.com/jquery-3.6.0.min.js',
-            'bootstrap.min.js': 'https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.min.js',
-            'adminlte.min.js': 'https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.min.js',
-        }
-    }
-}
-
 # Media files
 # Using Cloudflare R2 for Storage
 AWS_ACCESS_KEY_ID = config('AWS_ACCESS_KEY_ID')
@@ -197,7 +173,7 @@ AWS_QUERYSTRING_AUTH = False
 AWS_S3_SIGNATURE_VERSION = 's3v4'
 AWS_S3_REGION_NAME = config('AWS_S3_REGION_NAME', default='eeur')
 
-# Storage class selection
+# Use STORAGES for Django 4.2+
 STORAGES = {
     "default": {
         "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
@@ -206,9 +182,6 @@ STORAGES = {
         "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
     },
 }
-
-# Keep for compatibility with older Django versions/apps
-DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 
 MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/"
 MEDIA_ROOT = BASE_DIR / 'media'
