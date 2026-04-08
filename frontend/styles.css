@@ -6,14 +6,12 @@
     -webkit-tap-highlight-color: transparent;
 }
 
-html, body {
+html {
     width: 100%;
-    min-height: 100%;
+    height: auto;
+    margin: 0;
+    padding: 0;
     overflow-x: hidden;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    scroll-behavior: smooth;
-    position: relative;
 }
 
 body {
@@ -22,7 +20,14 @@ body {
     color: #333;
     line-height: 1.6;
     padding-bottom: 80px;
-    /* Space for bottom nav */
+    width: 100%;
+    min-height: 100vh;
+    overflow-x: hidden;
+    overflow-y: auto !important;
+    display: block;
+    position: relative;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
 }
 
 .container {
