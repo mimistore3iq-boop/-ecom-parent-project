@@ -11,7 +11,9 @@ html {
     margin: 0;
     padding: 0;
     /* Remove any overflow constraints that might break mobile scrolling */
-    overflow: visible !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    height: auto !important;
 }
 
 body {
@@ -22,14 +24,15 @@ body {
     padding-bottom: 80px;
     width: 100%;
     /* Ensure body can grow beyond viewport */
-    min-height: 100%;
+    min-height: 100vh !important;
     display: block !important;
     position: relative !important;
     overflow-x: hidden !important;
-    overflow-y: visible !important;
+    overflow-y: auto !important;
     -webkit-overflow-scrolling: touch !important;
-    touch-action: manipulation !important;
+    touch-action: pan-y !important;
 }
+
 
 .container {
     max-width: 1200px;

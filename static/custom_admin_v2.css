@@ -1186,22 +1186,154 @@ textarea:focus {
         padding: 0 !important;
     }
 }  
-/* FINAL RESPONSIVE OVERRIDE - ULTRA AGGRESSIVE FIX */  
+/* FINAL RESPONSIVE OVERRIDE - ULTRA AGGRESSIVE RTL MOBILE FIX */  
 @media (max-width: 991.98px) {
-  html {
-    overflow-x: hidden !important;
-    height: auto !important;
-  }
+    html, body {
+        overflow-x: hidden !important;
+        width: 100% !important;
+        position: relative !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        height: auto !important;
+        min-height: 100vh !important;
+    }
 
-  body {
-    overflow-x: hidden !important;
-    overflow-y: auto !important;
-    width: 100% !important;
-    position: relative !important;
-    padding-bottom: 0 !important;
-    min-height: 100vh !important;
-    display: block !important;
-  }
+    body {
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+    }
+
+    .wrapper {
+        overflow: visible !important;
+        display: block !important;
+        width: 100% !important;
+    }
+
+    /* SIDEBAR FIX FOR RTL MOBILE - COMPLETELY HIDE BY DEFAULT */
+    .main-sidebar { 
+        display: none !important; 
+        visibility: hidden !important;
+        position: fixed !important;
+        top: 0 !important;
+        bottom: 0 !important;
+        right: 0 !important; /* Sidebar on right for RTL */
+        left: auto !important;
+        z-index: 10000 !important;
+        width: 280px !important;
+        transform: translateX(100%) !important; /* Hide to the right */
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        background: #2c3e50 !important;
+        box-shadow: -5px 0 20px rgba(0,0,0,0.5) !important;
+    }
+  
+    body.sidebar-open .main-sidebar { 
+        display: block !important; 
+        visibility: visible !important;
+        transform: translateX(0) !important;
+    }
+
+    /* FORCE CONTENT TO FILL SCREEN - REMOVE ALL SIDEBAR MARGINS */
+    .content-wrapper, 
+    .main-header, 
+    .main-footer,
+    #content-main {
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        position: relative !important;
+        left: 0 !important;
+        right: 0 !important;
+        padding: 10px !important;
+        display: block !important;
+        transform: none !important;
+    }
+
+    /* Fix for the "white overlap" - force reset Jazzmin inline styles */
+    .sidebar-mini.sidebar-collapse .content-wrapper,
+    .sidebar-mini.sidebar-collapse .main-footer,
+    .sidebar-mini.sidebar-collapse .main-header,
+    .sidebar-mini-md.sidebar-collapse .content-wrapper,
+    .sidebar-mini-md.sidebar-collapse .main-footer,
+    .sidebar-mini-md.sidebar-collapse .main-header {
+        margin-right: 0 !important;
+        margin-left: 0 !important;
+    }
+
+    /* Stats and Rows stacking */
+    .row, .stats-grid, .container, .container-fluid {
+        display: flex !important;
+        flex-direction: column !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    [class*="col-"] {
+        width: 100% !important;
+        max-width: 100% !important;
+        flex: 0 0 100% !important;
+        padding: 5px !important;
+        margin-bottom: 15px !important;
+        display: block !important;
+    }
+
+    /* Table responsiveness */
+    .table-responsive, .dataTables_wrapper {
+        display: block !important;
+        width: 100% !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        border: none !important;
+        margin-bottom: 15px !important;
+    }
+
+    .table {
+        width: 100% !important;
+        min-width: 600px !important;
+    }
+
+    /* Floating Hamburger Menu - Move to bottom right for better reach */
+    .voro-mobile-hamburger {
+        display: flex !important;
+        position: fixed !important;
+        bottom: 25px !important;
+        right: 25px !important;
+        z-index: 10001 !important;
+        width: 55px !important;
+        height: 55px !important;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        color: white !important;
+        border-radius: 50% !important;
+        align-items: center !important;
+        justify-content: center !important;
+        font-size: 24px !important;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.4) !important;
+        cursor: pointer !important;
+        border: 2px solid white !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+
+    /* Sidebar Backdrop */
+    .voro-sidebar-backdrop {
+        display: none;
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        background: rgba(0,0,0,0.6) !important;
+        z-index: 9999 !important;
+        backdrop-filter: blur(4px) !important;
+    }
+
+    body.sidebar-open .voro-sidebar-backdrop {
+        display: block !important;
+    }
+}
+
 
   .wrapper {
     overflow: visible !important;
