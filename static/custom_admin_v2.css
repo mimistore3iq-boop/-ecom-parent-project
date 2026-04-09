@@ -1186,12 +1186,26 @@ textarea:focus {
         padding: 0 !important;
     }
 }  
-/* FINAL RESPONSIVE OVERRIDE - AGGRESSIVE FIX */  
+/* FINAL RESPONSIVE OVERRIDE - ULTRA AGGRESSIVE FIX */  
 @media (max-width: 991.98px) {
-  html, body {
+  html {
     overflow-x: hidden !important;
+    height: auto !important;
+  }
+
+  body {
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
     width: 100% !important;
     position: relative !important;
+    padding-bottom: 0 !important;
+    min-height: 100vh !important;
+    display: block !important;
+  }
+
+  .wrapper {
+    overflow: visible !important;
+    display: block !important;
   }
 
   .main-sidebar { 
@@ -1200,7 +1214,7 @@ textarea:focus {
     top: 0 !important;
     bottom: 0 !important;
     left: 0 !important;
-    z-index: 1050 !important;
+    z-index: 10000 !important;
     width: 280px !important;
     transform: translateX(-100%) !important;
     transition: transform 0.3s ease-in-out !important;
@@ -1209,74 +1223,82 @@ textarea:focus {
   .sidebar-open .main-sidebar { 
     display: block !important; 
     transform: translateX(0) !important;
-    box-shadow: 0 0 20px rgba(0,0,0,0.5) !important;
+    box-shadow: 0 0 30px rgba(0,0,0,0.7) !important;
   }
 
   .content-wrapper, .main-header, .main-footer {
     margin-left: 0 !important;
     margin-right: 0 !important;
     width: 100% !important;
+    position: relative !important;
+    left: 0 !important;
   }
 
   .content-wrapper {
     padding: 10px !important;
     min-height: calc(100vh - 100px) !important;
+    overflow-x: hidden !important;
   }
 
-  /* Force all columns to 100% width on mobile */
-  .row {
-    margin-left: -5px !important;
-    margin-right: -5px !important;
+  /* Dashboard Stats and Rows */
+  .dashboard-stats {
     display: block !important;
   }
 
-  .col-1, .col-2, .col-3, .col-4, .col-5, .col-6, .col-7, .col-8, .col-9, .col-10, .col-11, .col-12,
-  .col-sm-1, .col-sm-2, .col-sm-3, .col-sm-4, .col-sm-5, .col-sm-6, .col-sm-7, .col-sm-8, .col-sm-9, .col-sm-10, .col-sm-11, .col-sm-12,
-  .col-md-1, .col-md-2, .col-md-3, .col-md-4, .col-md-5, .col-md-6, .col-md-7, .col-md-8, .col-md-9, .col-md-10, .col-md-11, .col-md-12,
-  .col-lg-1, .col-lg-2, .col-lg-3, .col-lg-4, .col-lg-5, .col-lg-6, .col-lg-7, .col-lg-8, .col-lg-9, .col-lg-10, .col-lg-11, .col-lg-12 {
+  .stat-card {
     width: 100% !important;
-    max-width: 100% !important;
-    flex: 0 0 100% !important;
-    padding-left: 5px !important;
-    padding-right: 5px !important;
     margin-bottom: 15px !important;
   }
 
+  .row {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    display: block !important;
+  }
+
+  [class*="col-"] {
+    width: 100% !important;
+    max-width: 100% !important;
+    flex: 0 0 100% !important;
+    padding: 5px !important;
+    margin-bottom: 15px !important;
+    float: none !important;
+  }
+
   /* Fix tables on mobile */
-  .card-body.table-responsive {
+  .card-body.table-responsive, .table-responsive {
     padding: 0 !important;
     overflow-x: auto !important;
     -webkit-overflow-scrolling: touch !important;
+    border: none !important;
   }
 
   .table {
     width: 100% !important;
+    min-width: 600px !important; /* Force horizontal scroll for tables */
     margin-bottom: 0 !important;
-  }
-
-  /* Fix dashboard info boxes */
-  .info-box {
-    margin-bottom: 15px !important;
   }
 
   /* Fix floating hamburger menu visibility */
   .voro-mobile-hamburger {
     display: flex !important;
     position: fixed !important;
-    bottom: 25px !important;
-    right: 25px !important;
-    z-index: 1060 !important;
-    width: 55px !important;
-    height: 55px !important;
+    bottom: 30px !important;
+    right: 30px !important;
+    z-index: 10001 !important;
+    width: 60px !important;
+    height: 60px !important;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
     color: white !important;
     border-radius: 50% !important;
     align-items: center !important;
     justify-content: center !important;
-    font-size: 22px !important;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.3) !important;
+    font-size: 24px !important;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.4) !important;
     cursor: pointer !important;
-    border: 2px solid rgba(255,255,255,0.2) !important;
+    border: 3px solid rgba(255,255,255,0.3) !important;
+    visibility: visible !important;
+    opacity: 1 !important;
   }
 
   /* Sidebar Backdrop */
@@ -1287,9 +1309,9 @@ textarea:focus {
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0,0,0,0.5);
-    z-index: 1040;
-    backdrop-filter: blur(3px);
+    background: rgba(0,0,0,0.6);
+    z-index: 9999;
+    backdrop-filter: blur(4px);
   }
 
   .sidebar-open .voro-sidebar-backdrop {
@@ -1299,5 +1321,10 @@ textarea:focus {
   /* Hide unnecessarily large elements on mobile */
   .main-header .nav-link span {
     display: none !important;
+  }
+  
+  /* Fix header overlap */
+  .main-header {
+    z-index: 1000 !important;
   }
 }
