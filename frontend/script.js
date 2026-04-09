@@ -569,12 +569,10 @@ function updateCartQuantity(index, change) {
 // Modal Functions
 function showModal(modalId) {
     document.getElementById(modalId).classList.add('active');
-    document.body.style.overflow = 'hidden';
 }
 
 function hideModal(modalId) {
     document.getElementById(modalId).classList.remove('active');
-    document.body.style.overflow = 'auto';
 }
 
 // Loading Functions

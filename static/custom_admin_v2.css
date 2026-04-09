@@ -1209,7 +1209,7 @@ textarea:focus {
   }
 
   .main-sidebar { 
-    display: none !important; 
+    display: block !important; 
     position: fixed !important;
     top: 0 !important;
     bottom: 0 !important;
@@ -1218,12 +1218,14 @@ textarea:focus {
     width: 280px !important;
     transform: translateX(-100%) !important;
     transition: transform 0.3s ease-in-out !important;
+    visibility: hidden !important;
   }
   
   .sidebar-open .main-sidebar { 
     display: block !important; 
     transform: translateX(0) !important;
     box-shadow: 0 0 30px rgba(0,0,0,0.7) !important;
+    visibility: visible !important;
   }
 
   .content-wrapper, .main-header, .main-footer {

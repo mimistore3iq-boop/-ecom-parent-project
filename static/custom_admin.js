@@ -21,6 +21,13 @@ onDocumentReady(function() {
         document.body.classList.remove('sidebar-open');
         document.body.classList.remove('sidebar-mini');
         document.body.classList.remove('sidebar-mini-md');
+        
+        // Inline style injection to ensure sidebar is hidden
+        const sidebar = document.querySelector('.main-sidebar');
+        if (sidebar) {
+            sidebar.style.transform = 'translateX(-100%)';
+            sidebar.style.visibility = 'hidden';
+        }
     }
 
     // Initialize all custom features
@@ -117,12 +124,21 @@ function initializeMobileSidebar() {
 
     // 4. Toggle Logic
     const toggleSidebar = () => {
+        const sidebar = document.querySelector('.main-sidebar');
         if (document.body.classList.contains('sidebar-open')) {
             document.body.classList.remove('sidebar-open');
             document.body.classList.add('sidebar-collapse');
+            if (window.innerWidth <= 991 && sidebar) {
+                sidebar.style.transform = 'translateX(-100%)';
+                sidebar.style.visibility = 'hidden';
+            }
         } else {
             document.body.classList.add('sidebar-open');
             document.body.classList.remove('sidebar-collapse');
+            if (window.innerWidth <= 991 && sidebar) {
+                sidebar.style.transform = 'translateX(0)';
+                sidebar.style.visibility = 'visible';
+            }
         }
         
         // Toggle icon between bars and times if using floating button

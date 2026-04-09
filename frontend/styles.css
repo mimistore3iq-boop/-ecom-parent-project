@@ -8,11 +8,10 @@
 
 html {
     width: 100%;
-    height: auto;
     margin: 0;
     padding: 0;
-    overflow-x: hidden;
-    -webkit-text-size-adjust: 100%;
+    /* Remove any overflow constraints that might break mobile scrolling */
+    overflow: visible !important;
 }
 
 body {
@@ -22,13 +21,14 @@ body {
     line-height: 1.6;
     padding-bottom: 80px;
     width: 100%;
-    min-height: 100.1vh;
-    overflow-x: hidden;
+    /* Ensure body can grow beyond viewport */
+    min-height: 100%;
+    display: block !important;
+    position: relative !important;
+    overflow-x: hidden !important;
     overflow-y: visible !important;
-    display: block;
-    position: static !important;
-    -webkit-overflow-scrolling: touch;
-    touch-action: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    touch-action: manipulation !important;
 }
 
 .container {
