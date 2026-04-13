@@ -40,11 +40,13 @@
       /* Ensure root element takes full height */
       html, body, #root {
         width: 100%;
-        min-height: 100vh;
-        min-height: -webkit-fill-available;
+        min-height: 100%; /* Changed from 100vh to avoid scroll traps */
         margin: 0;
         padding: 0;
         overflow-x: hidden;
+        overflow-y: auto !important; /* Force scrolling */
+        -webkit-overflow-scrolling: touch !important;
+        touch-action: pan-y !important;
       }
       body {
         font-family: 'Cairo', 'Tajawal', sans-serif;
