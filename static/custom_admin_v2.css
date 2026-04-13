@@ -430,7 +430,6 @@ body {
         display: block !important;
         width: 100% !important;
         overflow-x: auto !important;
-        -webkit-overflow-scrolling: touch !important;
     }
 
     table {
@@ -639,6 +638,7 @@ body {
         width: 100vw !important;
         height: 100vh !important;
         background: rgba(0,0,0,0.6) !important;
+        -webkit-backdrop-filter: blur(4px) !important;
         backdrop-filter: blur(4px) !important;
         z-index: 1040 !important;
         display: none;
@@ -814,6 +814,10 @@ img {
     }
 }
 
+@keyframes spin {
+    from {
+        transform: rotate(0deg) !important;
+    }
     to {
         transform: rotate(360deg) !important;
     }
@@ -1200,7 +1204,6 @@ textarea:focus {
 
     body {
         overflow-y: auto !important;
-        -webkit-overflow-scrolling: touch !important;
     }
 
     .wrapper {
@@ -1284,7 +1287,6 @@ textarea:focus {
         display: block !important;
         width: 100% !important;
         overflow-x: auto !important;
-        -webkit-overflow-scrolling: touch !important;
         border: none !important;
         margin-bottom: 15px !important;
     }
@@ -1326,13 +1328,13 @@ textarea:focus {
         bottom: 0 !important;
         background: rgba(0,0,0,0.6) !important;
         z-index: 9999 !important;
+        -webkit-backdrop-filter: blur(4px) !important;
         backdrop-filter: blur(4px) !important;
     }
 
     body.sidebar-open .voro-sidebar-backdrop {
         display: block !important;
     }
-}
 
 
   .wrapper {
@@ -1403,7 +1405,6 @@ textarea:focus {
   .card-body.table-responsive, .table-responsive {
     padding: 0 !important;
     overflow-x: auto !important;
-    -webkit-overflow-scrolling: touch !important;
     border: none !important;
   }
 
@@ -1445,6 +1446,7 @@ textarea:focus {
     bottom: 0;
     background: rgba(0,0,0,0.6);
     z-index: 9999;
+    -webkit-backdrop-filter: blur(4px);
     backdrop-filter: blur(4px);
   }
 

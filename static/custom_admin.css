@@ -386,7 +386,6 @@ body {
 
     body {
         overflow-y: auto !important;
-        -webkit-overflow-scrolling: touch !important;
     }
 
     .wrapper {
@@ -470,7 +469,6 @@ body {
         display: block !important;
         width: 100% !important;
         overflow-x: auto !important;
-        -webkit-overflow-scrolling: touch !important;
         border: none !important;
         margin-bottom: 15px !important;
     }
@@ -512,6 +510,7 @@ body {
         bottom: 0 !important;
         background: rgba(0,0,0,0.6) !important;
         z-index: 9999 !important;
+        -webkit-backdrop-filter: blur(4px) !important;
         backdrop-filter: blur(4px) !important;
     }
 

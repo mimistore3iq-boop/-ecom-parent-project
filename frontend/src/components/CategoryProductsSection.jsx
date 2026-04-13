@@ -150,7 +150,6 @@ const CategoryProductsSection = ({
       .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
       
       .horizontal-scroll-fix {
-        -webkit-overflow-scrolling: touch;
         scroll-snap-type: x mandatory;
         scroll-behavior: smooth;
         touch-action: pan-x pan-y; /* تفعيل السحب الأفقي والعمودي معاً */
@@ -193,7 +192,6 @@ const CategoryProductsSection = ({
             style={{ 
               scrollbarWidth: 'none',
               msOverflowStyle: 'none',
-              WebkitOverflowScrolling: 'touch',
               scrollSnapType: 'x mandatory'
             }}
           >
