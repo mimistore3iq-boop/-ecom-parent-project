@@ -25,40 +25,38 @@ onDocumentReady(function() {
 
 
     // Initialize all custom features
-    addNotificationStyles();
-    initializeAnimations();
-    
-    // Wait for full load to initialize tooltips (Ensures jQuery/Popper are ready)
-    window.addEventListener('load', function() {
-        const jQuery = window.jQuery;
-        if (jQuery && typeof jQuery.fn.tooltip !== 'undefined') {
-            initializeTooltips();
-        } else {
-            console.log('Waiting for jQuery/Popper to be ready...');
-            // Retry once after a short delay
-            setTimeout(() => {
-                const jQueryRetry = window.jQuery;
-                if (jQueryRetry && typeof jQueryRetry.fn.tooltip !== 'undefined') initializeTooltips();
-            }, 1000);
-        }
+    try {
+        addNotificationStyles();
+        initializeAnimations();
         
-        // Auto-close Sidebar on Mobile at load
-        if (window.innerWidth < 768) {
-            document.body.classList.remove('sidebar-open');
-            document.body.classList.add('sidebar-collapse');
-        }
-    });
+        // Wait for full load to initialize tooltips (Ensures jQuery/Popper are ready)
+        window.addEventListener('load', function() {
+            const jQuery = window.jQuery;
+            if (jQuery && jQuery.fn && typeof jQuery.fn.tooltip !== 'undefined') {
+                initializeTooltips();
+            }
+            
+            // Auto-close Sidebar on Mobile at load
+            if (window.innerWidth < 991) {
+                document.body.classList.remove('sidebar-open');
+                document.body.classList.add('sidebar-collapse');
+                document.body.classList.remove('sidebar-mini');
+            }
+        });
 
-    initializeConfirmations();
-    initializeDashboardWidgets();
-    initializeSearchEnhancements();
-    initializeFormEnhancements();
-    initializeTableEnhancements();
-    initializeImgbbUploader();
-    enhanceSidebarToggle();
-    initializeDarkMode();
-    initializePerformanceMonitoring();
-    initializeMobileSidebar();
+        initializeConfirmations();
+        initializeDashboardWidgets();
+        initializeSearchEnhancements();
+        initializeFormEnhancements();
+        initializeTableEnhancements();
+        initializeImgbbUploader();
+        enhanceSidebarToggle();
+        initializeDarkMode();
+        initializePerformanceMonitoring();
+        initializeMobileSidebar();
+    } catch (e) {
+        console.error('Error initializing admin features:', e);
+    }
 
     console.log('✅ voro Admin Panel Loaded Successfully!');
 });

@@ -1464,3 +1464,11 @@ textarea:focus {
     z-index: 1000 !important;
   }
 }
+  
+/* Final Mobile Overrides */  
+@media (max-width: 991px) {  
+    .main-sidebar { display: none !important; transform: translateX(100%%) !important; transition: transform 0.3s ease !important; }  
+    .sidebar-open .main-sidebar { display: block !important; transform: translateX(0) !important; right: 0 !important; left: auto !important; width: 280px !important; z-index: 9999 !important; }  
+    .voro-mobile-hamburger { display: flex !important; }  
+    .content-wrapper, .main-header, .main-footer { margin-right: 0 !important; margin-left: 0 !important; width: 100%% !important; }  
+} 

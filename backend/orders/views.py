@@ -7,6 +7,7 @@ from .serializers import OrderSerializer, CreateOrderSerializer
 from notifications.firebase_service import send_notification_to_topic, subscribe_to_topic
 from notifications.views import create_notification
 from django.contrib.auth import get_user_model
+from utils.whatsapp_service import send_whatsapp_order_notification
 
 
 class OrderViewSet(viewsets.ModelViewSet):
@@ -89,6 +90,9 @@ class OrderViewSet(viewsets.ModelViewSet):
                 body=f'طلب جديد من {order.customer_name} بقيمة {order.total} د.ع',
                 data=notification_data
             )
+
+            # Send WhatsApp Notification to Manager
+            send_whatsapp_order_notification(order)
         except Exception as e:
             print(f"Error sending admin notification: {str(e)}")
 
