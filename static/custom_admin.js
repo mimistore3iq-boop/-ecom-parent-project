@@ -67,9 +67,7 @@ onDocumentReady(function() {
 // Mobile Sidebar Overlay System
 function initializeMobileSidebar() {
     // If on Login Page, DO NOT initialize Sidebar controls to avoid overlap
-    if (window.innerWidth > 991 || document.body.classList.contains('login-page') || document.querySelector('.login-container')) {
-        document.body.classList.remove('sidebar-open');
-        document.body.classList.add('sidebar-collapse');
+    if (document.body.classList.contains('login-page') || document.querySelector('.login-container')) {
         return;
     }
 
@@ -100,69 +98,37 @@ function initializeMobileSidebar() {
         floatingBtn.className = 'voro-mobile-hamburger';
         floatingBtn.innerHTML = '<i class="fas fa-bars"></i>';
         document.body.appendChild(floatingBtn);
-        
-        // Only show if mobile AND not login page
-        const updateVisibility = () => {
-            const isLoginPage = document.body.classList.contains('login-page');
-            if (window.innerWidth <= 768 && !isLoginPage) {
-                floatingBtn.style.display = 'flex';
-            } else {
-                floatingBtn.style.display = 'none';
-            }
-        };
-        window.addEventListener('resize', updateVisibility);
-        updateVisibility();
     }
 
     // 4. Toggle Logic
-    const toggleSidebar = () => {
+    const toggleSidebar = (e) => {
+        if (e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        
         if (document.body.classList.contains('sidebar-open')) {
             document.body.classList.remove('sidebar-open');
             document.body.classList.add('sidebar-collapse');
+            if (floatingBtn) floatingBtn.querySelector('i').className = 'fas fa-bars';
         } else {
             document.body.classList.add('sidebar-open');
             document.body.classList.remove('sidebar-collapse');
-        }
-        
-        // Toggle icon between bars and times if using floating button
-        if (floatingBtn) {
-            const icon = floatingBtn.querySelector('i');
-            if (document.body.classList.contains('sidebar-open')) {
-                icon.className = 'fas fa-times';
-            } else {
-                icon.className = 'fas fa-bars';
-            }
+            if (floatingBtn) floatingBtn.querySelector('i').className = 'fas fa-times';
         }
     };
 
-
     if (floatingBtn) {
-        floatingBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            toggleSidebar();
-        });
+        floatingBtn.onclick = toggleSidebar;
     }
 
-    // Existing pushmenu toggle (if any)
-    let toggleBtn = document.querySelector('[data-widget="pushmenu"]');
-    if (toggleBtn) {
-        toggleBtn.addEventListener('click', (e) => {
-            if (window.innerWidth <= 991) {
-                e.preventDefault();
-                e.stopPropagation();
-                toggleSidebar();
-            }
-        });
-    }
-
-    backdrop.addEventListener('click', toggleSidebar);
-    closeBtn.addEventListener('click', toggleSidebar);
+    backdrop.onclick = toggleSidebar;
+    closeBtn.onclick = toggleSidebar;
 
     // Close on navigation link click (mobile)
     sidebar.querySelectorAll('.nav-link').forEach(link => {
         link.addEventListener('click', () => {
-            if (document.body.classList.contains('sidebar-open')) {
+            if (window.innerWidth <= 991 && document.body.classList.contains('sidebar-open')) {
                 toggleSidebar();
             }
         });
