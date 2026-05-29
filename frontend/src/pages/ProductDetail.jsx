@@ -276,7 +276,7 @@ const ProductDetail = ({ user }) => {
               )}
               {stockCount > 0 && (
                 <div className="absolute top-4 right-4 bg-blue-500 text-white px-3 py-1 rounded-lg">
-                  متبقي {stockCount}
+                  متبقي من المنتج {stockCount}
                 </div>
               )}
               {stockCount === 0 && (
@@ -346,7 +346,7 @@ const ProductDetail = ({ user }) => {
                 </div>
                 {stockCount > 0 && (
                   <div className="bg-blue-500 text-white px-4 py-2 rounded-lg font-semibold">
-                    متبقي {stockCount}
+                    متبقي من المنتج {stockCount}
                   </div>
                 )}
               </div>
@@ -385,7 +385,7 @@ const ProductDetail = ({ user }) => {
               <span className="text-gray-700">حالة المخزون:</span>
               {stockCount > 0 ? (
                 <span className="text-green-600 font-semibold">
-                  متوفر ({stockCount} قطعة)
+                  متبقي من المنتج {stockCount}
                 </span>
               ) : (
                 <span className="text-red-600 font-semibold">نفد المخزون</span>

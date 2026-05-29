@@ -15,24 +15,44 @@ def send_telegram_order_notification(order):
     product_images = []
     
     for item in order.items.all():
-        # Format item price
-        item_price_formatted = f"{int(float(item.price)):,}".replace(',', ' ') + " دينار عراقي"
+        # Format item price as integer and append currency
+        try:
+            price_val = int(float(item.price))
+            item_price_formatted = f"{price_val} دينار عراقي"
+        except (ValueError, TypeError):
+            item_price_formatted = f"{item.price} د.ع"
+            
         items_text += f"- {item.product_name} (العدد: {item.quantity}, السعر: {item_price_formatted})\n"
         
         # Collect product image URLs
         image_url = None
         if hasattr(item.product, 'main_image') and item.product.main_image:
-            image_url = item.product.main_image
+            # Check if it's a file field or string
+            if hasattr(item.product.main_image, 'url'):
+                image_url = item.product.main_image.url
+            else:
+                image_url = str(item.product.main_image)
         elif hasattr(item.product, 'image') and item.product.image:
-            image_url = item.product.image
+            if hasattr(item.product.image, 'url'):
+                image_url = item.product.image.url
+            else:
+                image_url = str(item.product.image)
         elif hasattr(item.product, 'main_image_url') and item.product.main_image_url:
             image_url = item.product.main_image_url
             
-        if image_url and image_url not in product_images:
-            product_images.append(image_url)
+        if image_url:
+            # Ensure absolute URL
+            if image_url.startswith('/'):
+                image_url = f"https://ecom-parent-project.onrender.com{image_url}"
+            if image_url not in product_images:
+                product_images.append(image_url)
 
-    # Format total price
-    total_formatted = f"{int(float(order.total)):,}".replace(',', ' ') + " دينار عراقي"
+    # Format total price as integer
+    try:
+        total_val = int(float(order.total))
+        total_formatted = f"{total_val} دينار عراقي"
+    except (ValueError, TypeError):
+        total_formatted = f"{order.total} د.ع"
 
     message = (
         f"🔔 *تم استلام طلب جديد*\n\n"
@@ -56,9 +76,9 @@ def send_telegram_order_notification(order):
                     "type": "photo",
                     "media": img_url
                 }
-                # Attach caption only to the first image
+                # Attach caption only to the first image (limit 1024 chars)
                 if i == 0:
-                    media_item["caption"] = message
+                    media_item["caption"] = message[:1020]
                     media_item["parse_mode"] = "Markdown"
                 media.append(media_item)
             
