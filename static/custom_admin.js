@@ -9,19 +9,29 @@ function onDocumentReady(fn) {
     }
 }
 
+// Fix for TypeError: Cannot read properties of undefined (reading 'enumerable')
+// Ensure basic objects exist if Bootstrap fails to initialize them
+if (typeof window.Popper === 'undefined') { window.Popper = {}; }
+
 onDocumentReady(function() {
     console.log('🛍️ voro Admin Panel Initializing...');
 
-    // Fix for mobile responsiveness: Ensure Viewport Meta Tag exists
-    ensureViewportMeta();
-
-    // Force collapse on mobile initially and remove classes that push content
-    if (window.innerWidth <= 991) {
-        document.body.classList.add('sidebar-collapse');
-        document.body.classList.remove('sidebar-open');
-        document.body.classList.remove('sidebar-mini');
-        document.body.classList.remove('sidebar-mini-md');
-    }
+    // Mobile specific layout fixes
+    const updateLayoutForMobile = () => {
+        if (window.innerWidth <= 991) {
+            document.body.classList.add('sidebar-collapse');
+            document.body.classList.remove('sidebar-open');
+            // Force content to take full width
+            const contentWrapper = document.querySelector('.content-wrapper');
+            if (contentWrapper) {
+                contentWrapper.style.marginRight = '0';
+                contentWrapper.style.marginLeft = '0';
+            }
+        }
+    };
+    
+    updateLayoutForMobile();
+    window.addEventListener('resize', updateLayoutForMobile);
 
 
     // Initialize all custom features
