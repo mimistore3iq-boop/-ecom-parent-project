@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
@@ -20,16 +20,16 @@
         <div class="container">
             <div class="header-top">
                 <div class="user-actions">
-                    <button class="btn-icon" id="loginBtn">
+                    <button type="button" class="btn-icon" id="loginBtn">
                         <i class="fas fa-user"></i>
                         <span>تسجيل دخول</span>
                     </button>
-                    <button class="btn-icon" id="cartBtn">
+                    <button type="button" class="btn-icon" id="cartBtn">
                         <i class="fas fa-shopping-cart"></i>
                         <span class="cart-count">0</span>
                     </button>
                     <div class="dropdown">
-                        <button class="btn-icon" id="categoriesBtn">
+                        <button type="button" class="btn-icon" id="categoriesBtn">
                             <i class="fas fa-list"></i>
                             <span>الأقسام</span>
                         </button>
@@ -47,7 +47,7 @@
 
             <div class="search-bar">
                 <input type="text" id="searchInput" placeholder="ابحث عن المنتجات...">
-                <button class="search-btn">
+                <button type="button" class="search-btn" title="بحث" aria-label="بحث">
                     <i class="fas fa-search"></i>
                 </button>
             </div>
@@ -83,7 +83,7 @@
         <div class="container">
             <div class="section-header">
                 <h3>المنتجات المميزة</h3>
-                <button class="view-all-btn" id="viewAllBtn">عرض الكل</button>
+                <button type="button" class="view-all-btn" id="viewAllBtn">عرض الكل</button>
             </div>
             <div class="products-grid" id="productsGrid">
                 <!-- Products will be loaded here -->
@@ -93,19 +93,19 @@
 
     <!-- Bottom Navigation -->
     <nav class="bottom-nav">
-        <button class="nav-item active" data-page="home">
+        <button type="button" class="nav-item active" data-page="home">
             <i class="fas fa-home"></i>
             <span>الرئيسية</span>
         </button>
-        <button class="nav-item" data-page="categories">
+        <button type="button" class="nav-item" data-page="categories">
             <i class="fas fa-th-large"></i>
             <span>الأقسام</span>
         </button>
-        <button class="nav-item" data-page="cart">
+        <button type="button" class="nav-item" data-page="cart">
             <i class="fas fa-shopping-cart"></i>
             <span>السلة</span>
         </button>
-        <button class="nav-item" data-page="profile">
+        <button type="button" class="nav-item" data-page="profile">
             <i class="fas fa-user"></i>
             <span>الملف الشخصي</span>
         </button>
@@ -116,7 +116,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h4>تسجيل الدخول</h4>
-                <button class="close-btn" id="closeLoginModal">
+                <button type="button" class="close-btn" id="closeLoginModal" title="إغلاق" aria-label="إغلاق">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
@@ -142,7 +142,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h4>سلة التسوق</h4>
-                <button class="close-btn" id="closeCartModal">
+                <button type="button" class="close-btn" id="closeCartModal" title="إغلاق" aria-label="إغلاق">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
@@ -154,18 +154,18 @@
             <div class="coupon-section" id="couponSection">
                 <div class="coupon-input-container">
                     <input type="text" id="couponInput" placeholder="أدخل كود الخصم" class="coupon-input">
-                    <button id="applyCouponBtn" class="btn-primary coupon-btn">تطبيق</button>
+                    <button type="button" id="applyCouponBtn" class="btn-primary coupon-btn">تطبيق</button>
                 </div>
-                <div id="couponMessage" class="coupon-message" style="display: none;"></div>
-                <div id="couponDiscount" class="coupon-discount" style="display: none;"></div>
-                <button id="removeCouponBtn" class="btn-secondary remove-coupon-btn" style="display: none;">إزالة الكوبون</button>
+                <div id="couponMessage" class="coupon-message"></div>
+                <div id="couponDiscount" class="coupon-discount"></div>
+                <button type="button" id="removeCouponBtn" class="btn-secondary remove-coupon-btn">إزالة الكوبون</button>
             </div>
             
             <div class="cart-footer">
                 <div class="cart-total">
                     <span>المجموع: <span id="cartTotal">0</span> ر.س</span>
                 </div>
-                <button class="btn-primary" id="checkoutBtn">إتمام الطلب</button>
+                <button type="button" class="btn-primary" id="checkoutBtn">إتمام الطلب</button>
             </div>
         </div>
     </div>
@@ -175,7 +175,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h4 id="productModalTitle">تفاصيل المنتج</h4>
-                <button class="close-btn" id="closeProductModal">
+                <button type="button" class="close-btn" id="closeProductModal" title="إغلاق" aria-label="إغلاق">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
