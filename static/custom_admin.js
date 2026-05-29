@@ -2,7 +2,6 @@
 
 var MOBILE_BP = 991;
 var mobileLayoutReady = false;
-var lastViewportWasMobile = null;
 
 function isMobile() {
     return window.innerWidth <= MOBILE_BP;
@@ -30,7 +29,7 @@ function applyMobileLayoutOnce() {
     mobileLayoutReady = true;
 
     document.body.classList.add('voro-mobile-ready', 'sidebar-collapse');
-    document.body.classList.remove('sidebar-open', 'layout-fixed', 'sidebar-mini');
+    document.body.classList.remove('sidebar-open', 'layout-fixed', 'sidebar-mini', 'hold-transition');
     document.documentElement.classList.add('voro-mobile-ready');
 
     var wrapper = document.querySelector('.wrapper');
@@ -51,23 +50,14 @@ function lockScrollForSidebar(open) {
     document.body.classList.toggle('sidebar-scroll-lock', open);
 }
 
-// Only react when crossing mobile/desktop breakpoint (not address-bar resize)
-window.addEventListener('resize', debounce(function () {
-    var nowMobile = isMobile();
-    if (lastViewportWasMobile === null) {
-        lastViewportWasMobile = nowMobile;
-        return;
-    }
-    if (nowMobile !== lastViewportWasMobile) {
-        lastViewportWasMobile = nowMobile;
-        mobileLayoutReady = false;
-        if (nowMobile) applyMobileLayoutOnce();
-    }
-}, 400), { passive: true });
+// لا نستخدم resize على الموبايل — المتصفح يطلقه أثناء التمرير ويسبب تجميد
+window.addEventListener('orientationchange', function () {
+    if (!isMobile()) return;
+    mobileLayoutReady = false;
+    applyMobileLayoutOnce();
+}, { passive: true });
 
 onDocumentReady(function() {
-    lastViewportWasMobile = isMobile();
-
     try {
         if (isMobile()) {
             applyMobileLayoutOnce();

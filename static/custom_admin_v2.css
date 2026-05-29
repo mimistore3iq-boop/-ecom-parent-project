@@ -1575,8 +1575,35 @@ textarea:focus {
 
 /* === Mobile performance: smooth scroll, no freeze/jank === */
 @media (max-width: 991.98px) {
+    html {
+        scroll-behavior: auto !important;
+    }
+
+    body,
+    body.hold-transition,
+    body.hold-transition * {
+        transition: none !important;
+        animation-duration: 0s !important;
+    }
+
     body {
         background: #f0f2f5 !important;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior-y: auto;
+    }
+
+    .dashboard-container,
+    .dashboard-stats,
+    .stat-card,
+    .welcome-section,
+    .quick-actions,
+    .action-btn,
+    .recent-activity,
+    .system-info,
+    .info-item {
+        transition: none !important;
+        animation: none !important;
+        transform: none !important;
     }
 
     /* Disable heavy transitions/animations during scroll */
@@ -1616,7 +1643,12 @@ textarea:focus {
 
     .main-sidebar {
         transition: transform 0.2s ease-out !important;
-        will-change: transform;
+    }
+
+    .voro-mobile-hamburger {
+        touch-action: manipulation;
+        -webkit-user-select: none;
+        user-select: none;
     }
 
     /* Lock scroll only when sidebar menu is open */

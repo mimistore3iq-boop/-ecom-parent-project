@@ -5,9 +5,30 @@
 
 {% block extrahead %}
     {{ block.super }}
-    <link rel="stylesheet" type="text/css" href="{% static 'custom_admin_v2.css' %}?v=2.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
+        @media (max-width: 991.98px) {
+            .dashboard-container,
+            .dashboard-stats,
+            .stat-card,
+            .welcome-section,
+            .quick-actions,
+            .action-btn,
+            .recent-activity,
+            .system-info {
+                transition: none !important;
+                animation: none !important;
+                transform: none !important;
+            }
+            .stat-card::before {
+                display: none !important;
+            }
+            .stat-card:hover,
+            .action-btn:hover {
+                transform: none !important;
+                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1) !important;
+            }
+        }
         .dashboard-stats {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -441,31 +462,36 @@
 </div>
 
 <script>
-    // Update current time
-    function updateTime() {
-        const now = new Date();
-        const timeString = now.toLocaleString('ar-SA', {
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit'
+    (function () {
+        var timeEl = document.getElementById('current-time');
+        if (!timeEl) return;
+
+        function updateTime() {
+            var now = new Date();
+            var opts = {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
+            };
+            if (window.innerWidth > 991) {
+                opts.second = '2-digit';
+            }
+            timeEl.textContent = now.toLocaleString('ar-SA', opts);
+        }
+
+        updateTime();
+        // كل ثانية على الديسكتوب فقط — على الموبايل يسبب تجميد أثناء التمرير
+        setInterval(updateTime, window.innerWidth > 991 ? 1000 : 60000);
+
+        document.addEventListener('DOMContentLoaded', function () {
+            if (window.innerWidth <= 991) return;
+            document.querySelectorAll('.stat-card').forEach(function (card, index) {
+                card.style.animationDelay = (index * 0.1) + 's';
+                card.style.animation = 'fadeInUp 0.6s ease forwards';
+            });
         });
-        document.getElementById('current-time').textContent = timeString;
-    }
-    
-    // Update time every second
-    setInterval(updateTime, 1000);
-    updateTime();
-    
-    // Add loading animation to stat cards
-    document.addEventListener('DOMContentLoaded', function() {
-        const statCards = document.querySelectorAll('.stat-card');
-        statCards.forEach((card, index) => {
-            card.style.animationDelay = `${index * 0.1}s`;
-            card.style.animation = 'fadeInUp 0.6s ease forwards';
-        });
-    });
+    })();
 </script>
 {% endblock %}
