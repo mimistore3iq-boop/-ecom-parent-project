@@ -169,12 +169,20 @@
             z-index: 9999;
             opacity: 0;
             visibility: hidden;
+            pointer-events: none;
             transition: all 0.3s ease;
         }
         
         .loading-overlay.show {
             opacity: 1;
             visibility: visible;
+            pointer-events: auto;
+        }
+
+        @media (max-width: 991.98px) {
+            html {
+                scroll-behavior: auto;
+            }
         }
         
         .loading-spinner-large {
@@ -270,8 +278,9 @@
         });
     });
     
-    // Add smooth scrolling
-    document.documentElement.style.scrollBehavior = 'smooth';
+    if (window.innerWidth > 991) {
+        document.documentElement.style.scrollBehavior = 'smooth';
+    }
 </script>
 {% endblock %}
 

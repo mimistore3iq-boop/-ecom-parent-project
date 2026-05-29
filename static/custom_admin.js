@@ -22,14 +22,36 @@ function forceMobileAdminLayout() {
     });
 }
 
+// AdminLTE layout-fixed traps scroll inside .wrapper on mobile — use document scroll
+function fixMobileScroll() {
+    if (window.innerWidth > 991) return;
+    document.body.classList.remove('layout-fixed');
+    document.body.style.setProperty('overflow-y', 'auto', 'important');
+    document.body.style.setProperty('height', 'auto', 'important');
+    var wrapper = document.querySelector('.wrapper');
+    if (wrapper) {
+        wrapper.style.setProperty('overflow', 'visible', 'important');
+        wrapper.style.setProperty('height', 'auto', 'important');
+    }
+    var content = document.querySelector('.content-wrapper');
+    if (content) {
+        content.style.setProperty('overflow', 'visible', 'important');
+        content.style.setProperty('height', 'auto', 'important');
+    }
+}
+
 forceMobileAdminLayout();
-window.addEventListener('resize', forceMobileAdminLayout);
+fixMobileScroll();
+window.addEventListener('resize', function () {
+    forceMobileAdminLayout();
+    fixMobileScroll();
+});
 
 onDocumentReady(function() {
     console.log('🛍️ voro Admin Panel Initializing...');
 
     forceMobileAdminLayout();
-
+    fixMobileScroll();
 
     // Initialize all custom features
     try {
@@ -49,6 +71,7 @@ onDocumentReady(function() {
                 document.body.classList.add('sidebar-collapse');
                 document.body.classList.remove('sidebar-mini');
                 forceMobileAdminLayout();
+                fixMobileScroll();
             }
         });
 

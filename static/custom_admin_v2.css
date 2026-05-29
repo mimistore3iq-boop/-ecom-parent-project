@@ -416,7 +416,8 @@ body {
 
     .wrapper {
         width: 100% !important;
-        overflow-x: hidden !important;
+        overflow: visible !important;
+        height: auto !important;
     }
 
     /* Force content to fill screen on mobile */
@@ -603,7 +604,7 @@ body {
     }
 }
 
-
+@media (max-width: 991.98px) {
     /* Floating Hamburger Menu */
     .voro-mobile-hamburger {
         display: flex !important;
@@ -1498,4 +1499,76 @@ textarea:focus {
         margin-right: 0 !important;
         margin-left: 0 !important;
     }
-} 
+}
+
+/* Hide mobile-only UI on desktop */
+@media (min-width: 992px) {
+    .voro-mobile-hamburger,
+    .voro-sidebar-backdrop {
+        display: none !important;
+        pointer-events: none !important;
+    }
+}
+
+/* === Mobile scroll fix: natural page scroll (AdminLTE layout-fixed override) === */
+@media (max-width: 991.98px) {
+    html {
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+        height: auto !important;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    body,
+    body.layout-fixed,
+    body.layout-navbar-fixed,
+    body.sidebar-mini,
+    body.sidebar-collapse {
+        overflow-x: hidden !important;
+        overflow-y: auto !important;
+        height: auto !important;
+        min-height: 100vh !important;
+        position: relative !important;
+        touch-action: pan-y;
+    }
+
+    body.layout-fixed .wrapper,
+    .wrapper {
+        overflow: visible !important;
+        overflow-y: visible !important;
+        height: auto !important;
+        min-height: 0 !important;
+        max-height: none !important;
+    }
+
+    .content-wrapper,
+    .content-wrapper > .content {
+        overflow: visible !important;
+        overflow-y: visible !important;
+        height: auto !important;
+        max-height: none !important;
+        min-height: 0 !important;
+        padding-bottom: 5rem !important;
+    }
+
+    body:not(.sidebar-open) .main-sidebar {
+        pointer-events: none !important;
+    }
+
+    body:not(.sidebar-open) .voro-sidebar-backdrop {
+        display: none !important;
+        pointer-events: none !important;
+    }
+
+    [dir="rtl"] .main-sidebar {
+        right: 0 !important;
+        left: auto !important;
+        transform: translateX(100%) !important;
+    }
+
+    body.sidebar-open [dir="rtl"] .main-sidebar,
+    body.sidebar-open .main-sidebar {
+        transform: translateX(0) !important;
+        pointer-events: auto !important;
+    }
+}
