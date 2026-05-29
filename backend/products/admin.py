@@ -42,10 +42,12 @@ class ProductAdmin(admin.ModelAdmin):
     form = ProductAdminForm
     change_form_template = 'admin/products/product/change_form.html'
     change_list_template = 'admin/products/product/change_list.html'
-    list_display = ('product_image', 'name', 'category', 'brand', 'price', 'stock_quantity', 'display_order', 'is_active', 'is_featured', 'show_on_homepage', 'created_at')
-    list_filter = ('category', 'brand', 'is_active', 'is_featured', 'show_on_homepage', 'created_at')
+    # بدون list_editable — التحرير من صفحة المنتج فقط (جدول التحرير السريع يجمّد الموبايل)
+    list_display = ('product_image', 'name', 'category', 'price', 'stock_quantity', 'is_active', 'created_at')
+    list_display_links = ('product_image', 'name')
+    list_filter = ('category', 'is_active', 'is_featured', 'created_at')
     search_fields = ('name', 'description', 'brand', 'model')
-    list_editable = ('price', 'stock_quantity', 'display_order', 'is_active', 'is_featured', 'show_on_homepage')
+    list_per_page = 25
     
     def product_image(self, obj):
         """عرض صورة صغيرة من المنتج"""
@@ -77,12 +79,6 @@ class ProductAdmin(admin.ModelAdmin):
             'fields': ('is_active', 'is_featured', 'show_on_homepage', 'display_order')
         }),
     )
-
-    class Media:
-        css = {
-            'all': ('custom_admin_v2.css',)
-        }
-
 
 class ProductReviewAdmin(admin.ModelAdmin):
     list_display = ('product', 'user', 'rating', 'created_at')

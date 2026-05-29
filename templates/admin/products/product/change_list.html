@@ -1,62 +1,184 @@
 {% extends "admin/change_list.html" %}
-{% load i18n static %}
+{% load i18n admin_urls static admin_list %}
 
 {% block extrastyle %}
 {{ block.super }}
 <style>
+/* موبايل: بطاقات بسيطة مثل الصفحة الرئيسية — تمرير عمودي واحد فقط */
 @media (max-width: 991.98px) {
+    .change-list .filtered .panel,
+    #changelist-filter {
+        display: none;
+    }
+
+    .change-list.filtered #changelist-filter-toggle {
+        display: inline-block;
+    }
+
     #changelist,
     #changelist-form,
-    .results,
-    #content-main {
+    #content-main,
+    .results {
         overflow: visible !important;
         width: 100% !important;
         max-width: 100% !important;
+        min-width: 0 !important;
     }
 
     #changelist .results {
-        overflow-x: auto !important;
-        overflow-y: visible !important;
-        -webkit-overflow-scrolling: touch;
-        display: block !important;
-        width: 100% !important;
-    }
-
-    #result_list,
-    .table-responsive table {
-        min-width: 720px;
-    }
-
-    #changelist-filter {
-        position: relative !important;
-        width: 100% !important;
-        max-height: none !important;
         overflow: visible !important;
     }
 
+    #result_list {
+        display: block !important;
+        min-width: 0 !important;
+        width: 100% !important;
+        border: none !important;
+    }
+
+    #result_list thead {
+        display: none !important;
+    }
+
+    #result_list tbody {
+        display: block !important;
+    }
+
+    #result_list tbody tr {
+        display: block !important;
+        width: 100% !important;
+        margin: 0 0 12px 0 !important;
+        padding: 14px !important;
+        background: #fff !important;
+        border: 1px solid #e9ecef !important;
+        border-radius: 12px !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06) !important;
+    }
+
+    #result_list tbody tr:hover {
+        background: #fff !important;
+    }
+
+    #result_list tbody td {
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        width: 100% !important;
+        padding: 6px 0 !important;
+        border: none !important;
+        text-align: right !important;
+        white-space: normal !important;
+    }
+
+    #result_list tbody td::before {
+        content: attr(data-label);
+        font-weight: 600;
+        color: #6c757d;
+        margin-left: 12px;
+        flex-shrink: 0;
+    }
+
+    #result_list tbody td.action-checkbox {
+        justify-content: flex-start !important;
+    }
+
+    #result_list tbody td.action-checkbox::before {
+        content: "تحديد";
+    }
+
+    #result_list tbody td.field-product_image {
+        justify-content: center !important;
+    }
+
+    #result_list tbody td.field-product_image::before {
+        display: none;
+    }
+
+    #result_list tbody td.field-name a {
+        font-weight: 700;
+        color: #667eea !important;
+        font-size: 1.05rem;
+    }
+
     #changelist-search {
-        flex-wrap: wrap;
-        gap: 0.5rem;
+        flex-direction: column;
+        gap: 8px;
     }
 
     #changelist-search input,
     #changelist-search select,
     .actions select,
+    .actions .button,
     .actions button {
+        width: 100% !important;
         min-height: 44px;
         font-size: 16px;
     }
 
-    .paginator {
-        flex-wrap: wrap;
-        justify-content: center;
+    .change-list-actions {
+        padding-bottom: 8px !important;
     }
 
-    #changelist .card,
-    #changelist .module {
-        transition: none !important;
-        animation: none !important;
+    .paginator {
+        flex-wrap: wrap;
+        gap: 4px;
+    }
+
+    .select2-container {
+        display: none !important;
+    }
+
+    .search-filter,
+    .actions select {
+        display: block !important;
+        width: 100% !important;
+        opacity: 1 !important;
+        position: static !important;
     }
 }
 </style>
+{% endblock %}
+
+{% block extrajs %}
+{{ block.super }}
+<script>
+(function () {
+    if (window.innerWidth > 991) return;
+
+    function labelTableCells() {
+        var headers = [];
+        document.querySelectorAll('#result_list thead th').forEach(function (th) {
+            var t = th.querySelector('.text');
+            headers.push(t ? t.innerText.trim() : th.innerText.trim());
+        });
+        if (!headers.length) return;
+
+        document.querySelectorAll('#result_list tbody tr').forEach(function (row) {
+            row.querySelectorAll('td').forEach(function (td, i) {
+                if (!td.getAttribute('data-label') && headers[i]) {
+                    td.setAttribute('data-label', headers[i]);
+                }
+            });
+        });
+    }
+
+    function destroyMobileSelect2() {
+        if (!window.jQuery || !jQuery.fn.select2) return;
+        jQuery('.search-filter, .actions select, .search-filter-mptt').each(function () {
+            try {
+                if (jQuery(this).data('select2')) {
+                    jQuery(this).select2('destroy');
+                }
+            } catch (e) { /* ignore */ }
+            jQuery(this).show();
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        labelTableCells();
+        destroyMobileSelect2();
+        setTimeout(destroyMobileSelect2, 100);
+    });
+})();
+</script>
 {% endblock %}

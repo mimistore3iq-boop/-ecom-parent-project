@@ -1681,16 +1681,13 @@ textarea:focus {
         overflow: visible !important;
     }
 
-    #changelist .results,
-    .card-body.table-responsive {
-        overflow-x: auto !important;
-        overflow-y: visible !important;
-        -webkit-overflow-scrolling: touch;
-        touch-action: pan-x pan-y;
+    /* Products list: vertical card scroll (no nested horizontal trap) */
+    #changelist .results {
+        overflow: visible !important;
     }
 
     #result_list {
-        min-width: 720px;
+        min-width: 0 !important;
     }
 
     #changelist-filter {
