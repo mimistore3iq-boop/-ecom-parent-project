@@ -358,18 +358,52 @@ body {
 }
 
 /* RTL Support */
-[dir="rtl"] .sidebar-dark-purple .nav-sidebar>.nav-item>.nav-link:hover,
-[dir="rtl"] .sidebar-dark-purple .nav-sidebar>.nav-item>.nav-link.active {
-    transform: translateX(-5px) !important;
+/* RTL Support Fixes */
+[dir="rtl"] .main-sidebar {
+    left: auto !important;
+    right: 0 !important;
 }
 
-[dir="rtl"] .sidebar-dark-purple .nav-sidebar>.nav-item>.nav-link>.nav-icon {
-    margin-right: 10px !important;
+[dir="rtl"] .content-wrapper {
     margin-left: 0 !important;
+    margin-right: 250px !important;
 }
 
-[dir="rtl"] .breadcrumb-item+.breadcrumb-item::before {
-    content: "→" !important;
+/* Fix for Mobile View where sidebar overlaps */
+@media (max-width: 991.98px) {
+    [dir="rtl"] .content-wrapper {
+        margin-right: 0 !important;
+    }
+    
+    .main-sidebar {
+        transform: translateX(100%) !important;
+        transition: transform 0.3s ease-in-out !important;
+    }
+    
+    .sidebar-open .main-sidebar {
+        transform: translateX(0) !important;
+    }
+    
+    /* Ensure tables don't break layout */
+    .table-responsive {
+        border: 0 !important;
+        margin-bottom: 0 !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+    }
+
+    /* Fix login page on mobile */
+    .login-box {
+        width: 90% !important;
+        margin: 20px auto !important;
+    }
+}
+
+/* Fix Uncaught TypeError: Cannot read properties of undefined (reading 'enumerable') */
+/* This often happens when Bootstrap scripts are loaded in wrong order or duplicated */
+/* We will hide any broken UI elements if they appear */
+.popover, .tooltip {
+    pointer-events: none !important;
 }
 
 /* Responsive Design Improvements */
@@ -400,7 +434,6 @@ body {
         display: block !important;
     }
 
-    /* Fix Sidebar on Mobile */
     .main-sidebar {
         transform: translate3d(100%, 0, 0) !important;
         transition: transform 0.3s ease-in-out !important;

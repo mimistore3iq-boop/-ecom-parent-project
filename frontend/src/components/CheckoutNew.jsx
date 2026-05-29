@@ -193,7 +193,7 @@ const Checkout = ({ cart, onCheckout, onClose, appliedCoupon, couponDiscount }) 
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
               </div>
-              <h3 className="text-xl font-bold text-gray-800 mb-2">تم إتمام الطلب بنجاح!</h3>
+              <h3 className="text-xl font-bold text-gray-800 mb-2">تم ارسال طلبك بنجاح</h3>
               <p className="text-gray-600">سيتم التواصل معك قريباً لتأكيد تفاصيل الطلب</p>
             </div>
           ) : (
