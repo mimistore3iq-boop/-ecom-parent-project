@@ -645,113 +645,163 @@ const AdminPanel = ({ user, setUser }) => {
                   </div>
                 )}
 
-                <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-x-auto">
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-900 text-white">
-                      <tr>
-                        <th className="px-3 md:px-6 py-3 text-center text-xs md:text-sm font-medium uppercase tracking-wider w-12">
-                          <input
-                            type="checkbox"
-                            checked={selectedProducts.size === products.length && products.length > 0}
-                            onChange={toggleAllProducts}
-                            className="w-4 h-4 cursor-pointer"
-                          />
+                <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                  {/* Table view for desktop */}
+                  <div className="hidden md:block overflow-x-auto">
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="bg-gray-900 text-white">
+                        <tr>
+                          <th className="px-6 py-3 text-center text-sm font-medium uppercase tracking-wider w-12">
+                            <input
+                              type="checkbox"
+                              checked={selectedProducts.size === products.length && products.length > 0}
+                              onChange={toggleAllProducts}
+                              className="w-4 h-4 cursor-pointer"
+                            />
+                          </th>
+                          <th className="px-6 py-3 text-right text-sm font-medium uppercase tracking-wider">
+                            الصورة
+                          </th>
+                        <th className="px-6 py-3 text-right text-sm font-medium uppercase tracking-wider">
+                          المنتج
                         </th>
-                        <th className="px-3 md:px-6 py-3 text-right text-xs md:text-sm font-medium uppercase tracking-wider">
-                          الصورة
+                        <th className="px-6 py-3 text-right text-sm font-medium uppercase tracking-wider">
+                          القسم
                         </th>
-                      <th className="px-3 md:px-6 py-3 text-right text-xs md:text-sm font-medium uppercase tracking-wider">
-                        المنتج
-                      </th>
-                      <th className="px-3 md:px-6 py-3 text-right text-xs md:text-sm font-medium uppercase tracking-wider">
-                        القسم
-                      </th>
-                      <th className="px-3 md:px-6 py-3 text-right text-xs md:text-sm font-medium uppercase tracking-wider">
-                        السعر
-                      </th>
-                      <th className="px-3 md:px-6 py-3 text-right text-xs md:text-sm font-medium uppercase tracking-wider">
-                        المخزون
-                      </th>
-                      <th className="px-3 md:px-6 py-3 text-right text-xs md:text-sm font-medium uppercase tracking-wider">
-                        الإجراءات
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
+                        <th className="px-6 py-3 text-right text-sm font-medium uppercase tracking-wider">
+                          السعر
+                        </th>
+                        <th className="px-6 py-3 text-right text-sm font-medium uppercase tracking-wider">
+                          المخزون
+                        </th>
+                        <th className="px-6 py-3 text-right text-sm font-medium uppercase tracking-wider">
+                          الإجراءات
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {products.map((product) => (
+                        <tr key={product.id} className="hover:bg-gray-50">
+                          <td className="px-6 py-4 whitespace-nowrap text-center">
+                            <input
+                              type="checkbox"
+                              checked={selectedProducts.has(product.id)}
+                              onChange={() => toggleProductSelection(product.id)}
+                              className="w-4 h-4 cursor-pointer"
+                            />
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <img
+                              className="h-20 w-20 rounded-lg object-cover border border-gray-200"
+                              src={product.image || product.main_image || product.main_image_url || 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 80 80"%3E%3Crect fill="%23f3f4f6" width="80" height="80"/%3E%3Ctext fill="%239ca3af" font-family="sans-serif" font-size="10" dy="2.5" font-weight="bold" x="50%25" y="50%25" text-anchor="middle"%3Eلا توجد صورة%3C/text%3E%3C/svg%3E'}
+                              alt={product.name}
+                              title={product.name}
+                              onError={(e) => {
+                                console.warn(`❌ Failed to load image for product: ${product.name}`, e.target.src);
+                                e.target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 80 80"%3E%3Crect fill="%23f3f4f6" width="80" height="80"/%3E%3Ctext fill="%239ca3af" font-family="sans-serif" font-size="10" dy="2.5" font-weight="bold" x="50%25" y="50%25" text-anchor="middle"%3Eلا توجد صورة%3C/text%3E%3C/svg%3E';
+                              }}
+                            />
+                          </td>
+                          <td className="px-6 py-4">
+                            <div>
+                              <div className="text-base font-medium text-gray-900">
+                                {product.name}
+                              </div>
+                              <div className="text-sm text-gray-500 line-clamp-2">
+                                {product.description?.substring(0, 60)}
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {product.category?.name || 'غير محدد'}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-bold">
+                            {product.price} د.ع
+                            {product.discount > 0 && (
+                              <span className="text-red-500 text-xs mr-1">
+                                (-{product.discount}%)
+                              </span>
+                            )}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${product.stock > 10
+                                ? 'bg-green-100 text-green-800'
+                                : product.stock > 0
+                                  ? 'bg-yellow-100 text-yellow-800'
+                                  : 'bg-red-100 text-red-800'
+                              }`}>
+                              {product.stock} قطعة
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2 space-x-reverse">
+                            <button
+                              onClick={() => openModal('product', product)}
+                              className="text-primary-600 hover:text-primary-900"
+                            >
+                              تعديل
+                            </button>
+                            <button
+                              onClick={() => handleDelete('products', product.id)}
+                              className="text-red-600 hover:text-red-900"
+                            >
+                              حذف
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  </div>
+
+                  {/* Card view for mobile */}
+                  <div className="md:hidden divide-y divide-gray-200">
                     {products.map((product) => (
-                      <tr key={product.id} className="hover:bg-gray-50">
-                        <td className="px-3 md:px-6 py-4 whitespace-nowrap text-center">
+                      <div key={product.id} className="p-4 flex flex-col space-y-3">
+                        <div className="flex items-center gap-3">
                           <input
                             type="checkbox"
                             checked={selectedProducts.has(product.id)}
                             onChange={() => toggleProductSelection(product.id)}
-                            className="w-4 h-4 cursor-pointer"
+                            className="w-5 h-5 cursor-pointer"
                           />
-                        </td>
-                        <td className="px-3 md:px-6 py-4 whitespace-nowrap">
                           <img
-                            className="h-16 w-16 md:h-20 md:w-20 rounded-lg object-cover border border-gray-200"
+                            className="h-16 w-16 rounded-lg object-cover border border-gray-200"
                             src={product.image || product.main_image || product.main_image_url || 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 80 80"%3E%3Crect fill="%23f3f4f6" width="80" height="80"/%3E%3Ctext fill="%239ca3af" font-family="sans-serif" font-size="10" dy="2.5" font-weight="bold" x="50%25" y="50%25" text-anchor="middle"%3Eلا توجد صورة%3C/text%3E%3C/svg%3E'}
                             alt={product.name}
-                            title={product.name}
-                            onError={(e) => {
-                              console.warn(`❌ Failed to load image for product: ${product.name}`, e.target.src);
-                              e.target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 80 80"%3E%3Crect fill="%23f3f4f6" width="80" height="80"/%3E%3Ctext fill="%239ca3af" font-family="sans-serif" font-size="10" dy="2.5" font-weight="bold" x="50%25" y="50%25" text-anchor="middle"%3Eلا توجد صورة%3C/text%3E%3C/svg%3E';
-                            }}
-                            onLoad={() => {
-                              console.log(`✅ Image loaded for product: ${product.name}`);
-                            }}
                           />
-                        </td>
-                        <td className="px-3 md:px-6 py-4">
-                          <div>
-                            <div className="text-sm md:text-base font-medium text-gray-900">
-                              {product.name}
-                            </div>
-                            <div className="text-xs md:text-sm text-gray-500 line-clamp-2">
-                              {product.description?.substring(0, 60)}
-                            </div>
+                          <div className="flex-1">
+                            <div className="text-sm font-bold text-gray-900">{product.name}</div>
+                            <div className="text-xs text-gray-500">{product.category?.name || 'غير محدد'}</div>
                           </div>
-                        </td>
-                        <td className="px-3 md:px-6 py-4 whitespace-nowrap text-xs md:text-sm text-gray-900">
-                          {product.category?.name || 'غير محدد'}
-                        </td>
-                        <td className="px-3 md:px-6 py-4 whitespace-nowrap text-xs md:text-sm text-gray-900 font-bold">
-                          {product.price} د.ع
-                          {product.discount > 0 && (
-                            <span className="text-red-500 text-xs mr-1">
-                              (-{product.discount}%)
-                            </span>
-                          )}
-                        </td>
-                        <td className="px-3 md:px-6 py-4 whitespace-nowrap">
-                          <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${product.stock > 10
-                              ? 'bg-green-100 text-green-800'
-                              : product.stock > 0
-                                ? 'bg-yellow-100 text-yellow-800'
-                                : 'bg-red-100 text-red-800'
-                            }`}>
-                            {product.stock} قطعة
+                        </div>
+                        <div className="flex justify-between items-center text-sm">
+                          <div className="font-bold text-primary-600">{product.price} د.ع</div>
+                          <span className={`px-2 py-0.5 text-[10px] font-bold rounded-full ${product.stock > 10
+                                ? 'bg-green-100 text-green-800'
+                                : product.stock > 0
+                                  ? 'bg-yellow-100 text-yellow-800'
+                                  : 'bg-red-100 text-red-800'
+                              }`}>
+                            المخزون: {product.stock}
                           </span>
-                        </td>
-                        <td className="px-3 md:px-6 py-4 whitespace-nowrap text-xs md:text-sm font-medium space-x-2 space-x-reverse">
+                        </div>
+                        <div className="flex gap-2">
                           <button
                             onClick={() => openModal('product', product)}
-                            className="text-primary-600 hover:text-primary-900"
+                            className="flex-1 py-2 bg-gray-100 text-gray-700 rounded-lg font-bold text-xs"
                           >
                             تعديل
                           </button>
                           <button
                             onClick={() => handleDelete('products', product.id)}
-                            className="text-red-600 hover:text-red-900"
+                            className="flex-1 py-2 bg-red-50 text-red-600 rounded-lg font-bold text-xs"
                           >
                             حذف
                           </button>
-                        </td>
-                      </tr>
+                        </div>
+                      </div>
                     ))}
-                  </tbody>
-                </table>
+                  </div>
                 </div>
               </>
             )}
@@ -813,100 +863,135 @@ const AdminPanel = ({ user, setUser }) => {
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500"></div>
               </div>
             ) : (
-              <div className="bg-white rounded-lg shadow overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-900 text-white">
-                    <tr>
-                      <th className="px-3 md:px-6 py-3 text-right text-xs md:text-sm font-bold uppercase tracking-wider">
-                        رقم الطلب
-                      </th>
-                      <th className="px-3 md:px-6 py-3 text-right text-xs md:text-sm font-bold uppercase tracking-wider">
-                        العميل
-                      </th>
-                      <th className="px-3 md:px-6 py-3 text-right text-xs md:text-sm font-bold uppercase tracking-wider">
-                        رقم الهاتف
-                      </th>
-                      <th className="px-3 md:px-6 py-3 text-right text-xs md:text-sm font-bold uppercase tracking-wider">
-                        المبلغ الإجمالي
-                      </th>
-                      <th className="px-3 md:px-6 py-3 text-right text-xs md:text-sm font-bold uppercase tracking-wider">
-                        الحالة
-                      </th>
-                      <th className="px-3 md:px-6 py-3 text-right text-xs md:text-sm font-bold uppercase tracking-wider">
-                        التاريخ
-                      </th>
-                      <th className="px-3 md:px-6 py-3 text-right text-xs md:text-sm font-bold uppercase tracking-wider">
-                        التفاصيل
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {orders.map((order) => (
-                      <tr key={order.id} className="hover:bg-gray-50">
-                        <td className="px-3 md:px-6 py-3 whitespace-nowrap text-xs md:text-sm font-medium text-gray-900">
-                          #{order.id}
-                        </td>
-                        <td className="px-3 md:px-6 py-3 whitespace-nowrap text-xs md:text-sm text-gray-900 font-medium">
-                          <div className="flex items-center gap-2">
-                            <span>{order.customer_name || 'غير محدد'}</span>
-                            {order.customer_name && (
-                              <button 
-                                onClick={() => copyToClipboard(order.customer_name, 'اسم الزبون')}
-                                className="text-primary-600 hover:text-primary-800 p-1"
-                                title="نسخ الاسم"
-                              >
-                                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
-                                </svg>
-                              </button>
-                            )}
-                          </div>
-                        </td>
-                        <td className="px-3 md:px-6 py-3 whitespace-nowrap text-xs md:text-sm text-gray-900 font-medium">
-                          <div className="flex items-center gap-2">
-                            <span>{order.customer_phone || order.user?.phone || 'غير محدد'}</span>
-                            {(order.customer_phone || order.user?.phone) && (
-                              <button 
-                                onClick={() => copyToClipboard(order.customer_phone || order.user?.phone, 'رقم الهاتف')}
-                                className="text-primary-600 hover:text-primary-800 p-1"
-                                title="نسخ الرقم"
-                              >
-                                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
-                                </svg>
-                              </button>
-                            )}
-                          </div>
-                        </td>
-                        <td className="px-3 md:px-6 py-3 whitespace-nowrap text-xs md:text-sm text-gray-900 font-bold">
-                          {order.total_amount} د.ع
-                        </td>
-                        <td className="px-3 md:px-6 py-3 whitespace-nowrap">
-                          <span className={`inline-flex px-2 md:px-3 py-1 text-xs md:text-sm font-bold rounded-lg border-2 ${order.status === 'completed'
-                              ? 'bg-green-200 text-green-900 border-green-900'
-                              : order.status === 'pending'
-                                ? 'bg-yellow-200 text-yellow-900 border-yellow-900'
-                                : 'bg-red-200 text-red-900 border-red-900'
-                            }`}>
-                            {order.status === 'completed' ? 'مكتمل' :
-                              order.status === 'pending' ? 'قيد المعالجة' : 'ملغي'}
-                          </span>
-                        </td>
-                        <td className="px-3 md:px-6 py-3 whitespace-nowrap text-xs md:text-sm text-gray-700 font-medium">
-                          {new Date(order.created_at).toLocaleDateString('ar-SA')}
-                        </td>
-                        <td className="px-3 md:px-6 py-3 whitespace-nowrap text-xs md:text-sm">
-                          <button 
-                            onClick={() => showOrderDetails(order)}
-                            className="text-primary-600 hover:text-primary-800 font-bold underline"
-                          >
-                            عرض
-                          </button>
-                        </td>
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                {/* Desktop View */}
+                <div className="hidden md:block overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-900 text-white">
+                      <tr>
+                        <th className="px-6 py-3 text-right text-sm font-bold uppercase tracking-wider">
+                          رقم الطلب
+                        </th>
+                        <th className="px-6 py-3 text-right text-sm font-bold uppercase tracking-wider">
+                          العميل
+                        </th>
+                        <th className="px-6 py-3 text-right text-sm font-bold uppercase tracking-wider">
+                          رقم الهاتف
+                        </th>
+                        <th className="px-6 py-3 text-right text-sm font-bold uppercase tracking-wider">
+                          المبلغ الإجمالي
+                        </th>
+                        <th className="px-6 py-3 text-right text-sm font-bold uppercase tracking-wider">
+                          الحالة
+                        </th>
+                        <th className="px-6 py-3 text-right text-sm font-bold uppercase tracking-wider">
+                          التاريخ
+                        </th>
+                        <th className="px-6 py-3 text-right text-sm font-bold uppercase tracking-wider">
+                          التفاصيل
+                        </th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {orders.map((order) => (
+                        <tr key={order.id} className="hover:bg-gray-50">
+                          <td className="px-6 py-3 whitespace-nowrap text-sm font-medium text-gray-900">
+                            #{order.id?.toString().substring(0, 8)}
+                          </td>
+                          <td className="px-6 py-3 whitespace-nowrap text-sm text-gray-900 font-medium">
+                            <div className="flex items-center gap-2">
+                              <span>{order.customer_name || 'غير محدد'}</span>
+                              {order.customer_name && (
+                                <button 
+                                  onClick={() => copyToClipboard(order.customer_name, 'اسم الزبون')}
+                                  className="text-primary-600 hover:text-primary-800 p-1"
+                                >
+                                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                                  </svg>
+                                </button>
+                              )}
+                            </div>
+                          </td>
+                          <td className="px-6 py-3 whitespace-nowrap text-sm text-gray-900 font-medium">
+                            <div className="flex items-center gap-2">
+                              <span>{order.customer_phone || order.user?.phone || 'غير محدد'}</span>
+                              {(order.customer_phone || order.user?.phone) && (
+                                <button 
+                                  onClick={() => copyToClipboard(order.customer_phone || order.user?.phone, 'رقم الهاتف')}
+                                  className="text-primary-600 hover:text-primary-800 p-1"
+                                >
+                                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                                  </svg>
+                                </button>
+                              )}
+                            </div>
+                          </td>
+                          <td className="px-6 py-3 whitespace-nowrap text-sm text-gray-900 font-bold">
+                            {order.total_amount || order.total} د.ع
+                          </td>
+                          <td className="px-6 py-3 whitespace-nowrap">
+                            <span className={`inline-flex px-3 py-1 text-sm font-bold rounded-lg border-2 ${order.status === 'completed' || order.status === 'delivered'
+                                ? 'bg-green-100 text-green-800 border-green-200'
+                                : order.status === 'pending'
+                                  ? 'bg-yellow-100 text-yellow-800 border-yellow-200'
+                                  : 'bg-red-100 text-red-800 border-red-200'
+                              }`}>
+                              {order.status === 'completed' || order.status === 'delivered' ? 'مكتمل' :
+                                order.status === 'pending' ? 'قيد المعالجة' : 'ملغي'}
+                            </span>
+                          </td>
+                          <td className="px-6 py-3 whitespace-nowrap text-sm text-gray-700 font-medium">
+                            {new Date(order.created_at).toLocaleDateString('ar-SA')}
+                          </td>
+                          <td className="px-6 py-3 whitespace-nowrap text-sm">
+                            <button 
+                              onClick={() => showOrderDetails(order)}
+                              className="text-primary-600 hover:text-primary-800 font-bold underline"
+                            >
+                              عرض
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Mobile View */}
+                <div className="md:hidden divide-y divide-gray-200">
+                  {orders.map((order) => (
+                    <div key={order.id} className="p-4 flex flex-col space-y-3">
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs font-bold text-gray-500">#{order.id?.toString().substring(0, 8)}</span>
+                        <span className="text-xs text-gray-400">{new Date(order.created_at).toLocaleDateString('ar-SA')}</span>
+                      </div>
+                      <div className="flex flex-col space-y-1">
+                        <div className="text-sm font-bold text-gray-900">{order.customer_name || 'غير محدد'}</div>
+                        <div className="text-xs text-gray-600">{order.customer_phone || order.user?.phone || 'غير محدد'}</div>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <div className="font-bold text-primary-600">{order.total_amount || order.total} د.ع</div>
+                        <span className={`px-2 py-0.5 text-[10px] font-bold rounded-full ${order.status === 'completed' || order.status === 'delivered'
+                              ? 'bg-green-100 text-green-800'
+                              : order.status === 'pending'
+                                ? 'bg-yellow-100 text-yellow-800'
+                                : 'bg-red-100 text-red-800'
+                            }`}>
+                          {order.status === 'completed' || order.status === 'delivered' ? 'مكتمل' :
+                            order.status === 'pending' ? 'قيد المعالجة' : 'ملغي'}
+                        </span>
+                      </div>
+                      <button 
+                        onClick={() => showOrderDetails(order)}
+                        className="w-full py-2 bg-indigo-50 text-indigo-600 rounded-lg font-bold text-xs"
+                      >
+                        عرض التفاصيل
+                      </button>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
           </div>
@@ -1448,14 +1533,14 @@ const AdminPanel = ({ user, setUser }) => {
               {selectedOrder.items && selectedOrder.items.length > 0 ? (
                 <div className="space-y-4">
                   {selectedOrder.items.map((item, index) => (
-                    <div key={index} className="flex gap-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                    <div key={index} className="flex flex-col sm:flex-row gap-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
                       {/* Product Image */}
                       {item.product_image && (
-                        <div className="flex-shrink-0">
+                        <div className="flex-shrink-0 flex justify-center">
                           <img
                             src={item.product_image}
                             alt={item.product_name}
-                            className="w-24 h-24 object-cover rounded-lg"
+                            className="w-24 h-24 sm:w-20 sm:h-20 object-cover rounded-lg"
                             onError={(e) => {
                               e.target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 96 96"%3E%3Crect fill="%23f3f4f6" width="96" height="96"/%3E%3Ctext fill="%239ca3af" font-family="sans-serif" font-size="12" dy="3.5" font-weight="bold" x="50%25" y="50%25" text-anchor="middle"%3Eلا توجد صورة%3C/text%3E%3C/svg%3E';
                             }}
@@ -1465,19 +1550,19 @@ const AdminPanel = ({ user, setUser }) => {
                       
                       {/* Product Info */}
                       <div className="flex-1">
-                        <p className="font-semibold text-gray-900 text-base">{item.product_name}</p>
-                        <div className="grid grid-cols-2 gap-4 mt-2 text-sm text-gray-600">
-                          <div>
+                        <p className="font-semibold text-gray-900 text-sm md:text-base text-center sm:text-right">{item.product_name}</p>
+                        <div className="grid grid-cols-3 gap-2 mt-2 text-xs text-gray-600">
+                          <div className="text-center sm:text-right">
                             <p className="text-gray-500">السعر</p>
-                            <p className="font-semibold text-gray-900">{item.price} د.ع</p>
+                            <p className="font-bold text-gray-900">{item.price}</p>
                           </div>
-                          <div>
+                          <div className="text-center sm:text-right">
                             <p className="text-gray-500">الكمية</p>
-                            <p className="font-semibold text-gray-900">{item.quantity}</p>
+                            <p className="font-bold text-gray-900">{item.quantity}</p>
                           </div>
-                          <div>
+                          <div className="text-center sm:text-right">
                             <p className="text-gray-500">الإجمالي</p>
-                            <p className="font-semibold text-gray-900">{item.total_price} د.ع</p>
+                            <p className="font-bold text-gray-900">{item.total_price}</p>
                           </div>
                         </div>
                       </div>

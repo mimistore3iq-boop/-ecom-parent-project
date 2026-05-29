@@ -45,14 +45,6 @@ export const ProductCard = ({ product, onAddToCart }) => {
           </div>
         )}
 
-        {/* Stock Count Badge */}
-        {product.stock > 0 && (
-          <div className="absolute bottom-2 right-2 bg-indigo-600 text-white text-[10px] font-bold px-3 py-1.5 rounded-full z-20 shadow-lg flex items-center gap-1.5 border border-white/20">
-            <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
-            متبقي {product.stock}
-          </div>
-        )}
-
         {/* Out of Stock Overlay */}
         {product.stock === 0 && (
           <div className="absolute inset-0 bg-black/5 backdrop-blur-[0.5px] flex items-center justify-center z-20">

@@ -274,7 +274,7 @@ const ProductDetail = ({ user }) => {
                   <span className="text-white font-bold text-lg">{discountPercentage}%</span>
                 </div>
               )}
-              {stockCount <= 5 && stockCount > 0 && (
+              {stockCount > 0 && (
                 <div className="absolute top-4 right-4 bg-blue-500 text-white px-3 py-1 rounded-lg">
                   متبقي {stockCount}
                 </div>
@@ -344,7 +344,7 @@ const ProductDetail = ({ user }) => {
                     </span>
                   )}
                 </div>
-                {stockCount <= 5 && stockCount > 0 && (
+                {stockCount > 0 && (
                   <div className="bg-blue-500 text-white px-4 py-2 rounded-lg font-semibold">
                     متبقي {stockCount}
                   </div>
