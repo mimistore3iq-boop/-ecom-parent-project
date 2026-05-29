@@ -1,18 +1,59 @@
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
-// Fixed bottom navigation styled to match the screenshot
-// Shows 4 actions: Home, WhatsApp, Call, Top
-// - Uses environment variable for WhatsApp phone if available
-// - Hidden on md+ screens
-const BottomNav = () => {
-    const whatsappPhone = process.env.REACT_APP_WHATSAPP_PHONE || '+9647700000000';
+const readCartCount = () => {
+    try {
+        const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+        return cart.reduce((total, item) => total + (item.quantity || 1), 0);
+    } catch {
+        return 0;
+    }
+};
+
+/**
+ * شريط تنقل سفلي للموبايل: الرئيسية، السلة، واتساب، اتصال، أعلى
+ */
+const BottomNav = ({ onCartClick, cartCount: cartCountProp }) => {
+    const navigate = useNavigate();
+    const whatsappPhone = process.env.REACT_APP_WHATSAPP_PHONE || '9647737698219';
+    const [cartCount, setCartCount] = useState(cartCountProp ?? readCartCount());
+
+    useEffect(() => {
+        setCartCount(cartCountProp ?? readCartCount());
+    }, [cartCountProp]);
+
+    useEffect(() => {
+        const refresh = () => setCartCount(cartCountProp ?? readCartCount());
+        window.addEventListener('storage', refresh);
+        window.addEventListener('cart-updated', refresh);
+        return () => {
+            window.removeEventListener('storage', refresh);
+            window.removeEventListener('cart-updated', refresh);
+        };
+    }, [cartCountProp]);
 
     const scrollTop = () => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
+    const handleCart = (e) => {
+        e.preventDefault();
+        if (onCartClick) {
+            onCartClick();
+            return;
+        }
+        if (window.location.pathname === '/') {
+            window.dispatchEvent(new CustomEvent('voro:open-cart'));
+        } else {
+            navigate('/?openCart=1');
+        }
+    };
+
+    const phoneDigits = whatsappPhone.replace(/[^\d]/g, '');
+
     return (
-        <nav className="fixed bottom-0 left-0 right-0 bg-white border-t shadow-[0_-2px_10px_rgba(0,0,0,0.05)] md:hidden z-50">
-            <div className="grid grid-cols-4 text-center">
+        <nav className="fixed bottom-0 left-0 right-0 bg-white border-t shadow-[0_-2px_10px_rgba(0,0,0,0.05)] md:hidden z-50 safe-area-pb">
+            <div className="grid grid-cols-5 text-center">
                 <a
                     href="/"
                     className="py-3 flex flex-col items-center justify-center text-gray-700 hover:text-primary-600"
@@ -23,8 +64,27 @@ const BottomNav = () => {
                     <span className="text-xs">الرئيسية</span>
                 </a>
 
+                <button
+                    type="button"
+                    onClick={handleCart}
+                    className="py-3 flex flex-col items-center justify-center text-gray-700 hover:text-primary-600 relative"
+                    aria-label="السلة"
+                >
+                    <span className="relative inline-flex">
+                        <svg className="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                        {cartCount > 0 && (
+                            <span className="absolute -top-1 -right-2 min-w-[18px] h-[18px] px-1 flex items-center justify-center rounded-full bg-primary-600 text-white text-[10px] font-bold leading-none">
+                                {cartCount > 99 ? '99+' : cartCount}
+                            </span>
+                        )}
+                    </span>
+                    <span className="text-xs">السلة</span>
+                </button>
+
                 <a
-                    href={`https://wa.me/${whatsappPhone.replace(/[^\d]/g, '')}`}
+                    href={`https://wa.me/${phoneDigits}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="py-3 flex flex-col items-center justify-center text-gray-700 hover:text-primary-600"
@@ -36,7 +96,7 @@ const BottomNav = () => {
                 </a>
 
                 <a
-                    href={`tel:+${whatsappPhone.replace(/[^\d]/g, '')}`}
+                    href={`tel:+${phoneDigits}`}
                     className="py-3 flex flex-col items-center justify-center text-gray-700 hover:text-primary-600"
                 >
                     <svg className="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -46,6 +106,7 @@ const BottomNav = () => {
                 </a>
 
                 <button
+                    type="button"
                     onClick={scrollTop}
                     className="py-3 flex flex-col items-center justify-center text-gray-700 hover:text-primary-600"
                 >

@@ -4,6 +4,7 @@ import { api, endpoints } from '../api';
 import { formatCurrency, getFreeShippingThreshold } from '../utils/currency';
 import Cart from '../components/CartNew';
 import CheckoutNew from '../components/CheckoutNew';
+import BottomNav from '../components/BottomNav';
 import CountdownTimer from '../components/CountdownTimer';
 
 const ProductDetail = ({ user }) => {
@@ -97,6 +98,7 @@ const ProductDetail = ({ user }) => {
 
     setCart(newCart);
     localStorage.setItem('cart', JSON.stringify(newCart));
+    window.dispatchEvent(new Event('cart-updated'));
 
     // Show success message
     showNotification(`تم إضافة ${quantity} من ${product.name} للسلة بنجاح!`, 'success');
@@ -164,7 +166,7 @@ const ProductDetail = ({ user }) => {
   console.log('Product images to display:', productImages);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 pb-16 md:pb-0">
       {/* Header */}
       <header className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -507,6 +509,8 @@ const ProductDetail = ({ user }) => {
           onClose={() => setIsCheckoutOpen(false)}
         />
       )}
+
+      <BottomNav onCartClick={toggleCart} cartCount={getCartItemCount()} />
     </div>
   );
 };

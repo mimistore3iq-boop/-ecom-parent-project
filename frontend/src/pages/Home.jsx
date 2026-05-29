@@ -34,6 +34,17 @@ const Home = ({ user, setUser }) => {
       showNotification(welcomeMessage);
       localStorage.removeItem('welcome_message');
     }
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('openCart') === '1') {
+      setIsCartOpen(true);
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+  }, []);
+
+  useEffect(() => {
+    const openCart = () => setIsCartOpen(true);
+    window.addEventListener('voro:open-cart', openCart);
+    return () => window.removeEventListener('voro:open-cart', openCart);
   }, []);
 
   const refreshData = () => {
@@ -116,6 +127,7 @@ const Home = ({ user, setUser }) => {
   const handleCartChange = (newCart) => {
     setCart(newCart);
     localStorage.setItem('cart', JSON.stringify(newCart));
+    window.dispatchEvent(new Event('cart-updated'));
   };
 
   const addToCart = (product) => {
@@ -558,7 +570,7 @@ const Home = ({ user, setUser }) => {
       <Footer />
 
       {/* Bottom Navigation */}
-      <BottomNav />
+      <BottomNav onCartClick={toggleCart} cartCount={getCartItemCount()} />
     </div>
   );
 };
