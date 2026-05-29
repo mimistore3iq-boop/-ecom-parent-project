@@ -1674,4 +1674,27 @@ textarea:focus {
     .main-header .navbar-nav .nav-link span {
         display: none;
     }
+
+    /* Products / orders changelist — scroll table horizontally only */
+    #changelist,
+    #changelist-form {
+        overflow: visible !important;
+    }
+
+    #changelist .results,
+    .card-body.table-responsive {
+        overflow-x: auto !important;
+        overflow-y: visible !important;
+        -webkit-overflow-scrolling: touch;
+        touch-action: pan-x pan-y;
+    }
+
+    #result_list {
+        min-width: 720px;
+    }
+
+    #changelist-filter {
+        overflow: visible !important;
+        max-height: none !important;
+    }
 }
