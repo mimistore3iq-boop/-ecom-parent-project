@@ -9,29 +9,26 @@ function onDocumentReady(fn) {
     }
 }
 
-// Fix for TypeError: Cannot read properties of undefined (reading 'enumerable')
-// Ensure basic objects exist if Bootstrap fails to initialize them
-if (typeof window.Popper === 'undefined') { window.Popper = {}; }
+// Force full-width admin layout on mobile (RTL sidebar margin fix)
+function forceMobileAdminLayout() {
+    if (window.innerWidth > 991) return;
+    document.body.classList.add('sidebar-collapse');
+    document.body.classList.remove('sidebar-open');
+    document.querySelectorAll('.content-wrapper, .main-header, .main-footer, #content-main').forEach(function (el) {
+        el.style.setProperty('margin-right', '0', 'important');
+        el.style.setProperty('margin-left', '0', 'important');
+        el.style.setProperty('width', '100%', 'important');
+        el.style.setProperty('max-width', '100%', 'important');
+    });
+}
+
+forceMobileAdminLayout();
+window.addEventListener('resize', forceMobileAdminLayout);
 
 onDocumentReady(function() {
     console.log('🛍️ voro Admin Panel Initializing...');
 
-    // Mobile specific layout fixes
-    const updateLayoutForMobile = () => {
-        if (window.innerWidth <= 991) {
-            document.body.classList.add('sidebar-collapse');
-            document.body.classList.remove('sidebar-open');
-            // Force content to take full width
-            const contentWrapper = document.querySelector('.content-wrapper');
-            if (contentWrapper) {
-                contentWrapper.style.marginRight = '0';
-                contentWrapper.style.marginLeft = '0';
-            }
-        }
-    };
-    
-    updateLayoutForMobile();
-    window.addEventListener('resize', updateLayoutForMobile);
+    forceMobileAdminLayout();
 
 
     // Initialize all custom features
@@ -51,6 +48,7 @@ onDocumentReady(function() {
                 document.body.classList.remove('sidebar-open');
                 document.body.classList.add('sidebar-collapse');
                 document.body.classList.remove('sidebar-mini');
+                forceMobileAdminLayout();
             }
         });
 

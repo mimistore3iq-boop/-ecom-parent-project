@@ -67,11 +67,8 @@
     <meta property="og:type" content="website">
     <meta name="theme-color" content="#667eea">
 
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.2/js/bootstrap.bundle.min.js"></script>
+    <!-- jQuery + Bootstrap loaded once at page bottom via templates/admin/base.html (Jazzmin) -->
 
-    <!-- Local Static Scripts removed from head to avoid early execution errors -->
-    
     <!-- Disable Service Worker Cache if any -->
     <script>
         if ('serviceWorker' in navigator) {
@@ -84,9 +81,27 @@
             });
         }
     </script>
-    <link rel="stylesheet" type="text/css" href="{% static 'custom_admin.css' %}?v=15.1">
-    
     <style>
+        /* Critical mobile layout — works even if JS fails */
+        @media (max-width: 991.98px) {
+            .content-wrapper,
+            .main-header,
+            .main-footer,
+            #content-main {
+                margin-right: 0 !important;
+                margin-left: 0 !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                min-width: 0 !important;
+            }
+            .sidebar-mini .content-wrapper,
+            .sidebar-mini-md .content-wrapper,
+            .layout-fixed .content-wrapper {
+                margin-right: 0 !important;
+                margin-left: 0 !important;
+            }
+        }
+
         /* Custom header styling */
         .navbar {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
@@ -258,9 +273,9 @@
     // Add smooth scrolling
     document.documentElement.style.scrollBehavior = 'smooth';
 </script>
+{% endblock %}
 
-<!-- Load Custom JS after libraries -->
-<script src="{% static 'custom_admin.js' %}?v=15.0"></script>
-
-<script src="{% static 'manual_product_tabs.js' %}"></script>
+{% block extrajs %}
+    {{ block.super }}
+    <script src="{% static 'manual_product_tabs.js' %}"></script>
 {% endblock %}
