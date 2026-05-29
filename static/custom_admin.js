@@ -1,6 +1,21 @@
 /* ===== voro Admin Custom JavaScript ===== */
 
-// Helper function to safely run code after DOM is loaded
+var MOBILE_BP = 991;
+var mobileLayoutReady = false;
+var lastViewportWasMobile = null;
+
+function isMobile() {
+    return window.innerWidth <= MOBILE_BP;
+}
+
+function debounce(fn, wait) {
+    var timer;
+    return function () {
+        clearTimeout(timer);
+        timer = setTimeout(fn, wait);
+    };
+}
+
 function onDocumentReady(fn) {
     if (document.readyState === 'complete' || document.readyState === 'interactive') {
         setTimeout(fn, 1);
@@ -9,69 +24,67 @@ function onDocumentReady(fn) {
     }
 }
 
-// Force full-width admin layout on mobile (RTL sidebar margin fix)
-function forceMobileAdminLayout() {
-    if (window.innerWidth > 991) return;
-    document.body.classList.add('sidebar-collapse');
-    document.body.classList.remove('sidebar-open');
-    document.querySelectorAll('.content-wrapper, .main-header, .main-footer, #content-main').forEach(function (el) {
-        el.style.setProperty('margin-right', '0', 'important');
-        el.style.setProperty('margin-left', '0', 'important');
-        el.style.setProperty('width', '100%', 'important');
-        el.style.setProperty('max-width', '100%', 'important');
-    });
-}
+// Run once — NOT on resize (mobile browsers fire resize while scrolling → freeze)
+function applyMobileLayoutOnce() {
+    if (!isMobile() || mobileLayoutReady) return;
+    mobileLayoutReady = true;
 
-// AdminLTE layout-fixed traps scroll inside .wrapper on mobile — use document scroll
-function fixMobileScroll() {
-    if (window.innerWidth > 991) return;
-    document.body.classList.remove('layout-fixed');
-    document.body.style.setProperty('overflow-y', 'auto', 'important');
-    document.body.style.setProperty('height', 'auto', 'important');
+    document.body.classList.add('voro-mobile-ready', 'sidebar-collapse');
+    document.body.classList.remove('sidebar-open', 'layout-fixed', 'sidebar-mini');
+    document.documentElement.classList.add('voro-mobile-ready');
+
     var wrapper = document.querySelector('.wrapper');
     if (wrapper) {
-        wrapper.style.setProperty('overflow', 'visible', 'important');
-        wrapper.style.setProperty('height', 'auto', 'important');
+        wrapper.style.overflow = 'visible';
+        wrapper.style.height = 'auto';
     }
     var content = document.querySelector('.content-wrapper');
     if (content) {
-        content.style.setProperty('overflow', 'visible', 'important');
-        content.style.setProperty('height', 'auto', 'important');
+        content.style.overflow = 'visible';
+        content.style.height = 'auto';
     }
 }
 
-forceMobileAdminLayout();
-fixMobileScroll();
-window.addEventListener('resize', function () {
-    forceMobileAdminLayout();
-    fixMobileScroll();
-});
+function lockScrollForSidebar(open) {
+    if (!isMobile()) return;
+    document.documentElement.classList.toggle('sidebar-scroll-lock', open);
+    document.body.classList.toggle('sidebar-scroll-lock', open);
+}
+
+// Only react when crossing mobile/desktop breakpoint (not address-bar resize)
+window.addEventListener('resize', debounce(function () {
+    var nowMobile = isMobile();
+    if (lastViewportWasMobile === null) {
+        lastViewportWasMobile = nowMobile;
+        return;
+    }
+    if (nowMobile !== lastViewportWasMobile) {
+        lastViewportWasMobile = nowMobile;
+        mobileLayoutReady = false;
+        if (nowMobile) applyMobileLayoutOnce();
+    }
+}, 400), { passive: true });
 
 onDocumentReady(function() {
-    console.log('🛍️ voro Admin Panel Initializing...');
+    lastViewportWasMobile = isMobile();
 
-    forceMobileAdminLayout();
-    fixMobileScroll();
-
-    // Initialize all custom features
     try {
+        if (isMobile()) {
+            applyMobileLayoutOnce();
+            initializeMobileSidebar();
+            initializeConfirmations();
+            initializeImgbbUploader();
+            enhanceSidebarToggle();
+            return;
+        }
+
         addNotificationStyles();
         initializeAnimations();
-        
-        // Wait for full load to initialize tooltips (Ensures jQuery/Popper are ready)
-        window.addEventListener('load', function() {
-            const jQuery = window.jQuery;
+
+        window.addEventListener('load', function () {
+            var jQuery = window.jQuery;
             if (jQuery && jQuery.fn && typeof jQuery.fn.tooltip !== 'undefined') {
                 initializeTooltips();
-            }
-            
-            // Auto-close Sidebar on Mobile at load
-            if (window.innerWidth < 991) {
-                document.body.classList.remove('sidebar-open');
-                document.body.classList.add('sidebar-collapse');
-                document.body.classList.remove('sidebar-mini');
-                forceMobileAdminLayout();
-                fixMobileScroll();
             }
         });
 
@@ -84,12 +97,9 @@ onDocumentReady(function() {
         enhanceSidebarToggle();
         initializeDarkMode();
         initializePerformanceMonitoring();
-        initializeMobileSidebar();
     } catch (e) {
         console.error('Error initializing admin features:', e);
     }
-
-    console.log('✅ voro Admin Panel Loaded Successfully!');
 });
 
 
@@ -137,16 +147,18 @@ function initializeMobileSidebar() {
             e.preventDefault();
             e.stopPropagation();
         }
-        
-        if (document.body.classList.contains('sidebar-open')) {
-            document.body.classList.remove('sidebar-open');
-            document.body.classList.add('sidebar-collapse');
-            if (floatingBtn) floatingBtn.querySelector('i').className = 'fas fa-bars';
-        } else {
+
+        var opening = !document.body.classList.contains('sidebar-open');
+        if (opening) {
             document.body.classList.add('sidebar-open');
             document.body.classList.remove('sidebar-collapse');
             if (floatingBtn) floatingBtn.querySelector('i').className = 'fas fa-times';
+        } else {
+            document.body.classList.remove('sidebar-open');
+            document.body.classList.add('sidebar-collapse');
+            if (floatingBtn) floatingBtn.querySelector('i').className = 'fas fa-bars';
         }
+        lockScrollForSidebar(opening);
     };
 
     if (floatingBtn) {
@@ -166,8 +178,9 @@ function initializeMobileSidebar() {
     });
 }
 
-// Animation System
+// Animation System (desktop only — causes scroll jank on mobile)
 function initializeAnimations() {
+    if (isMobile()) return;
     const contentElements = document.querySelectorAll('.content-wrapper > *');
     contentElements.forEach((element, index) => {
         element.style.opacity = '0';
@@ -319,16 +332,27 @@ function addNotificationStyles() {
 // Sidebar Toggle Enhancement
 function enhanceSidebarToggle() {
     const sidebarToggle = document.querySelector('[data-widget="pushmenu"]');
-    if (sidebarToggle) {
-        sidebarToggle.addEventListener('click', () => {
-            const sidebar = document.querySelector('.main-sidebar');
-            if (sidebar) sidebar.style.transition = 'all 0.3s ease';
-        });
+    if (!sidebarToggle) return;
+
+    if (isMobile()) {
+        sidebarToggle.addEventListener('click', function (e) {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            var btn = document.querySelector('.voro-mobile-hamburger');
+            if (btn) btn.click();
+        }, true);
+        return;
     }
+
+    sidebarToggle.addEventListener('click', function () {
+        const sidebar = document.querySelector('.main-sidebar');
+        if (sidebar) sidebar.style.transition = 'transform 0.25s ease';
+    });
 }
 
-// Dark Mode Toggle
+// Dark Mode Toggle (desktop only — overlaps mobile menu button)
 function initializeDarkMode() {
+    if (isMobile()) return;
     const darkModeToggle = document.createElement('button');
     darkModeToggle.innerHTML = '<i class="fas fa-moon"></i>';
     darkModeToggle.className = 'btn btn-sm btn-outline-light';

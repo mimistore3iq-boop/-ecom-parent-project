@@ -1572,3 +1572,74 @@ textarea:focus {
         pointer-events: auto !important;
     }
 }
+
+/* === Mobile performance: smooth scroll, no freeze/jank === */
+@media (max-width: 991.98px) {
+    body {
+        background: #f0f2f5 !important;
+    }
+
+    /* Disable heavy transitions/animations during scroll */
+    .content-wrapper,
+    .content-wrapper .content,
+    .content-wrapper .row,
+    .card,
+    .box,
+    .info-box,
+    .btn,
+    .table,
+    .nav-link,
+    .navbar,
+    .main-header,
+    .main-footer,
+    .form-control {
+        transition: none !important;
+        animation: none !important;
+    }
+
+    .content-wrapper > * {
+        opacity: 1 !important;
+        transform: none !important;
+    }
+
+    .card:hover,
+    .box:hover,
+    .info-box:hover {
+        transform: none !important;
+    }
+
+    .voro-sidebar-backdrop {
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        background: rgba(0, 0, 0, 0.5) !important;
+    }
+
+    .main-sidebar {
+        transition: transform 0.2s ease-out !important;
+        will-change: transform;
+    }
+
+    /* Lock scroll only when sidebar menu is open */
+    html.sidebar-scroll-lock,
+    body.sidebar-scroll-lock {
+        overflow: hidden !important;
+        height: 100% !important;
+    }
+
+    /* Touch-friendly spacing */
+    .btn,
+    .nav-link,
+    .dropdown-item {
+        min-height: 44px;
+        display: inline-flex;
+        align-items: center;
+    }
+
+    .content-header h1 {
+        font-size: 1.25rem !important;
+    }
+
+    .main-header .navbar-nav .nav-link span {
+        display: none;
+    }
+}
