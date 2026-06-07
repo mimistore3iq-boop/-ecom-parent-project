@@ -10,17 +10,34 @@ const firebaseConfig = {
   appId: process.env.REACT_APP_FIREBASE_APP_ID
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
+// Only initialize Firebase when it is actually configured (production sets the
+// REACT_APP_FIREBASE_* env vars). Locally these are absent, so we skip init to
+// avoid a fatal "Missing App configuration value: projectId" crash. Push
+// notifications simply stay disabled in that case.
+const isFirebaseConfigured = Boolean(firebaseConfig.projectId && firebaseConfig.apiKey);
 
-// Initialize Firebase Cloud Messaging and get a reference to the service
-const messaging = getMessaging(app);
+let app = null;
+let messaging = null;
+
+if (isFirebaseConfigured) {
+  try {
+    app = initializeApp(firebaseConfig);
+    messaging = getMessaging(app);
+  } catch (error) {
+    console.warn('Firebase initialization skipped:', error?.message || error);
+  }
+} else {
+  console.info('Firebase not configured (REACT_APP_FIREBASE_* missing) — notifications disabled.');
+}
 
 // Export Firebase app instance
 export { app };
 
 // Request permission and get token
 export const requestNotificationPermission = async () => {
+  if (!messaging) {
+    return null;
+  }
   try {
     const permission = await Notification.requestPermission();
     
@@ -51,6 +68,9 @@ export const requestNotificationPermission = async () => {
 // Listen for foreground messages
 export const onMessageListener = () =>
   new Promise((resolve) => {
+    if (!messaging) {
+      return;
+    }
     onMessage(messaging, (payload) => {
       console.log('Message received in foreground:', payload);
       resolve(payload);

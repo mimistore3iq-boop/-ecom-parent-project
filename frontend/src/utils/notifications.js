@@ -2,8 +2,16 @@
 import { getMessaging, getToken, onMessage } from "firebase/messaging";
 import { app } from "../firebase";
 
-// Get messaging instance
-const messaging = getMessaging(app);
+// Get messaging instance only when Firebase is configured (app is null locally
+// when REACT_APP_FIREBASE_* env vars are absent). Avoids a load-time crash.
+let messaging = null;
+if (app) {
+  try {
+    messaging = getMessaging(app);
+  } catch (error) {
+    console.warn('Firebase messaging unavailable:', error?.message || error);
+  }
+}
 
 // Register service worker
 export const registerServiceWorker = () => {
@@ -20,6 +28,9 @@ export const registerServiceWorker = () => {
 
 // Get FCM token
 export const getFCMToken = async () => {
+  if (!messaging) {
+    return null;
+  }
   try {
     const currentToken = await getToken(messaging, { vapidKey: "38763797948fac18689f45fcb5bb9c5152d82738" });
     if (currentToken) {
@@ -55,6 +66,9 @@ export const requestNotificationPermission = async () => {
 // Listen for foreground messages
 export const onMessageListener = () => {
   return new Promise((resolve) => {
+    if (!messaging) {
+      return;
+    }
     onMessage(messaging, (payload) => {
       console.log('Message received:', payload);
       resolve(payload);
