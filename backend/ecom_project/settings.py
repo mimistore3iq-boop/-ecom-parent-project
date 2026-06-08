@@ -503,7 +503,7 @@ JAZZMIN_UI_TWEAKS = {
     "footer_fixed": False,
     "sidebar_fixed": False,
     "sidebar_collapse": True,
-    "sidebar": "sidebar-dark-purple",
+    "sidebar": "sidebar-dark-primary",
     "sidebar_nav_small_text": True,
     "sidebar_nav_flat_style": True,
     "sidebar_nav_legacy_style": False,

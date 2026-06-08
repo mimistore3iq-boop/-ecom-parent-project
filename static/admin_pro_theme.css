@@ -1,33 +1,35 @@
 /**
- * voro Admin Pro — modern global dashboard theme
+ * voro Admin Pro v4 — premium shell (sidebar, navbar, tables)
  */
-@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap');
 
 :root {
-    --pro-bg: #f0f2f8;
+    --pro-bg: #f4f4f5;
     --pro-surface: #ffffff;
-    --pro-border: #e5e7ef;
-    --pro-text: #1a1d26;
-    --pro-muted: #6b7280;
-    --pro-primary: #4f46e5;
-    --pro-primary-dark: #4338ca;
-    --pro-primary-soft: #eef2ff;
-    --pro-sidebar: #111827;
-    --pro-sidebar-hover: #1f2937;
-    --pro-radius: 14px;
-    --pro-radius-sm: 10px;
-    --pro-shadow: 0 1px 3px rgba(15, 23, 42, 0.06), 0 8px 24px rgba(15, 23, 42, 0.06);
-    --pro-shadow-lg: 0 12px 40px rgba(15, 23, 42, 0.12);
+    --pro-border: rgba(0, 0, 0, 0.06);
+    --pro-border-strong: rgba(0, 0, 0, 0.1);
+    --pro-text: #09090b;
+    --pro-muted: #71717a;
+    --pro-primary: #059669;
+    --pro-primary-dark: #047857;
+    --pro-primary-soft: #ecfdf5;
+    --pro-sidebar: #09090b;
+    --pro-sidebar-hover: #18181b;
+    --pro-radius: 16px;
+    --pro-radius-sm: 12px;
+    --pro-shadow: 0 1px 2px rgba(0,0,0,.04), 0 4px 16px rgba(0,0,0,.04);
+    --pro-shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.1);
 }
 
 /* ===== Base ===== */
 body,
 body.voro-admin-pro {
-    font-family: 'Cairo', 'Segoe UI', system-ui, sans-serif !important;
+    font-family: 'IBM Plex Sans Arabic', 'Cairo', system-ui, sans-serif !important;
     background: var(--pro-bg) !important;
     color: var(--pro-text) !important;
     font-size: 14px !important;
     line-height: 1.55 !important;
+    -webkit-font-smoothing: antialiased;
 }
 
 .wrapper {
@@ -36,112 +38,137 @@ body.voro-admin-pro {
 
 /* ===== Top navbar ===== */
 .main-header.navbar,
-.navbar-dark {
+.navbar-dark,
+.navbar-white {
     background: var(--pro-surface) !important;
     border-bottom: 1px solid var(--pro-border) !important;
-    box-shadow: var(--pro-shadow) !important;
-    min-height: 64px !important;
+    box-shadow: none !important;
+    min-height: 60px !important;
 }
 
 .main-header .navbar-nav .nav-link,
 .navbar-dark .navbar-nav .nav-link {
-    color: var(--pro-text) !important;
+    color: var(--pro-muted) !important;
     font-weight: 600 !important;
-    border-radius: var(--pro-radius-sm) !important;
+    font-size: 13px !important;
+    border-radius: 999px !important;
     padding: 8px 14px !important;
     margin: 0 2px !important;
 }
 
 .main-header .navbar-nav .nav-link:hover {
-    background: var(--pro-primary-soft) !important;
-    color: var(--pro-primary) !important;
+    background: #f4f4f5 !important;
+    color: var(--pro-text) !important;
     transform: none !important;
 }
 
 .navbar-brand,
 .brand-text {
-    color: var(--pro-primary) !important;
-    font-weight: 800 !important;
+    color: var(--pro-text) !important;
+    font-weight: 700 !important;
     text-shadow: none !important;
 }
 
 /* ===== Sidebar ===== */
 .main-sidebar,
+.sidebar-dark-primary,
 .sidebar-dark-purple {
     background: var(--pro-sidebar) !important;
-    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.08) !important;
+    box-shadow: none !important;
+    border-left: 1px solid rgba(255,255,255,.06) !important;
 }
 
 .brand-link {
-    background: rgba(255, 255, 255, 0.04) !important;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
-    padding: 18px 16px !important;
+    background: transparent !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+    padding: 20px 18px !important;
 }
 
 .brand-link .brand-text {
     color: #fff !important;
-    font-size: 1.25rem !important;
+    font-size: 1.15rem !important;
+    font-weight: 700 !important;
+    letter-spacing: -0.02em;
 }
 
 .sidebar-dark-purple .nav-sidebar > .nav-item > .nav-link,
 .nav-sidebar .nav-link {
-    color: rgba(255, 255, 255, 0.82) !important;
-    border-radius: var(--pro-radius-sm) !important;
-    margin: 3px 10px !important;
-    padding: 11px 14px !important;
+    color: rgba(255, 255, 255, 0.65) !important;
+    border-radius: 10px !important;
+    margin: 2px 12px !important;
+    padding: 10px 14px !important;
     font-weight: 600 !important;
+    font-size: 13px !important;
     transition: background 0.15s ease, color 0.15s ease !important;
 }
 
-.sidebar-dark-purple .nav-sidebar > .nav-item > .nav-link:hover,
-.sidebar-dark-purple .nav-sidebar > .nav-item > .nav-link.active,
-.nav-sidebar .nav-link.active {
-    background: var(--pro-primary) !important;
+.sidebar-dark-purple .nav-sidebar > .nav-item > .nav-link:hover {
+    background: var(--pro-sidebar-hover) !important;
     color: #fff !important;
-    box-shadow: 0 4px 14px rgba(79, 70, 229, 0.35) !important;
     transform: none !important;
 }
 
+.sidebar-dark-purple .nav-sidebar > .nav-item > .nav-link.active,
+.nav-sidebar .nav-link.active {
+    background: rgba(255, 255, 255, 0.1) !important;
+    color: #fff !important;
+    box-shadow: none !important;
+}
+
 .nav-sidebar .nav-icon {
-    font-size: 1rem !important;
+    font-size: 0.9rem !important;
     margin-left: 10px !important;
-    opacity: 0.95;
+    opacity: 0.85;
+}
+
+.nav-header {
+    color: rgba(255,255,255,.35) !important;
+    font-size: 10px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.08em !important;
+    text-transform: uppercase !important;
+    padding: 16px 18px 6px !important;
 }
 
 /* ===== Content ===== */
 .content-wrapper {
     background: var(--pro-bg) !important;
-    padding: 24px !important;
 }
 
 .content-header {
     background: transparent !important;
     box-shadow: none !important;
-    padding: 0 0 16px 0 !important;
-    margin-bottom: 8px !important;
+    padding: 24px 32px 0 !important;
+    margin-bottom: 0 !important;
 }
 
 .content-header h1,
 .content-wrapper .content-header h1 {
     color: var(--pro-text) !important;
-    font-weight: 800 !important;
-    font-size: 1.65rem !important;
-    letter-spacing: -0.02em;
+    font-weight: 700 !important;
+    font-size: 1.5rem !important;
+    letter-spacing: -0.03em;
 }
 
 .breadcrumb {
     background: transparent !important;
     padding: 0 !important;
-    margin: 0 !important;
+    margin: 6px 0 0 !important;
+    font-size: 13px;
 }
 
 .breadcrumb-item a {
-    color: var(--pro-primary) !important;
-    font-weight: 600;
+    color: var(--pro-muted) !important;
+    font-weight: 500;
 }
 
 .breadcrumb-item.active {
-    color: var(--pro-muted) !important;
+    color: var(--pro-text) !important;
+    font-weight: 600;
+}
+
+body.voro-admin-pro .content-wrapper > .content {
+    padding: 20px 32px 32px !important;
 }
 
 /* ===== Cards & modules ===== */
@@ -181,28 +208,29 @@ body.voro-admin-pro {
     border-radius: var(--pro-radius) !important;
     overflow: hidden !important;
     box-shadow: var(--pro-shadow) !important;
+    border: 1px solid var(--pro-border) !important;
 }
 
 #result_list thead th {
-    background: #f8fafc !important;
+    background: #fafafa !important;
     color: var(--pro-muted) !important;
     font-weight: 700 !important;
-    font-size: 12px !important;
+    font-size: 11px !important;
     text-transform: uppercase !important;
-    letter-spacing: 0.04em;
-    border-bottom: 2px solid var(--pro-border) !important;
+    letter-spacing: 0.06em;
+    border-bottom: 1px solid var(--pro-border) !important;
     padding: 14px 12px !important;
     white-space: nowrap;
 }
 
 #result_list tbody td {
     padding: 12px !important;
-    border-bottom: 1px solid #f1f3f9 !important;
+    border-bottom: 1px solid var(--pro-border) !important;
     vertical-align: middle !important;
 }
 
 #result_list tbody tr:hover {
-    background: var(--pro-primary-soft) !important;
+    background: #fafafa !important;
 }
 
 #result_list tbody tr:last-child td {
@@ -218,7 +246,7 @@ input[type="number"],
 input[type="email"],
 input[type="password"],
 input[type="url"] {
-    border: 1px solid var(--pro-border) !important;
+    border: 1px solid var(--pro-border-strong) !important;
     border-radius: var(--pro-radius-sm) !important;
     padding: 10px 14px !important;
     font-size: 14px !important;
@@ -230,21 +258,16 @@ input[type="url"] {
 select:focus,
 input:focus {
     border-color: var(--pro-primary) !important;
-    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15) !important;
+    box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.12) !important;
     outline: none !important;
 }
 
-/* IQD price fields in product list */
 .voro-iqd-input {
     min-width: 180px !important;
     text-align: right !important;
-    font-weight: 700 !important;
+    font-weight: 600 !important;
     color: var(--pro-primary-dark) !important;
     direction: rtl;
-}
-
-.voro-iqd-input:focus {
-    color: var(--pro-text) !important;
 }
 
 /* ===== Buttons ===== */
@@ -252,28 +275,33 @@ input:focus {
 button,
 input[type="submit"],
 .submit-row input {
-    border-radius: var(--pro-radius-sm) !important;
-    font-weight: 700 !important;
-    padding: 10px 20px !important;
+    border-radius: 999px !important;
+    font-weight: 600 !important;
+    padding: 9px 18px !important;
+    font-size: 13px !important;
     transition: transform 0.12s, box-shadow 0.12s !important;
 }
 
 .btn-primary,
 input[type="submit"].default,
 .submit-row input.default {
-    background: var(--pro-primary) !important;
+    background: var(--pro-text) !important;
     border: none !important;
     color: #fff !important;
-    box-shadow: 0 4px 14px rgba(79, 70, 229, 0.3) !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,.12) !important;
 }
 
 .btn-primary:hover,
 input[type="submit"].default:hover {
-    background: var(--pro-primary-dark) !important;
+    background: #27272a !important;
     transform: translateY(-1px) !important;
 }
 
-.btn-success { border-radius: var(--pro-radius-sm) !important; }
+.btn-success {
+    background: var(--pro-primary) !important;
+    border: none !important;
+    border-radius: 999px !important;
+}
 
 .submit-row,
 .change-list-actions,
@@ -288,8 +316,8 @@ input[type="submit"].default:hover {
 
 /* ===== Jazzmin tabs ===== */
 #jazzy-tabs {
-    border-bottom: 2px solid var(--pro-border) !important;
-    gap: 6px;
+    border-bottom: 1px solid var(--pro-border) !important;
+    gap: 4px;
     margin-bottom: 20px !important;
 }
 
@@ -297,106 +325,57 @@ input[type="submit"].default:hover {
     cursor: pointer !important;
     pointer-events: auto !important;
     border: none !important;
-    border-radius: var(--pro-radius-sm) var(--pro-radius-sm) 0 0 !important;
+    border-radius: 999px !important;
     color: var(--pro-muted) !important;
-    font-weight: 700 !important;
-    padding: 12px 20px !important;
+    font-weight: 600 !important;
+    font-size: 13px !important;
+    padding: 10px 18px !important;
     background: transparent !important;
 }
 
 #jazzy-tabs .nav-link:hover {
-    color: var(--pro-primary) !important;
-    background: var(--pro-primary-soft) !important;
+    color: var(--pro-text) !important;
+    background: #f4f4f5 !important;
 }
 
 #jazzy-tabs .nav-link.active {
-    color: var(--pro-primary) !important;
-    background: var(--pro-primary-soft) !important;
-    border-bottom: 3px solid var(--pro-primary) !important;
-}
-
-.change-form .tab-content {
-    padding: 8px 0 20px !important;
-}
-
-/* ===== Override Jazzmin / AdminLTE defaults ===== */
-body.voro-admin-pro .content-wrapper > .content {
-    padding: 20px 24px !important;
-}
-
-body.voro-admin-pro .card {
-    border-radius: var(--pro-radius) !important;
-    border: 1px solid var(--pro-border) !important;
-    box-shadow: var(--pro-shadow) !important;
-}
-
-body.voro-admin-pro .card-header {
-    background: #fff !important;
-    border-bottom: 1px solid var(--pro-border) !important;
-    font-weight: 800 !important;
-}
-
-body.voro-admin-pro .card-body .table {
-    margin-bottom: 0 !important;
-}
-
-body.voro-admin-pro .card-body .table td {
-    vertical-align: middle !important;
-    padding: 10px 12px !important;
-    border-top: 1px solid #f1f3f9 !important;
-}
-
-body.voro-admin-pro .btn-xs {
-    border-radius: 8px !important;
+    color: var(--pro-text) !important;
+    background: #f4f4f5 !important;
+    border-bottom: none !important;
     font-weight: 700 !important;
-    padding: 4px 10px !important;
 }
 
+/* ===== Dropdowns ===== */
 body.voro-admin-pro .dropdown-menu {
     border: 1px solid var(--pro-border) !important;
     border-radius: var(--pro-radius-sm) !important;
     box-shadow: var(--pro-shadow-lg) !important;
-    padding: 8px !important;
+    padding: 6px !important;
 }
 
 body.voro-admin-pro .dropdown-item {
     border-radius: 8px !important;
     font-weight: 600 !important;
+    font-size: 13px !important;
     padding: 10px 14px !important;
 }
 
 body.voro-admin-pro .dropdown-item:hover {
-    background: var(--pro-primary-soft) !important;
-    color: var(--pro-primary) !important;
-}
-
-body.voro-admin-pro .brand-link .brand-text {
-    color: #fff !important;
-    font-weight: 800 !important;
+    background: #f4f4f5 !important;
+    color: var(--pro-text) !important;
 }
 
 body.voro-admin-pro .user-panel .info a,
 body.voro-admin-pro .user-panel .info span {
-    color: rgba(255,255,255,0.9) !important;
+    color: rgba(255,255,255,0.85) !important;
     font-weight: 600 !important;
-}
-
-/* ===== Dashboard index ===== */
-.dashboard-stats .stat-card,
-.welcome-section,
-.recent-activity,
-.action-btn {
-    border-radius: var(--pro-radius) !important;
-}
-
-.welcome-section {
-    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%) !important;
+    font-size: 13px !important;
 }
 
 /* ===== Login ===== */
 .login-page,
 body.login {
-    background: linear-gradient(135deg, #eef2ff 0%, #f0f2f8 50%, #ede9fe 100%) !important;
+    background: var(--pro-bg) !important;
 }
 
 .login-box,
@@ -411,23 +390,26 @@ body.login {
     background: var(--pro-surface) !important;
     border-top: 1px solid var(--pro-border) !important;
     color: var(--pro-muted) !important;
-    padding: 16px 24px !important;
+    padding: 14px 24px !important;
+    font-size: 13px !important;
 }
 
 /* ===== Pagination ===== */
 .paginator a,
 .paginator span {
-    border-radius: 8px !important;
+    border-radius: 999px !important;
     padding: 6px 12px !important;
     margin: 0 2px;
+    font-weight: 600;
+    font-size: 13px;
 }
 
 .paginator .this-page {
-    background: var(--pro-primary) !important;
+    background: var(--pro-text) !important;
     color: #fff !important;
 }
 
-/* ===== Filters panel ===== */
+/* ===== Filters ===== */
 #changelist-filter {
     background: var(--pro-surface) !important;
     border: 1px solid var(--pro-border) !important;
@@ -437,15 +419,19 @@ body.login {
 }
 
 #changelist-filter h2 {
-    font-size: 14px !important;
-    font-weight: 800 !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
     color: var(--pro-text) !important;
 }
 
 /* ===== Mobile ===== */
 @media (max-width: 991.98px) {
-    .content-wrapper {
-        padding: 14px !important;
+    body.voro-admin-pro .content-wrapper > .content {
+        padding: 16px !important;
+    }
+
+    .content-header {
+        padding: 16px 16px 0 !important;
     }
 
     .content-header h1 {
@@ -457,11 +443,6 @@ body.login {
         flex-wrap: nowrap;
         white-space: nowrap;
         -webkit-overflow-scrolling: touch;
-    }
-
-    #jazzy-tabs .nav-link {
-        font-size: 12px !important;
-        padding: 10px 14px !important;
     }
 
     html, body {
