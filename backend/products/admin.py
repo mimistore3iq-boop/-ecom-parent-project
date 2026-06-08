@@ -91,18 +91,20 @@ class ProductAdmin(admin.ModelAdmin):
             amount = int(final)
             formatted = f'{amount:,}'.replace(',', '.')
             return mark_safe(
-                f'<span class="voro-price-display" style="color:#059669;font-weight:700;">'
-                f'{formatted} الف دينار عراقي</span>'
+                f'<span class="voro-price-final">{formatted} الف دينار عراقي</span>'
             )
-        return mark_safe('<span style="color:#9ca3af;">—</span>')
+        return mark_safe('<span class="voro-price-empty">—</span>')
 
     price_after_discount.short_description = 'السعر بعد الخصم'
     
     def product_image(self, obj):
         """عرض صورة صغيرة من المنتج"""
         if obj.main_image:
-            return mark_safe(f'<img src="{obj.main_image}" width="50" height="50" style="border-radius: 4px; object-fit: cover;" />')
-        return '❌ لا توجد صورة'
+            return mark_safe(
+                f'<img src="{obj.main_image}" width="48" height="48" '
+                f'style="border-radius:12px;object-fit:cover;border:1px solid rgba(0,0,0,.08);" />'
+            )
+        return mark_safe('<span class="voro-price-empty">—</span>')
     product_image.short_description = '🖼️ الصورة'
 
     fieldsets = (

@@ -1,0 +1,221 @@
+/**
+ * voro Admin — login page
+ */
+
+body.login-page,
+body.login {
+    background: var(--pro-bg) !important;
+    min-height: 100vh;
+}
+
+body.login .wrapper,
+body.login .content-wrapper {
+    margin: 0 !important;
+    padding: 0 !important;
+    min-height: 100vh;
+    background: transparent !important;
+}
+
+body.login .main-sidebar,
+body.login .main-header,
+body.login .main-footer {
+    display: none !important;
+}
+
+body.login .content-wrapper > .content {
+    padding: 0 !important;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.voro-login-wrap {
+    width: 100%;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background:
+        radial-gradient(circle at 100% 0%, rgba(5, 150, 105, 0.06) 0%, transparent 45%),
+        radial-gradient(circle at 0% 100%, rgba(37, 99, 235, 0.05) 0%, transparent 45%),
+        var(--pro-bg);
+}
+
+.voro-login-card {
+    width: 100%;
+    max-width: 420px;
+    background: var(--pro-surface);
+    border: 1px solid var(--pro-border);
+    border-radius: 20px;
+    box-shadow: var(--pro-shadow-lg);
+    overflow: hidden;
+}
+
+.voro-login-head {
+    padding: 36px 32px 28px;
+    text-align: center;
+    border-bottom: 1px solid var(--pro-border);
+}
+
+.voro-login-logo {
+    width: 56px;
+    height: 56px;
+    margin: 0 auto 16px;
+    border-radius: 16px;
+    background: var(--pro-text);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+}
+
+.voro-login-title {
+    margin: 0 0 6px;
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    color: var(--pro-text);
+}
+
+.voro-login-sub {
+    margin: 0;
+    font-size: 14px;
+    color: var(--pro-muted);
+    font-weight: 500;
+}
+
+.voro-login-body {
+    padding: 28px 32px 32px;
+}
+
+.voro-login-error {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    margin-bottom: 20px;
+    border-radius: 12px;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #b91c1c;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.voro-field {
+    margin-bottom: 18px;
+}
+
+.voro-field label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--pro-text);
+}
+
+.voro-field-input-wrap {
+    position: relative;
+}
+
+.voro-field-input-wrap i {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--pro-muted);
+    font-size: 14px;
+    pointer-events: none;
+}
+
+.voro-field input {
+    width: 100%;
+    padding: 13px 16px 13px 42px;
+    border: 1px solid var(--pro-border-strong);
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 500;
+    background: var(--pro-input-bg);
+    color: var(--pro-text);
+    transition: border-color 0.15s, box-shadow 0.15s;
+    box-sizing: border-box;
+}
+
+.voro-field input:focus {
+    outline: none;
+    border-color: var(--pro-primary);
+    box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.12);
+    background: var(--pro-surface);
+}
+
+.voro-login-submit {
+    width: 100%;
+    margin-top: 8px;
+    padding: 14px;
+    border: none;
+    border-radius: 999px;
+    background: var(--pro-text);
+    color: #fff;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.12s, box-shadow 0.12s;
+}
+
+.voro-login-submit:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.voro-login-submit:disabled {
+    opacity: 0.7;
+    cursor: wait;
+}
+
+.voro-login-foot {
+    padding: 16px 32px 24px;
+    text-align: center;
+    border-top: 1px solid var(--pro-border);
+    font-size: 12px;
+    color: var(--pro-muted);
+    font-weight: 500;
+}
+
+.voro-login-foot a {
+    color: var(--pro-primary);
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.voro-login-theme {
+    position: fixed;
+    top: 16px;
+    left: 16px;
+    z-index: 100;
+}
+
+html[data-voro-theme="dark"] .voro-login-wrap {
+    background: var(--pro-bg);
+}
+
+html[data-voro-theme="dark"] .voro-login-error {
+    background: rgba(239, 68, 68, 0.12);
+    border-color: rgba(239, 68, 68, 0.25);
+    color: #fca5a5;
+}
+
+html[data-voro-theme="dark"] .voro-login-submit {
+    background: var(--pro-primary);
+    color: #09090b;
+}
+
+@media (max-width: 480px) {
+    .voro-login-body,
+    .voro-login-head {
+        padding-left: 22px;
+        padding-right: 22px;
+    }
+}

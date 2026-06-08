@@ -1,0 +1,251 @@
+/**
+ * voro Admin — add/edit forms (all models)
+ */
+
+body.change-form .content.border-bottom {
+    background: var(--pro-surface) !important;
+    border-bottom: 1px solid var(--pro-border) !important;
+    margin-bottom: 0 !important;
+    padding: 16px 0 !important;
+}
+
+body.change-form .content.border-bottom h1 {
+    font-weight: 700 !important;
+    letter-spacing: -0.02em;
+    color: var(--pro-text) !important;
+}
+
+body.change-form #content-main {
+    max-width: 1200px;
+}
+
+/* ===== Fieldsets / cards ===== */
+body.change-form fieldset.module,
+body.change-form .card.form-row,
+body.change-form .inline-group {
+    background: var(--pro-surface) !important;
+    border: 1px solid var(--pro-border) !important;
+    border-radius: var(--pro-radius) !important;
+    box-shadow: var(--pro-shadow) !important;
+    margin-bottom: 20px !important;
+    overflow: hidden;
+}
+
+body.change-form fieldset.module h2,
+body.change-form .inline-group h2,
+body.change-form .card-header {
+    background: var(--pro-table-head) !important;
+    color: var(--pro-text) !important;
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    padding: 14px 20px !important;
+    border-bottom: 1px solid var(--pro-border) !important;
+    margin: 0 !important;
+}
+
+body.change-form .form-row,
+body.change-form fieldset.module .form-row {
+    padding: 16px 20px !important;
+    border-bottom: 1px solid var(--pro-border);
+}
+
+body.change-form fieldset.module .form-row:last-child {
+    border-bottom: none;
+}
+
+body.change-form label,
+body.change-form .control-label {
+    font-weight: 600 !important;
+    font-size: 13px !important;
+    color: var(--pro-text) !important;
+    margin-bottom: 6px !important;
+}
+
+body.change-form .help,
+body.change-form .helptext {
+    font-size: 12px !important;
+    color: var(--pro-muted) !important;
+    margin-top: 6px !important;
+}
+
+body.change-form .readonly {
+    padding: 10px 14px;
+    background: var(--pro-input-bg);
+    border-radius: var(--pro-radius-sm);
+    color: var(--pro-muted);
+    font-weight: 500;
+}
+
+/* ===== Submit row ===== */
+body.change-form .submit-row,
+body.change-form .card-footer.submit-row,
+body.change-form p.submit {
+    position: sticky;
+    bottom: 0;
+    z-index: 10;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    background: var(--pro-surface) !important;
+    border: 1px solid var(--pro-border) !important;
+    border-radius: var(--pro-radius) !important;
+    padding: 14px 20px !important;
+    margin-top: 20px !important;
+    box-shadow: var(--pro-shadow-lg) !important;
+}
+
+body.change-form .submit-row input,
+body.change-form p.submit input {
+    border-radius: 999px !important;
+    padding: 11px 24px !important;
+    font-weight: 700 !important;
+    margin: 0 !important;
+}
+
+body.change-form .submit-row input.default,
+body.change-form p.submit input[name="_save"] {
+    background: var(--pro-text) !important;
+    color: #fff !important;
+    border: none !important;
+}
+
+body.change-form .submit-row input[name="_addanother"],
+body.change-form .submit-row input[name="_continue"] {
+    background: var(--pro-input-bg) !important;
+    color: var(--pro-text) !important;
+    border: 1px solid var(--pro-border-strong) !important;
+}
+
+body.change-form .deletelink,
+body.change-form a.deletelink-box {
+    margin-right: auto !important;
+    color: #dc2626 !important;
+    font-weight: 700 !important;
+    padding: 10px 16px;
+    border-radius: 999px;
+    background: #fef2f2;
+    text-decoration: none !important;
+    font-size: 13px;
+}
+
+body.change-form .deletelink:hover {
+    background: #fee2e2 !important;
+}
+
+/* ===== Inlines ===== */
+body.change-form .inline-related {
+    border: 1px solid var(--pro-border) !important;
+    border-radius: var(--pro-radius-sm) !important;
+    margin-bottom: 12px !important;
+    overflow: hidden;
+}
+
+body.change-form .inline-related h3 {
+    background: var(--pro-table-head) !important;
+    padding: 12px 16px !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    border-bottom: 1px solid var(--pro-border) !important;
+}
+
+body.change-form .inline-related .form-row {
+    padding: 12px 16px !important;
+}
+
+body.change-form .add-row a {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 999px;
+    background: var(--pro-primary-soft);
+    color: var(--pro-primary) !important;
+    font-weight: 700;
+    font-size: 13px;
+    text-decoration: none !important;
+}
+
+/* ===== Select2 ===== */
+body.change-form .select2-container--default .select2-selection--single,
+body.change-form .select2-container--default .select2-selection--multiple {
+    border: 1px solid var(--pro-border-strong) !important;
+    border-radius: var(--pro-radius-sm) !important;
+    min-height: 42px !important;
+    background: var(--pro-input-bg) !important;
+}
+
+body.change-form .select2-container--default .select2-selection--single .select2-selection__rendered {
+    color: var(--pro-text) !important;
+    line-height: 40px !important;
+    padding-right: 14px !important;
+}
+
+body.change-form .select2-dropdown {
+    border: 1px solid var(--pro-border) !important;
+    border-radius: var(--pro-radius-sm) !important;
+    box-shadow: var(--pro-shadow-lg) !important;
+    background: var(--pro-surface) !important;
+}
+
+body.change-form .select2-results__option {
+    color: var(--pro-text) !important;
+    font-size: 13px;
+}
+
+body.change-form .select2-container--default .select2-results__option--highlighted[aria-selected] {
+    background: var(--pro-primary-soft) !important;
+    color: var(--pro-primary) !important;
+}
+
+/* ===== Related widget ===== */
+.related-widget-wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+}
+
+.related-widget-wrapper-link {
+    border-radius: 8px !important;
+    padding: 6px 10px !important;
+}
+
+/* ===== Object tools on form ===== */
+body.change-form .object-tools {
+    margin-bottom: 16px !important;
+}
+
+body.change-form .object-tools a {
+    background: var(--pro-input-bg) !important;
+    color: var(--pro-text) !important;
+    border: 1px solid var(--pro-border-strong) !important;
+    box-shadow: none !important;
+}
+
+/* ===== Dark mode forms ===== */
+html[data-voro-theme="dark"] body.change-form fieldset.module h2,
+html[data-voro-theme="dark"] body.change-form .inline-group h2 {
+    background: var(--pro-table-head) !important;
+}
+
+html[data-voro-theme="dark"] body.change-form .deletelink {
+    background: rgba(239, 68, 68, 0.15);
+    color: #fca5a5 !important;
+}
+
+html[data-voro-theme="dark"] body.change-form .form-control,
+html[data-voro-theme="dark"] body.change-form select,
+html[data-voro-theme="dark"] body.change-form textarea,
+html[data-voro-theme="dark"] body.change-form input[type="text"],
+html[data-voro-theme="dark"] body.change-form input[type="number"] {
+    background: var(--pro-input-bg) !important;
+    color: var(--pro-text) !important;
+    border-color: var(--pro-border-strong) !important;
+}
+
+html[data-voro-theme="dark"] body.change-form .submit-row input[name="_addanother"],
+html[data-voro-theme="dark"] body.change-form .submit-row input[name="_continue"] {
+    background: var(--pro-input-bg) !important;
+    color: var(--pro-text) !important;
+}

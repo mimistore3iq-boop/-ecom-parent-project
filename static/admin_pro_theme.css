@@ -10,11 +10,18 @@
     --pro-border-strong: rgba(0, 0, 0, 0.1);
     --pro-text: #09090b;
     --pro-muted: #71717a;
+    --pro-link: #2563eb;
     --pro-primary: #059669;
     --pro-primary-dark: #047857;
     --pro-primary-soft: #ecfdf5;
     --pro-sidebar: #09090b;
     --pro-sidebar-hover: #18181b;
+    --pro-input-bg: #fafafa;
+    --pro-table-head: #fafafa;
+    --pro-row-hover: #f4f4f5;
+    --pro-iqd-bg: #f0fdf4;
+    --pro-iqd-border: rgba(5, 150, 105, 0.25);
+    --pro-iqd-text: #047857;
     --pro-radius: 16px;
     --pro-radius-sm: 12px;
     --pro-shadow: 0 1px 2px rgba(0,0,0,.04), 0 4px 16px rgba(0,0,0,.04);
@@ -57,7 +64,7 @@ body.voro-admin-pro {
 }
 
 .main-header .navbar-nav .nav-link:hover {
-    background: #f4f4f5 !important;
+    background: var(--pro-row-hover) !important;
     color: var(--pro-text) !important;
     transform: none !important;
 }
@@ -212,7 +219,7 @@ body.voro-admin-pro .content-wrapper > .content {
 }
 
 #result_list thead th {
-    background: #fafafa !important;
+    background: var(--pro-table-head) !important;
     color: var(--pro-muted) !important;
     font-weight: 700 !important;
     font-size: 11px !important;
@@ -230,7 +237,7 @@ body.voro-admin-pro .content-wrapper > .content {
 }
 
 #result_list tbody tr:hover {
-    background: #fafafa !important;
+    background: var(--pro-row-hover) !important;
 }
 
 #result_list tbody tr:last-child td {
@@ -250,8 +257,8 @@ input[type="url"] {
     border-radius: var(--pro-radius-sm) !important;
     padding: 10px 14px !important;
     font-size: 14px !important;
-    background: #fff !important;
-    transition: border-color 0.15s, box-shadow 0.15s !important;
+    background: var(--pro-input-bg) !important;
+    color: var(--pro-text) !important;
 }
 
 .form-control:focus,
@@ -335,12 +342,12 @@ input[type="submit"].default:hover {
 
 #jazzy-tabs .nav-link:hover {
     color: var(--pro-text) !important;
-    background: #f4f4f5 !important;
+    background: var(--pro-row-hover) !important;
 }
 
 #jazzy-tabs .nav-link.active {
     color: var(--pro-text) !important;
-    background: #f4f4f5 !important;
+    background: var(--pro-row-hover) !important;
     border-bottom: none !important;
     font-weight: 700 !important;
 }
@@ -361,7 +368,7 @@ body.voro-admin-pro .dropdown-item {
 }
 
 body.voro-admin-pro .dropdown-item:hover {
-    background: #f4f4f5 !important;
+    background: var(--pro-row-hover) !important;
     color: var(--pro-text) !important;
 }
 
@@ -460,4 +467,216 @@ body.login {
         min-width: 140px !important;
         font-size: 13px !important;
     }
+}
+
+/* ===== Theme toggle button ===== */
+.voro-theme-toggle {
+    display: inline-flex !important;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px !important;
+    border-radius: 999px !important;
+    border: 1px solid var(--pro-border-strong) !important;
+    background: var(--pro-input-bg) !important;
+    color: var(--pro-text) !important;
+    font-weight: 600 !important;
+    font-size: 13px !important;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+}
+
+.voro-theme-toggle:hover {
+    background: var(--pro-row-hover) !important;
+    color: var(--pro-text) !important;
+}
+
+.voro-theme-toggle i {
+    font-size: 14px;
+}
+
+/* ===== Dark mode ===== */
+html[data-voro-theme="dark"] {
+    --pro-bg: #09090b;
+    --pro-surface: #18181b;
+    --pro-border: rgba(255, 255, 255, 0.08);
+    --pro-border-strong: rgba(255, 255, 255, 0.12);
+    --pro-text: #fafafa;
+    --pro-muted: #a1a1aa;
+    --pro-link: #60a5fa;
+    --pro-primary: #34d399;
+    --pro-primary-dark: #10b981;
+    --pro-primary-soft: rgba(52, 211, 153, 0.12);
+    --pro-sidebar: #000000;
+    --pro-sidebar-hover: #18181b;
+    --pro-input-bg: #27272a;
+    --pro-table-head: #1f1f23;
+    --pro-row-hover: #27272a;
+    --pro-iqd-bg: rgba(52, 211, 153, 0.08);
+    --pro-iqd-border: rgba(52, 211, 153, 0.25);
+    --pro-iqd-text: #6ee7b7;
+    --pro-shadow: 0 1px 2px rgba(0,0,0,.3), 0 4px 16px rgba(0,0,0,.25);
+    --pro-shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.45);
+}
+
+html[data-voro-theme="dark"] .main-header.navbar,
+html[data-voro-theme="dark"] .navbar-dark,
+html[data-voro-theme="dark"] .navbar-white {
+    background: var(--pro-surface) !important;
+    border-bottom-color: var(--pro-border) !important;
+}
+
+html[data-voro-theme="dark"] .main-header .navbar-nav .nav-link {
+    color: var(--pro-muted) !important;
+}
+
+html[data-voro-theme="dark"] .main-header .navbar-nav .nav-link:hover {
+    background: var(--pro-row-hover) !important;
+    color: var(--pro-text) !important;
+}
+
+html[data-voro-theme="dark"] .form-control-navbar {
+    background: var(--pro-input-bg) !important;
+    border-color: var(--pro-border) !important;
+    color: var(--pro-text) !important;
+}
+
+html[data-voro-theme="dark"] .alert-success {
+    background: rgba(52, 211, 153, 0.15) !important;
+    border-color: rgba(52, 211, 153, 0.3) !important;
+    color: #6ee7b7 !important;
+}
+
+html[data-voro-theme="dark"] .alert-danger {
+    background: rgba(239, 68, 68, 0.15) !important;
+    color: #fca5a5 !important;
+}
+
+html[data-voro-theme="dark"] .btn-primary,
+html[data-voro-theme="dark"] input[type="submit"].default {
+    background: var(--pro-primary) !important;
+    color: #09090b !important;
+}
+
+html[data-voro-theme="dark"] .paginator .this-page {
+    background: var(--pro-primary) !important;
+    color: #09090b !important;
+}
+
+html[data-voro-theme="dark"] .voro-price-final {
+    background: var(--pro-primary-soft);
+    color: var(--pro-iqd-text) !important;
+}
+
+html[data-voro-theme="dark"] .main-footer .float-right {
+    opacity: 0.4;
+}
+
+/* Hide Jazzmin version in footer */
+.main-footer .float-right {
+    display: none !important;
+}
+
+/* ===== Footer ===== */
+.voro-footer {
+    display: flex !important;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 14px 24px !important;
+}
+
+.voro-footer-dev {
+    font-size: 12px;
+    opacity: 0.85;
+}
+
+/* ===== Alerts / messages ===== */
+.alert {
+    border-radius: var(--pro-radius-sm) !important;
+    border: 1px solid var(--pro-border) !important;
+    font-weight: 600 !important;
+    font-size: 13px !important;
+}
+
+.alert-success {
+    background: var(--pro-primary-soft) !important;
+    color: var(--pro-primary-dark) !important;
+    border-color: rgba(5, 150, 105, 0.2) !important;
+}
+
+.alert-danger {
+    background: #fef2f2 !important;
+    color: #b91c1c !important;
+}
+
+.alert-warning {
+    background: #fffbeb !important;
+    color: #b45309 !important;
+}
+
+.alert-info {
+    background: #eff6ff !important;
+    color: #1d4ed8 !important;
+}
+
+/* ===== Page title bar (all pages) ===== */
+.content.border-bottom {
+    background: var(--pro-surface) !important;
+    border-bottom: 1px solid var(--pro-border) !important;
+}
+
+.content.border-bottom h1 {
+    color: var(--pro-text) !important;
+    font-weight: 700 !important;
+    letter-spacing: -0.02em;
+}
+
+/* ===== Dark mode — global inputs & tables ===== */
+html[data-voro-theme="dark"] .form-control,
+html[data-voro-theme="dark"] select,
+html[data-voro-theme="dark"] textarea,
+html[data-voro-theme="dark"] input[type="text"],
+html[data-voro-theme="dark"] input[type="number"],
+html[data-voro-theme="dark"] input[type="email"],
+html[data-voro-theme="dark"] input[type="password"],
+html[data-voro-theme="dark"] input[type="url"] {
+    background: var(--pro-input-bg) !important;
+    color: var(--pro-text) !important;
+    border-color: var(--pro-border-strong) !important;
+}
+
+html[data-voro-theme="dark"] #result_list tbody td {
+    background: var(--pro-surface) !important;
+    color: var(--pro-text) !important;
+}
+
+html[data-voro-theme="dark"] #jazzy-tabs .nav-link:hover,
+html[data-voro-theme="dark"] #jazzy-tabs .nav-link.active {
+    background: var(--pro-row-hover) !important;
+}
+
+html[data-voro-theme="dark"] .loading-overlay {
+    background: rgba(9, 9, 11, 0.85) !important;
+}
+
+html[data-voro-theme="dark"] .alert-danger {
+    background: rgba(239, 68, 68, 0.12) !important;
+    color: #fca5a5 !important;
+}
+
+html[data-voro-theme="dark"] .alert-warning {
+    background: rgba(234, 179, 8, 0.12) !important;
+    color: #fcd34d !important;
+}
+
+html[data-voro-theme="dark"] .alert-info {
+    background: rgba(59, 130, 246, 0.12) !important;
+    color: #93c5fd !important;
+}
+
+html[data-voro-theme="dark"] .submit-row input.default,
+html[data-voro-theme="dark"] body.change-form .submit-row input.default {
+    background: var(--pro-primary) !important;
+    color: #09090b !important;
 }

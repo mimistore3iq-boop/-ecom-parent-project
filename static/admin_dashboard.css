@@ -501,3 +501,50 @@ body.dashboard .content-wrapper > .content {
         justify-content: center;
     }
 }
+
+/* ===== Dark mode (dashboard) ===== */
+html[data-voro-theme="dark"] .voro-dash {
+    --vx-bg: #09090b;
+    --vx-surface: #18181b;
+    --vx-border: rgba(255,255,255,.08);
+    --vx-border-strong: rgba(255,255,255,.12);
+    --vx-text: #fafafa;
+    --vx-muted: #a1a1aa;
+    --vx-accent: #34d399;
+    --vx-accent-soft: rgba(52,211,153,.12);
+    --vx-shadow: 0 1px 2px rgba(0,0,0,.3), 0 4px 16px rgba(0,0,0,.25);
+    --vx-shadow-hover: 0 8px 30px rgba(0,0,0,.4);
+}
+
+html[data-voro-theme="dark"] .vx-kpi,
+html[data-voro-theme="dark"] .vx-panel,
+html[data-voro-theme="dark"] .vx-nav-tile {
+    background: var(--vx-surface);
+}
+
+html[data-voro-theme="dark"] .vx-nav-tile {
+    background: #1f1f23;
+}
+
+html[data-voro-theme="dark"] .vx-btn--primary {
+    background: var(--vx-accent);
+    color: #09090b !important;
+}
+
+html[data-voro-theme="dark"] .vx-btn--ghost {
+    background: var(--vx-surface);
+    border-color: var(--vx-border-strong);
+    color: var(--vx-text) !important;
+}
+
+html[data-voro-theme="dark"] .vx-top__title,
+html[data-voro-theme="dark"] .vx-kpi__num,
+html[data-voro-theme="dark"] .vx-nav-tile__title,
+html[data-voro-theme="dark"] .vx-feed__title {
+    color: var(--vx-text);
+}
+
+html[data-voro-theme="dark"] body.dashboard .content-wrapper {
+    background: var(--vx-bg) !important;
+    background-image: none !important;
+}

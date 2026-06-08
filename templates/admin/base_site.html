@@ -59,14 +59,16 @@
 {% block extrahead %}
     {{ block.super }}
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" type="text/css" href="{% static 'admin_pro_theme.css' %}?v=4.0">
+    <link rel="stylesheet" type="text/css" href="{% static 'admin_pro_theme.css' %}?v=6.0">
+    <link rel="stylesheet" type="text/css" href="{% static 'admin_changelist.css' %}?v=6.0">
+    <link rel="stylesheet" type="text/css" href="{% static 'admin_forms.css' %}?v=6.0">
     <!-- In-App Browser & SEO Meta Tags -->
     <meta property="og:title" content="voro Admin Panel | لوحة تحكم">
     <meta property="og:description" content="Manage your store with ease on any device.">
     <meta property="og:image" content="https://media.voroiq.com/logo.png">
     <meta property="og:url" content="https://ecom-parent-project.onrender.com/admin/">
     <meta property="og:type" content="website">
-    <meta name="theme-color" content="#667eea">
+    <meta name="theme-color" content="#ffffff">
 
     <!-- jQuery + Bootstrap loaded once at page bottom via templates/admin/base.html (Jazzmin) -->
 
@@ -134,8 +136,8 @@
         .loading-spinner-large {
             width: 50px;
             height: 50px;
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #667eea;
+            border: 4px solid var(--pro-border, #f3f3f3);
+            border-top: 4px solid var(--pro-primary, #059669);
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
@@ -177,18 +179,10 @@
 {% endblock %}
 
 {% block footer %}
-<div class="main-footer" style="background: #f8f9fa; border-top: 1px solid #dee2e6; padding: 15px 20px; text-align: center;">
-    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
-        <div style="color: #6c757d; font-weight: 500;">
-            <i class="fas fa-crown" style="color: #ffd700; margin-left: 5px;"></i>
-            © 2024 voro - جميع الحقوق محفوظة
-        </div>
-        <div style="color: #6c757d; font-size: 0.9rem;">
-            <i class="fas fa-code" style="margin-left: 5px;"></i>
-            تم التطوير بواسطة فريق voro
-        </div>
-    </div>
-</div>
+<footer class="main-footer voro-footer">
+    <span><i class="fas fa-store"></i> © {% now "Y" %} voro — جميع الحقوق محفوظة</span>
+    <span class="voro-footer-dev">تم التطوير بواسطة فريق voro</span>
+</footer>
 
 <!-- Loading Overlay -->
 <div class="loading-overlay" id="loadingOverlay">

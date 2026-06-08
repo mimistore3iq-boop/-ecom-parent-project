@@ -8,6 +8,15 @@
 <html lang="{{ LANGUAGE_CODE|default:"en-us" }}" {% if LANGUAGE_BIDI %}dir="rtl"{% endif %}>
 <head>
     <meta charset="utf-8">
+    <script>
+    (function () {
+        var t = localStorage.getItem('voro-admin-theme');
+        if (!t && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            t = 'dark';
+        }
+        document.documentElement.setAttribute('data-voro-theme', t || 'light');
+    })();
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <!--  Prevent admin panel being crawled by search engines -->
@@ -35,7 +44,7 @@
 
     {% if jazzmin_settings.custom_css %}
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="{% static jazzmin_settings.custom_css %}?v=4.0">
+    <link rel="stylesheet" href="{% static jazzmin_settings.custom_css %}?v=6.0">
     {% endif %}
 
     <!-- favicons -->
@@ -105,6 +114,14 @@
             {% endif %}
 
             <ul class="navbar-nav ml-auto">
+
+                <li class="nav-item d-flex align-items-center">
+                    <button type="button" class="nav-link voro-theme-toggle btn" id="voroThemeToggle" aria-pressed="false">
+                        <i class="fas fa-moon voro-icon-moon"></i>
+                        <i class="fas fa-sun voro-icon-sun" style="display:none"></i>
+                        <span class="voro-theme-label d-none d-md-inline">ليلي</span>
+                    </button>
+                </li>
 
                 {% if jazzmin_settings.show_ui_builder %}
                 <li class="nav-item">
@@ -382,6 +399,7 @@
 
 {% block extrajs %}{% endblock %}
 <script src="{% static 'admin_tabs_fix.js' %}"></script>
+<script src="{% static 'admin_theme_toggle.js' %}?v=6"></script>
 
 </body>
 </html>
