@@ -89,11 +89,12 @@ class ProductAdmin(admin.ModelAdmin):
         final = obj.discounted_price
         if obj.price and final < obj.price:
             amount = int(final)
-            formatted = f'{amount:,}'.replace(',', '،')
+            formatted = f'{amount:,}'.replace(',', '.')
             return mark_safe(
-                f'<span style="color:#198754;font-weight:700;">{formatted} الف دينار عراقي</span>'
+                f'<span class="voro-price-display" style="color:#059669;font-weight:700;">'
+                f'{formatted} الف دينار عراقي</span>'
             )
-        return mark_safe('<span style="color:#adb5bd;">—</span>')
+        return mark_safe('<span style="color:#9ca3af;">—</span>')
 
     price_after_discount.short_description = 'السعر بعد الخصم'
     

@@ -522,7 +522,7 @@ JAZZMIN_UI_TWEAKS = {
         "success": "btn-success"
     },
     "actions_sticky_top": True,
-    "custom_css": "custom_admin_v2.css",
+    "custom_css": "admin_pro_theme.css",
     "custom_js": "custom_admin.js",
     # Use external CDN for static files in production
     "use_external_cdn": False,
