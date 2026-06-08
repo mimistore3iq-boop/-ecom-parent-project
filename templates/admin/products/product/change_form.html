@@ -1,15 +1,6 @@
 {% extends "admin/change_form.html" %}
 {% load static %}
 
-{% block extrahead %}{{ block.super }}
-<style>
-    /* Hide all fieldsets and inline groups by default */
-    .form-row fieldset, .inline-group, .inline-related {
-        display: none !important;
-    }
-    .form-row fieldset.active, .inline-group.active, .inline-related.active {
-        display: block !important;
-    }
-</style>
-<script src="{% static 'manual_product_tabs.js' %}"></script>
+{% block extrahead %}
+{{ block.super }}
 {% endblock %}

@@ -41,7 +41,9 @@ export const ProductCard = ({ product, onAddToCart }) => {
         {/* Discount Badge */}
         {product.discount_percentage > 0 && (
           <div className="absolute top-2 right-2 bg-gradient-to-r from-red-600 to-pink-600 text-white text-[10px] font-bold px-2 py-1 rounded-lg z-20 shadow-md">
-            {product.discount_percentage}% خصم
+            {Number(product.discount_amount) > 0
+              ? `-${formatCurrency(product.discount_amount)}`
+              : `${product.discount_percentage}% خصم`}
           </div>
         )}
 

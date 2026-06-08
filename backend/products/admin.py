@@ -42,12 +42,60 @@ class ProductAdmin(admin.ModelAdmin):
     form = ProductAdminForm
     change_form_template = 'admin/products/product/change_form.html'
     change_list_template = 'admin/products/product/change_list.html'
-    # بدون list_editable — التحرير من صفحة المنتج فقط (جدول التحرير السريع يجمّد الموبايل)
-    list_display = ('product_image', 'name', 'category', 'price', 'stock_quantity', 'is_active', 'created_at')
+    list_display = (
+        'product_image',
+        'name',
+        'category',
+        'price',
+        'discount_amount',
+        'price_after_discount',
+        'stock_quantity',
+        'display_order',
+        'is_active',
+    )
     list_display_links = ('product_image', 'name')
+    list_editable = (
+        'category',
+        'price',
+        'discount_amount',
+        'stock_quantity',
+        'display_order',
+        'is_active',
+    )
     list_filter = ('category', 'is_active', 'is_featured', 'created_at')
     search_fields = ('name', 'description', 'brand', 'model')
     list_per_page = 25
+    ordering = ('display_order', '-created_at')
+    save_on_top = True
+
+    def formfield_for_dbfield(self, db_field, request, **kwargs):
+        field = super().formfield_for_dbfield(db_field, request, **kwargs)
+        labels = {
+            'category': 'القسم',
+            'price': 'السعر الأصلي (د.ع)',
+            'discount_amount': 'الخصم (د.ع)',
+            'stock_quantity': 'الكمية المتوفرة',
+            'display_order': 'ترتيب الظهور',
+            'is_active': 'نشط',
+        }
+        if db_field.name in labels:
+            field.label = labels[db_field.name]
+        if db_field.name in ('price', 'discount_amount'):
+            field.widget.attrs.setdefault('step', '1')
+            field.widget.attrs.setdefault('min', '0')
+        return field
+
+    def price_after_discount(self, obj):
+        final = obj.discounted_price
+        if obj.price and final < obj.price:
+            amount = int(final)
+            formatted = f'{amount:,}'.replace(',', '،')
+            return mark_safe(
+                f'<span style="color:#198754;font-weight:700;">{formatted} الف دينار عراقي</span>'
+            )
+        return mark_safe('<span style="color:#adb5bd;">—</span>')
+
+    price_after_discount.short_description = 'السعر بعد الخصم'
     
     def product_image(self, obj):
         """عرض صورة صغيرة من المنتج"""

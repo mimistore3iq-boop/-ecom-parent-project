@@ -59,6 +59,8 @@ window.addEventListener('orientationchange', function () {
 
 onDocumentReady(function() {
     try {
+        initJazzyAdminTabs();
+
         if (isMobile()) {
             applyMobileLayoutOnce();
             initializeMobileSidebar();
@@ -94,6 +96,18 @@ onDocumentReady(function() {
 
 
 // ===== FEATURE INITIALIZERS =====
+
+function initJazzyAdminTabs() {
+    var jQuery = window.jQuery;
+    if (!jQuery || !jQuery.fn || !jQuery.fn.tab) return;
+    var tabs = document.getElementById('jazzy-tabs');
+    if (!tabs || tabs.dataset.voroBound === '1') return;
+    tabs.dataset.voroBound = '1';
+    jQuery(tabs).find('.nav-link[href^="#"]').on('click', function (e) {
+        e.preventDefault();
+        jQuery(this).tab('show');
+    });
+}
 
 // Mobile Sidebar Overlay System
 function initializeMobileSidebar() {

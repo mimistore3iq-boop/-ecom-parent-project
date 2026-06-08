@@ -135,12 +135,19 @@ class Product(models.Model):
         return self.name
     
     def save(self, *args, **kwargs):
-        """Override save to generate slug"""
+        """Override save to generate slug and sync discount price from discount amount."""
         if not self.slug:
             from django.utils.text import slugify
             import uuid
             base_slug = slugify(self.name)
             self.slug = f"{base_slug}-{uuid.uuid4().hex[:8]}"
+
+        if self.discount_amount and self.discount_amount > 0:
+            self.discount_price = max(self.price - self.discount_amount, 0)
+        elif not self.discount_amount or self.discount_amount == 0:
+            if self.discount_price is None or self.discount_price >= self.price:
+                self.discount_price = None
+
         super().save(*args, **kwargs)
     
     @property

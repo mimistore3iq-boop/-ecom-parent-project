@@ -15,14 +15,7 @@ def send_telegram_order_notification(order):
     product_images = []
     
     for item in order.items.all():
-        # Format item price as integer and append currency
-        try:
-            price_val = int(float(item.price))
-            item_price_formatted = f"{price_val} دينار عراقي"
-        except (ValueError, TypeError):
-            item_price_formatted = f"{item.price} د.ع"
-            
-        items_text += f"- {item.product_name} (العدد: {item.quantity}, السعر: {item_price_formatted})\n"
+        items_text += f"- {item.product_name} (العدد: {item.quantity})\n"
         
         # Collect product image URLs
         image_url = None

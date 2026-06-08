@@ -4,146 +4,128 @@
 {% block extrastyle %}
 {{ block.super }}
 <style>
-/* موبايل: بطاقات بسيطة مثل الصفحة الرئيسية — تمرير عمودي واحد فقط */
+.voro-products-changelist .help.iqd-hint {
+    background: linear-gradient(135deg, #667eea15, #764ba215);
+    border: 1px solid #667eea40;
+    border-radius: 10px;
+    padding: 10px 14px;
+    margin-bottom: 12px;
+    font-size: 13px;
+    color: #495057;
+}
+
+@media (min-width: 992px) {
+    #result_list thead th {
+        background: linear-gradient(135deg, #667eea, #764ba2) !important;
+        color: #fff !important;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+    #result_list tbody tr:nth-child(even) {
+        background: #f8f9fc;
+    }
+    #result_list tbody tr:hover {
+        background: #eef1ff !important;
+    }
+    #result_list td.field-price input,
+    #result_list td.field-discount_amount input,
+    #result_list td.field-stock_quantity input,
+    #result_list td.field-display_order input {
+        min-width: 90px;
+        text-align: center;
+        border-radius: 8px;
+        border: 1px solid #ced4da;
+        font-weight: 600;
+    }
+    #result_list td.field-category select {
+        min-width: 140px;
+        border-radius: 8px;
+    }
+}
+
 @media (max-width: 991.98px) {
     .change-list .filtered .panel,
     #changelist-filter {
         display: none;
     }
-
-    .change-list.filtered #changelist-filter-toggle {
-        display: inline-block;
-    }
-
     #changelist,
     #changelist-form,
     #content-main,
     .results {
         overflow: visible !important;
         width: 100% !important;
-        max-width: 100% !important;
-        min-width: 0 !important;
     }
-
-    #changelist .results {
-        overflow: visible !important;
-    }
-
     #result_list {
         display: block !important;
         min-width: 0 !important;
         width: 100% !important;
         border: none !important;
     }
-
-    #result_list thead {
-        display: none !important;
-    }
-
-    #result_list tbody {
-        display: block !important;
-    }
-
+    #result_list thead { display: none !important; }
+    #result_list tbody { display: block !important; }
     #result_list tbody tr {
         display: block !important;
-        width: 100% !important;
-        margin: 0 0 12px 0 !important;
+        margin-bottom: 12px !important;
         padding: 14px !important;
         background: #fff !important;
         border: 1px solid #e9ecef !important;
         border-radius: 12px !important;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06) !important;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.06) !important;
     }
-
-    #result_list tbody tr:hover {
-        background: #fff !important;
-    }
-
     #result_list tbody td {
         display: flex !important;
         justify-content: space-between !important;
         align-items: center !important;
         width: 100% !important;
-        padding: 6px 0 !important;
+        padding: 8px 0 !important;
         border: none !important;
-        text-align: right !important;
-        white-space: normal !important;
     }
-
     #result_list tbody td::before {
         content: attr(data-label);
         font-weight: 600;
         color: #6c757d;
-        margin-left: 12px;
+        margin-left: 10px;
         flex-shrink: 0;
+        font-size: 12px;
     }
-
-    #result_list tbody td.action-checkbox {
-        justify-content: flex-start !important;
-    }
-
-    #result_list tbody td.action-checkbox::before {
-        content: "تحديد";
-    }
-
-    #result_list tbody td.field-product_image {
-        justify-content: center !important;
-    }
-
-    #result_list tbody td.field-product_image::before {
-        display: none;
-    }
-
-    #result_list tbody td.field-name a {
-        font-weight: 700;
-        color: #667eea !important;
-        font-size: 1.05rem;
-    }
-
-    #changelist-search {
-        flex-direction: column;
-        gap: 8px;
-    }
-
-    #changelist-search input,
-    #changelist-search select,
-    .actions select,
-    .actions .button,
-    .actions button {
-        width: 100% !important;
-        min-height: 44px;
+    #result_list tbody td input,
+    #result_list tbody td select {
+        max-width: 55%;
         font-size: 16px;
+        min-height: 40px;
+        border-radius: 8px;
     }
-
-    .change-list-actions {
-        padding-bottom: 8px !important;
-    }
-
-    .paginator {
-        flex-wrap: wrap;
-        gap: 4px;
-    }
-
-    .select2-container {
-        display: none !important;
-    }
-
-    .search-filter,
-    .actions select {
-        display: block !important;
-        width: 100% !important;
-        opacity: 1 !important;
-        position: static !important;
-    }
+    #result_list tbody td.field-product_image::before,
+    #result_list tbody td.field-price_after_discount::before { display: none; }
+    #result_list tbody td.field-product_image { justify-content: center !important; }
+    .select2-container { display: none !important; }
 }
 </style>
+{% endblock %}
+
+{% block result_list %}
+<div class="voro-products-changelist">
+    <p class="help iqd-hint">
+        💡 عدّل <strong>القسم، السعر، الخصم، الكمية، الترتيب</strong> مباشرة ثم اضغط
+        <strong>«حفظ»</strong> أعلى أو أسفل القائمة. مثال: سعر 45000 وخصم 2000 ← يصبح 43000 للزبون.
+        الترتيب: الرقم الأصغر يظهر أولاً داخل القسم.
+    </p>
+    {{ block.super }}
+</div>
 {% endblock %}
 
 {% block extrajs %}
 {{ block.super }}
 <script>
 (function () {
-    if (window.innerWidth > 991) return;
+    function formatIqdInputs() {
+        document.querySelectorAll(
+            '#result_list td.field-price input, #result_list td.field-discount_amount input'
+        ).forEach(function (input) {
+            input.setAttribute('placeholder', 'د.ع');
+            input.setAttribute('inputmode', 'numeric');
+        });
+    }
 
     function labelTableCells() {
         var headers = [];
@@ -152,7 +134,6 @@
             headers.push(t ? t.innerText.trim() : th.innerText.trim());
         });
         if (!headers.length) return;
-
         document.querySelectorAll('#result_list tbody tr').forEach(function (row) {
             row.querySelectorAll('td').forEach(function (td, i) {
                 if (!td.getAttribute('data-label') && headers[i]) {
@@ -162,22 +143,26 @@
         });
     }
 
-    function destroyMobileSelect2() {
+    function stripSelect2OnTable() {
         if (!window.jQuery || !jQuery.fn.select2) return;
-        jQuery('.search-filter, .actions select, .search-filter-mptt').each(function () {
+        jQuery('#result_list select').each(function () {
             try {
-                if (jQuery(this).data('select2')) {
-                    jQuery(this).select2('destroy');
-                }
+                if (jQuery(this).data('select2')) jQuery(this).select2('destroy');
             } catch (e) { /* ignore */ }
             jQuery(this).show();
         });
     }
 
-    document.addEventListener('DOMContentLoaded', function () {
+    function boot() {
+        formatIqdInputs();
         labelTableCells();
-        destroyMobileSelect2();
-        setTimeout(destroyMobileSelect2, 100);
+        stripSelect2OnTable();
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        boot();
+        setTimeout(boot, 400);
+        setTimeout(boot, 1200);
     });
 })();
 </script>

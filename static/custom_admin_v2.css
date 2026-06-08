@@ -1695,3 +1695,104 @@ textarea:focus {
         max-height: none !important;
     }
 }
+
+/* ===== voro Professional Admin Theme ===== */
+.content-wrapper > .content-header h1 {
+    font-weight: 700 !important;
+    color: #2d3748 !important;
+}
+
+.card, .module, .box {
+    border-radius: 12px !important;
+    border: none !important;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06) !important;
+}
+
+.card-header, .box-header {
+    border-radius: 12px 12px 0 0 !important;
+    font-weight: 600 !important;
+}
+
+/* Jazzmin fieldset tabs — banner, coupon, product */
+#jazzy-tabs {
+    border-bottom: 2px solid #e9ecef;
+    gap: 4px;
+    flex-wrap: wrap;
+}
+
+#jazzy-tabs .nav-link {
+    cursor: pointer !important;
+    pointer-events: auto !important;
+    border-radius: 10px 10px 0 0 !important;
+    font-weight: 600 !important;
+    color: #495057 !important;
+    padding: 10px 18px !important;
+    border: 1px solid transparent !important;
+    margin-bottom: -2px;
+}
+
+#jazzy-tabs .nav-link:hover {
+    color: #667eea !important;
+    background: #f0f3ff !important;
+}
+
+#jazzy-tabs .nav-link.active {
+    background: linear-gradient(135deg, #667eea, #764ba2) !important;
+    color: #fff !important;
+    border-color: transparent !important;
+}
+
+.change-form .tab-content {
+    padding: 20px 5px !important;
+}
+
+.change-form .tab-pane .card {
+    margin-bottom: 0 !important;
+}
+
+.btn-primary, input[type=submit].default {
+    background: linear-gradient(135deg, #667eea, #764ba2) !important;
+    border: none !important;
+    border-radius: 10px !important;
+    font-weight: 600 !important;
+    padding: 10px 22px !important;
+}
+
+.btn-primary:hover {
+    opacity: 0.92;
+    transform: translateY(-1px);
+}
+
+#result_list {
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.submit-row, .change-list-actions {
+    background: #fff;
+    border-radius: 12px;
+    padding: 12px !important;
+    margin-bottom: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.form-control, select, textarea {
+    border-radius: 8px !important;
+}
+
+.main-sidebar {
+    box-shadow: -2px 0 16px rgba(0,0,0,0.08) !important;
+}
+
+@media (max-width: 991.98px) {
+    #jazzy-tabs .nav-link {
+        font-size: 12px !important;
+        padding: 8px 12px !important;
+    }
+    #jazzy-tabs {
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        white-space: nowrap;
+        -webkit-overflow-scrolling: touch;
+    }
+}
