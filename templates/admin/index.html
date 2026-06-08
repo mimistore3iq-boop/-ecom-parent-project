@@ -1,497 +1,217 @@
 {% extends "admin/base_site.html" %}
-{% load i18n admin_urls static admin_list %}
+{% load i18n static %}
 
-{% block title %}{{ title }} | {{ site_title|default:_('Django site admin') }}{% endblock %}
+{% block bodyclass %}{{ block.super }} dashboard{% endblock %}
 
 {% block extrahead %}
-    {{ block.super }}
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        @media (max-width: 991.98px) {
-            .dashboard-container,
-            .dashboard-stats,
-            .stat-card,
-            .welcome-section,
-            .quick-actions,
-            .action-btn,
-            .recent-activity,
-            .system-info {
-                transition: none !important;
-                animation: none !important;
-                transform: none !important;
-            }
-            .stat-card::before {
-                display: none !important;
-            }
-            .stat-card:hover,
-            .action-btn:hover {
-                transform: none !important;
-                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1) !important;
-            }
-        }
-        .dashboard-stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 15px;
-            margin-bottom: 30px;
-        }
-        
-        @media (max-width: 768px) {
-            .dashboard-stats {
-                grid-template-columns: 1fr;
-                gap: 10px;
-            }
-            
-            .stat-card {
-                padding: 15px !important;
-            }
-            
-            .stat-number {
-                font-size: 1.8rem !important;
-            }
-        }
-        
-        .stat-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 25px;
-            border-radius: 15px;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
-        }
-        
-        .stat-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            right: 0;
-            width: 100px;
-            height: 100px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 50%;
-            transform: translate(30px, -30px);
-        }
-        
-        .stat-icon {
-            font-size: 2.5rem;
-            margin-bottom: 15px;
-            opacity: 0.9;
-        }
-        
-        .stat-number {
-            font-size: 2.2rem;
-            font-weight: 700;
-            margin-bottom: 5px;
-        }
-        
-        .stat-label {
-            font-size: 1rem;
-            opacity: 0.9;
-            font-weight: 500;
-        }
-        
-        .quick-actions {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-bottom: 30px;
-        }
-        
-        .action-btn {
-            display: flex;
-            align-items: center;
-            padding: 15px 20px;
-            background: white;
-            border: 2px solid #e9ecef;
-            border-radius: 10px;
-            text-decoration: none;
-            color: #495057;
-            transition: all 0.3s ease;
-            font-weight: 500;
-        }
-        
-        .action-btn:hover {
-            border-color: #667eea;
-            color: #667eea;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
-            text-decoration: none;
-        }
-        
-        .action-btn i {
-            margin-left: 10px;
-            font-size: 1.2rem;
-        }
-        
-        .recent-activity {
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
-            margin-bottom: 20px;
-        }
-        
-        .activity-header {
-            display: flex;
-            align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid #f8f9fa;
-        }
-        
-        .activity-header h3 {
-            margin: 0;
-            color: #495057;
-            font-weight: 600;
-        }
-        
-        .activity-header i {
-            margin-left: 10px;
-            color: #667eea;
-            font-size: 1.3rem;
-        }
-        
-        .activity-item {
-            display: flex;
-            align-items: center;
-            padding: 12px 0;
-            border-bottom: 1px solid #f8f9fa;
-        }
-        
-        .activity-item:last-child {
-            border-bottom: none;
-        }
-        
-        .activity-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-left: 15px;
-            font-size: 1rem;
-        }
-        
-        .activity-content {
-            flex: 1;
-        }
-        
-        .activity-title {
-            font-weight: 500;
-            color: #495057;
-            margin-bottom: 3px;
-        }
-        
-        .activity-time {
-            font-size: 0.85rem;
-            color: #6c757d;
-        }
-        
-        .welcome-section {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 30px;
-            border-radius: 15px;
-            margin-bottom: 30px;
-            text-align: center;
-        }
-        
-        .welcome-title {
-            font-size: 2rem;
-            font-weight: 700;
-            margin-bottom: 10px;
-        }
-        
-        .welcome-subtitle {
-            font-size: 1.1rem;
-            opacity: 0.9;
-        }
-        
-        .system-info {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-top: 20px;
-        }
-        
-        .info-item {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 15px;
-            border-radius: 10px;
-            text-align: center;
-        }
-        
-        .info-label {
-            font-size: 0.9rem;
-            opacity: 0.8;
-            margin-bottom: 5px;
-        }
-        
-        .info-value {
-            font-size: 1.1rem;
-            font-weight: 600;
-        }
-    </style>
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'admin_dashboard.css' %}?v=3.0">
 {% endblock %}
 
 {% block content %}
-<div class="dashboard-container">
-    <!-- Welcome Section -->
-    <div class="welcome-section">
-        <div class="welcome-title">
-            <i class="fas fa-crown"></i>
-            مرحباً بك في لوحة تحكم voro
-        </div>
-        <div class="welcome-subtitle">
-            إدارة متجرك الإلكتروني بكل سهولة واحترافية
-        </div>
-        <div class="system-info">
-            <div class="info-item">
-                <div class="info-label">الوقت الحالي</div>
-                <div class="info-value" id="current-time"></div>
-            </div>
-            <div class="info-item">
-                <div class="info-label">آخر تسجيل دخول</div>
-                <div class="info-value">{{ user.last_login|date:"Y/m/d H:i" }}</div>
-            </div>
-            <div class="info-item">
-                <div class="info-label">حالة النظام</div>
-                <div class="info-value">
-                    <i class="fas fa-circle" style="color: #28a745;"></i>
-                    نشط
-                </div>
-            </div>
-        </div>
-    </div>
+<div class="voro-dash">
 
-    <!-- Statistics Cards -->
-    <div class="dashboard-stats">
-        <div class="stat-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-            <div class="stat-icon">
-                <i class="fas fa-users"></i>
+    <!-- Hero + Stats -->
+    <section class="voro-dash-hero">
+        <div class="voro-dash-hero__intro">
+            <div class="voro-dash-hero__badge">
+                <i class="fas fa-store"></i> voro Admin
             </div>
-            <div class="stat-number" id="users-count">{{ users_count|default:"0" }}</div>
-            <div class="stat-label">إجمالي المستخدمين</div>
-        </div>
-        
-        <div class="stat-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
-            <div class="stat-icon">
-                <i class="fas fa-box"></i>
+            <h1 class="voro-dash-hero__title">
+                مرحباً، {{ user.get_full_name|default:user.username }}
+            </h1>
+            <p class="voro-dash-hero__sub">إدارة متجرك الإلكتروني — لوحة تحكم احترافية</p>
+            <div class="voro-dash-hero__meta">
+                <span><i class="far fa-clock"></i> <span id="voro-current-time">—</span></span>
+                <span><i class="fas fa-sign-in-alt"></i> آخر دخول: {{ user.last_login|date:"Y/m/d H:i"|default:"—" }}</span>
+                <span><span class="dot-live"></span> النظام نشط</span>
             </div>
-            <div class="stat-number" id="products-count">{{ products_count|default:"0" }}</div>
-            <div class="stat-label">إجمالي المنتجات</div>
         </div>
-        
-        <div class="stat-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
-            <div class="stat-icon">
-                <i class="fas fa-shopping-cart"></i>
+        <div class="voro-dash-stats">
+            <div class="voro-stat">
+                <div class="voro-stat__icon"><i class="fas fa-users"></i></div>
+                <div class="voro-stat__num">{{ users_count|default:"0" }}</div>
+                <div class="voro-stat__label">المستخدمون</div>
             </div>
-            <div class="stat-number" id="orders-count">{{ orders_count|default:"0" }}</div>
-            <div class="stat-label">إجمالي الطلبات</div>
-        </div>
-        
-        <div class="stat-card" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
-            <div class="stat-icon">
-                <i class="fas fa-dollar-sign"></i>
+            <div class="voro-stat">
+                <div class="voro-stat__icon"><i class="fas fa-box"></i></div>
+                <div class="voro-stat__num">{{ products_count|default:"0" }}</div>
+                <div class="voro-stat__label">المنتجات</div>
             </div>
-            <div class="stat-number" id="revenue">{{ total_revenue|default:"0" }} د.ع</div>
-            <div class="stat-label">إجمالي المبيعات</div>
+            <div class="voro-stat">
+                <div class="voro-stat__icon"><i class="fas fa-shopping-cart"></i></div>
+                <div class="voro-stat__num">{{ orders_count|default:"0" }}</div>
+                <div class="voro-stat__label">الطلبات</div>
+            </div>
+            <div class="voro-stat">
+                <div class="voro-stat__icon"><i class="fas fa-coins"></i></div>
+                <div class="voro-stat__num">{{ total_revenue|default:"0"|floatformat:0 }} د.ع</div>
+                <div class="voro-stat__label">المبيعات</div>
+            </div>
         </div>
-    </div>
+    </section>
 
     <!-- Quick Actions -->
-    <div class="quick-actions">
-        <a href="{% url 'voro_admin:products_product_add' %}" class="action-btn">
-            <i class="fas fa-plus"></i>
-            إضافة منتج جديد
+    <section class="voro-dash-actions">
+        <a href="{% url 'admin:products_product_add' %}" class="voro-action">
+            <span class="voro-action__icon"><i class="fas fa-plus"></i></span>
+            إضافة منتج
         </a>
-        <a href="{% url 'voro_admin:products_category_changelist' %}" class="action-btn">
-            <i class="fas fa-tags"></i>
-            إدارة الأقسام
+        <a href="{% url 'admin:products_category_changelist' %}" class="voro-action">
+            <span class="voro-action__icon"><i class="fas fa-tags"></i></span>
+            الأقسام
         </a>
-        <a href="{% url 'voro_admin:orders_order_changelist' %}" class="action-btn">
-            <i class="fas fa-list-alt"></i>
-            عرض الطلبات
+        <a href="{% url 'admin:orders_order_changelist' %}" class="voro-action">
+            <span class="voro-action__icon"><i class="fas fa-receipt"></i></span>
+            الطلبات
         </a>
-        <a href="{% url 'voro_admin:users_user_changelist' %}" class="action-btn">
-            <i class="fas fa-users-cog"></i>
-            إدارة المستخدمين
+        <a href="{% url 'admin:products_coupon_changelist' %}" class="voro-action">
+            <span class="voro-action__icon"><i class="fas fa-ticket-alt"></i></span>
+            الكوبونات
         </a>
-    </div>
+        <a href="{% url 'admin:users_user_changelist' %}" class="voro-action">
+            <span class="voro-action__icon"><i class="fas fa-user-cog"></i></span>
+            المستخدمون
+        </a>
+        <a href="/" target="_blank" class="voro-action">
+            <span class="voro-action__icon"><i class="fas fa-external-link-alt"></i></span>
+            عرض المتجر
+        </a>
+    </section>
 
-    <!-- Recent Activity -->
-    <div class="recent-activity">
-        <div class="activity-header">
-            <i class="fas fa-clock"></i>
-            <h3>النشاط الأخير</h3>
-        </div>
-        
-        <div class="activity-item">
-            <div class="activity-icon" style="background: #e3f2fd; color: #1976d2;">
-                <i class="fas fa-user-plus"></i>
-            </div>
-            <div class="activity-content">
-                <div class="activity-title">تم تسجيل مستخدم جديد</div>
-                <div class="activity-time">منذ 5 دقائق</div>
-            </div>
-        </div>
-        
-        <div class="activity-item">
-            <div class="activity-icon" style="background: #f3e5f5; color: #7b1fa2;">
-                <i class="fas fa-shopping-cart"></i>
-            </div>
-            <div class="activity-content">
-                <div class="activity-title">طلب جديد تم استلامه</div>
-                <div class="activity-time">منذ 15 دقيقة</div>
-            </div>
-        </div>
-        
-        <div class="activity-item">
-            <div class="activity-icon" style="background: #e8f5e8; color: #388e3c;">
-                <i class="fas fa-box"></i>
-            </div>
-            <div class="activity-content">
-                <div class="activity-title">تم إضافة منتج جديد</div>
-                <div class="activity-time">منذ 30 دقيقة</div>
-            </div>
-        </div>
-        
-        <div class="activity-item">
-            <div class="activity-icon" style="background: #fff3e0; color: #f57c00;">
-                <i class="fas fa-edit"></i>
-            </div>
-            <div class="activity-content">
-                <div class="activity-title">تم تحديث معلومات المنتج</div>
-                <div class="activity-time">منذ ساعة</div>
-            </div>
-        </div>
-    </div>
+    <div class="voro-dash-grid">
 
-    <!-- Notifications -->
-    <div class="recent-activity">
-        <div class="activity-header">
-            <i class="fas fa-bell"></i>
-            <h3>
-                الإشعارات
-                {% if unread_notifications_count and unread_notifications_count > 0 %}
-                    <span class="badge badge-danger" style="margin-right:10px">غير مقروء: {{ unread_notifications_count }}</span>
-                {% endif %}
-            </h3>
-        </div>
-
-        {% if recent_notifications %}
-            {% for n in recent_notifications %}
-                <div class="activity-item">
-                    <div class="activity-icon" style="background: #e3f2fd; color: #1976d2;">
-                        <i class="fas fa-bell"></i>
-                    </div>
-                    <div class="activity-content">
-                        <div class="activity-title">
-                            {{ n.title }}
-                            <span class="badge {% if n.level == 'success' %}badge-success{% elif n.level == 'warning' %}badge-warning{% elif n.level == 'error' %}badge-danger{% else %}badge-info{% endif %}">
-                                {{ n.get_level_display }}
-                            </span>
-                            {% if not n.is_read %}
-                                <span class="badge badge-info">جديد</span>
-                            {% endif %}
-                        </div>
-                        <div class="activity-time">
-                            {{ n.created_at|date:"Y/m/d H:i" }}
-                            {% if n.recipient %} • للمستخدم: {{ n.recipient.get_full_name }}{% endif %}
-                        </div>
-                        {% if n.body %}
-                            <div style="color:#6c757d; margin-top:5px">{{ n.body }}</div>
-                        {% endif %}
-                    </div>
+        <!-- App Modules -->
+        <div class="voro-dash-main">
+            {% if app_list %}
+            <div class="voro-panel">
+                <div class="voro-panel__head">
+                    <h2><i class="fas fa-th-large"></i> إدارة التطبيقات</h2>
                 </div>
-            {% endfor %}
-            <div style="margin-top:10px">
-                <a href="{% url 'voro_admin:notifications_notification_changelist' %}" class="action-btn" style="display:inline-flex">عرض كل الإشعارات <i class="fas fa-arrow-left"></i></a>
-            </div>
-        {% else %}
-            <div class="activity-item">
-                <div class="activity-content">
-                    <div class="activity-title">لا توجد إشعارات حالياً</div>
-                </div>
-            </div>
-        {% endif %}
-    </div>
-
-    <!-- App List (Original Django Admin) -->
-    {% if app_list %}
-        <div class="recent-activity">
-            <div class="activity-header">
-                <i class="fas fa-th-large"></i>
-                <h3>إدارة التطبيقات</h3>
-            </div>
-            
-            {% for app in app_list %}
-                <div class="app-section" style="margin-bottom: 20px;">
-                    <h4 style="color: #667eea; font-weight: 600; margin-bottom: 15px;">
-                        <i class="fas fa-folder"></i>
-                        {{ app.name }}
-                    </h4>
-                    
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px;">
-                        {% for model in app.models %}
-                            <a href="{{ model.admin_url }}" class="action-btn" style="padding: 10px 15px;">
-                                <i class="fas fa-{{ model.object_name|lower }}"></i>
-                                {{ model.name }}
-                                {% if model.add_url %}
-                                    <span style="margin-right: auto;">
-                                        <a href="{{ model.add_url }}" style="color: #28a745; margin-right: 5px;">
-                                            <i class="fas fa-plus"></i>
-                                        </a>
+                <div class="voro-panel__body">
+                    <div class="voro-modules">
+                        {% for app in app_list %}
+                        <div class="voro-module">
+                            <div class="voro-module__head">
+                                <i class="fas fa-folder-open"></i>
+                                {{ app.name }}
+                            </div>
+                            <ul class="voro-module__list">
+                                {% for model in app.models %}
+                                <li class="voro-module__item">
+                                    {% if model.admin_url %}
+                                    <a href="{{ model.admin_url }}" class="voro-module__link">
+                                        <i class="model-icon fas fa-{% if model.object_name == 'Product' %}box{% elif model.object_name == 'Category' %}tags{% elif model.object_name == 'Order' or model.object_name == 'NewOrder' or model.object_name == 'ProcessedOrder' %}shopping-cart{% elif model.object_name == 'User' %}user{% elif model.object_name == 'Coupon' %}ticket-alt{% elif model.object_name == 'Banner' %}image{% elif model.object_name == 'Notification' %}bell{% elif model.object_name == 'ProductReview' %}star{% else %}cube{% endif %}"></i>
+                                        <span>{{ model.name }}</span>
+                                    </a>
+                                    {% else %}
+                                    <span class="voro-module__link" style="cursor:default;opacity:0.6">
+                                        <i class="model-icon fas fa-cube"></i>
+                                        <span>{{ model.name }}</span>
                                     </span>
-                                {% endif %}
-                            </a>
+                                    {% endif %}
+                                    {% if model.add_url %}
+                                    <a href="{{ model.add_url }}" class="voro-module__add" title="إضافة جديد">
+                                        <i class="fas fa-plus"></i>
+                                    </a>
+                                    {% endif %}
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
                         {% endfor %}
                     </div>
                 </div>
-            {% endfor %}
+            </div>
+            {% endif %}
+
+            {% if pending_orders %}
+            <div class="voro-panel">
+                <div class="voro-panel__head">
+                    <h2><i class="fas fa-hourglass-half"></i> طلبات قيد الانتظار</h2>
+                    <span class="voro-badge voro-badge--warn">{{ pending_orders }}</span>
+                </div>
+            </div>
+            {% endif %}
         </div>
-    {% endif %}
+
+        <!-- Sidebar: Notifications + Recent -->
+        <aside class="voro-dash-aside">
+            <div class="voro-panel">
+                <div class="voro-panel__head">
+                    <h2>
+                        <i class="fas fa-bell"></i> الإشعارات
+                        {% if unread_notifications_count %}
+                        <span class="voro-badge voro-badge--danger">{{ unread_notifications_count }}</span>
+                        {% endif %}
+                    </h2>
+                    <a href="{% url 'admin:notifications_notification_changelist' %}" class="voro-panel__link">الكل</a>
+                </div>
+                <div class="voro-panel__body">
+                    {% if recent_notifications %}
+                    <ul class="voro-feed">
+                        {% for n in recent_notifications %}
+                        <li class="voro-feed__item">
+                            <div class="voro-feed__icon voro-feed__icon--blue">
+                                <i class="fas fa-bell"></i>
+                            </div>
+                            <div class="voro-feed__body">
+                                <div class="voro-feed__title">
+                                    {% if not n.is_read %}<span class="voro-badge voro-badge--new">جديد</span>{% endif %}
+                                    {{ n.title }}
+                                </div>
+                                <div class="voro-feed__meta">{{ n.created_at|date:"Y/m/d H:i" }}</div>
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    <div class="voro-feed__empty">لا توجد إشعارات</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="voro-panel">
+                <div class="voro-panel__head">
+                    <h2><i class="fas fa-clock"></i> آخر الطلبات</h2>
+                    <a href="{% url 'admin:orders_order_changelist' %}" class="voro-panel__link">الكل</a>
+                </div>
+                <div class="voro-panel__body">
+                    {% if recent_orders %}
+                    <ul class="voro-feed">
+                        {% for order in recent_orders %}
+                        <li class="voro-feed__item">
+                            <div class="voro-feed__icon voro-feed__icon--purple">
+                                <i class="fas fa-shopping-bag"></i>
+                            </div>
+                            <div class="voro-feed__body">
+                                <div class="voro-feed__title">طلب #{{ order.id }}</div>
+                                <div class="voro-feed__meta">{{ order.created_at|date:"Y/m/d H:i" }} — {{ order.get_status_display|default:order.status }}</div>
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    <div class="voro-feed__empty">لا توجد طلبات</div>
+                    {% endif %}
+                </div>
+            </div>
+        </aside>
+    </div>
 </div>
 
 <script>
-    (function () {
-        var timeEl = document.getElementById('current-time');
-        if (!timeEl) return;
-
-        function updateTime() {
-            var now = new Date();
-            var opts = {
-                year: 'numeric',
-                month: '2-digit',
-                day: '2-digit',
-                hour: '2-digit',
-                minute: '2-digit'
-            };
-            if (window.innerWidth > 991) {
-                opts.second = '2-digit';
-            }
-            timeEl.textContent = now.toLocaleString('ar-SA', opts);
-        }
-
-        updateTime();
-        // كل ثانية على الديسكتوب فقط — على الموبايل يسبب تجميد أثناء التمرير
-        setInterval(updateTime, window.innerWidth > 991 ? 1000 : 60000);
-
-        document.addEventListener('DOMContentLoaded', function () {
-            if (window.innerWidth <= 991) return;
-            document.querySelectorAll('.stat-card').forEach(function (card, index) {
-                card.style.animationDelay = (index * 0.1) + 's';
-                card.style.animation = 'fadeInUp 0.6s ease forwards';
-            });
+(function () {
+    var el = document.getElementById('voro-current-time');
+    if (!el) return;
+    function tick() {
+        el.textContent = new Date().toLocaleString('ar-IQ', {
+            year: 'numeric', month: '2-digit', day: '2-digit',
+            hour: '2-digit', minute: '2-digit'
         });
-    })();
+    }
+    tick();
+    setInterval(tick, window.innerWidth > 991 ? 60000 : 300000);
+})();
 </script>
 {% endblock %}

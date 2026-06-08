@@ -510,7 +510,7 @@ JAZZMIN_UI_TWEAKS = {
     "sidebar_nav_compact_style": True,
     "sidebar_disable_expand": False,
     "sidebar_nav_child_indent": True,
-    "theme": "litera",
+    "theme": "default",
     "default_theme_mode": "auto",
     "theme_condition": "none",
     "button_classes": {

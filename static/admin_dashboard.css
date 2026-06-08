@@ -1,0 +1,476 @@
+/**
+ * voro Dashboard — professional admin home
+ */
+.voro-dash {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+/* ===== Hero ===== */
+.voro-dash-hero {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 28px 32px;
+    margin-bottom: 24px;
+    border-radius: 18px;
+    background: linear-gradient(135deg, #1e1b4b 0%, #312e81 45%, #4338ca 100%);
+    color: #fff;
+    box-shadow: 0 20px 50px rgba(49, 46, 129, 0.35);
+    position: relative;
+    overflow: hidden;
+}
+
+.voro-dash-hero::before {
+    content: '';
+    position: absolute;
+    top: -60%;
+    left: -10%;
+    width: 50%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 65%);
+    pointer-events: none;
+}
+
+.voro-dash-hero__intro {
+    position: relative;
+    z-index: 1;
+    flex: 1 1 260px;
+}
+
+.voro-dash-hero__badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    margin-bottom: 12px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.12);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+}
+
+.voro-dash-hero__title {
+    margin: 0 0 8px;
+    font-size: 1.75rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+}
+
+.voro-dash-hero__sub {
+    margin: 0;
+    opacity: 0.88;
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+.voro-dash-hero__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-top: 18px;
+    font-size: 13px;
+    opacity: 0.9;
+}
+
+.voro-dash-hero__meta span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.voro-dash-hero__meta .dot-live {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #34d399;
+    box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.35);
+}
+
+/* ===== Stat cards ===== */
+.voro-dash-stats {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(130px, 1fr));
+    gap: 12px;
+    flex: 1 1 320px;
+    max-width: 480px;
+}
+
+.voro-stat {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 16px 18px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    backdrop-filter: blur(8px);
+    transition: background 0.15s ease;
+}
+
+.voro-stat:hover {
+    background: rgba(255, 255, 255, 0.16);
+}
+
+.voro-stat__icon {
+    font-size: 1.1rem;
+    opacity: 0.85;
+    margin-bottom: 8px;
+}
+
+.voro-stat__num {
+    font-size: 1.55rem;
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+}
+
+.voro-stat__label {
+    margin-top: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    opacity: 0.82;
+}
+
+/* ===== Quick actions ===== */
+.voro-dash-actions {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.voro-action {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 18px;
+    border-radius: 14px;
+    background: #fff;
+    border: 1px solid #e5e7ef;
+    color: #1a1d26;
+    text-decoration: none !important;
+    font-weight: 700;
+    font-size: 14px;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
+    transition: border-color 0.15s, box-shadow 0.15s, transform 0.12s;
+}
+
+.voro-action:hover {
+    border-color: #4f46e5;
+    color: #4f46e5;
+    box-shadow: 0 8px 24px rgba(79, 70, 229, 0.12);
+    transform: translateY(-2px);
+}
+
+.voro-action__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 11px;
+    background: #eef2ff;
+    color: #4f46e5;
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+/* ===== Main grid ===== */
+.voro-dash-grid {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 24px;
+    align-items: start;
+}
+
+.voro-panel {
+    background: #fff;
+    border: 1px solid #e5e7ef;
+    border-radius: 16px;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05), 0 6px 20px rgba(15, 23, 42, 0.04);
+    overflow: hidden;
+}
+
+.voro-panel + .voro-panel {
+    margin-top: 20px;
+}
+
+.voro-panel__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 22px;
+    border-bottom: 1px solid #f1f3f9;
+}
+
+.voro-panel__head h2 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 800;
+    color: #1a1d26;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.voro-panel__head h2 i {
+    color: #4f46e5;
+}
+
+.voro-panel__link {
+    font-size: 13px;
+    font-weight: 700;
+    color: #4f46e5;
+    text-decoration: none !important;
+}
+
+.voro-panel__body {
+    padding: 16px 22px 22px;
+}
+
+/* ===== App modules grid ===== */
+.voro-modules {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+}
+
+.voro-module {
+    border: 1px solid #e8ebf4;
+    border-radius: 14px;
+    overflow: hidden;
+    background: #fafbff;
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.voro-module:hover {
+    border-color: #c7d2fe;
+    box-shadow: 0 6px 20px rgba(79, 70, 229, 0.08);
+}
+
+.voro-module__head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 16px;
+    background: #fff;
+    border-bottom: 1px solid #eef1f8;
+    font-weight: 800;
+    font-size: 14px;
+    color: #312e81;
+}
+
+.voro-module__head i {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9px;
+    background: #eef2ff;
+    color: #4f46e5;
+    font-size: 14px;
+}
+
+.voro-module__list {
+    list-style: none;
+    margin: 0;
+    padding: 8px;
+}
+
+.voro-module__item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 0;
+}
+
+.voro-module__link {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    color: #374151 !important;
+    text-decoration: none !important;
+    font-weight: 600;
+    font-size: 13px;
+    transition: background 0.12s, color 0.12s;
+    min-width: 0;
+}
+
+.voro-module__link:hover {
+    background: #fff;
+    color: #4f46e5 !important;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
+}
+
+.voro-module__link i.model-icon {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    background: #fff;
+    color: #6b7280;
+    font-size: 12px;
+    flex-shrink: 0;
+}
+
+.voro-module__add {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 9px;
+    background: #ecfdf5;
+    color: #059669 !important;
+    text-decoration: none !important;
+    font-size: 13px;
+    flex-shrink: 0;
+    transition: background 0.12s, transform 0.12s;
+}
+
+.voro-module__add:hover {
+    background: #d1fae5;
+    transform: scale(1.06);
+}
+
+/* ===== Notifications / activity list ===== */
+.voro-feed {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.voro-feed__item {
+    display: flex;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid #f3f4f8;
+}
+
+.voro-feed__item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.voro-feed__icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 11px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 14px;
+}
+
+.voro-feed__icon--blue { background: #eff6ff; color: #2563eb; }
+.voro-feed__icon--green { background: #ecfdf5; color: #059669; }
+.voro-feed__icon--purple { background: #f5f3ff; color: #7c3aed; }
+.voro-feed__icon--orange { background: #fff7ed; color: #ea580c; }
+
+.voro-feed__body {
+    flex: 1;
+    min-width: 0;
+}
+
+.voro-feed__title {
+    font-weight: 700;
+    font-size: 13px;
+    color: #1a1d26;
+    margin-bottom: 3px;
+    line-height: 1.4;
+}
+
+.voro-feed__meta {
+    font-size: 12px;
+    color: #9ca3af;
+    font-weight: 500;
+}
+
+.voro-feed__empty {
+    text-align: center;
+    padding: 24px 16px;
+    color: #9ca3af;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.voro-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    margin-right: 6px;
+}
+
+.voro-badge--new { background: #dbeafe; color: #1d4ed8; }
+.voro-badge--warn { background: #fef3c7; color: #b45309; }
+.voro-badge--danger { background: #fee2e2; color: #b91c1c; }
+
+/* ===== Hide default Jazzmin dashboard clutter on index ===== */
+body.dashboard .content-header {
+    display: none !important;
+}
+
+body.dashboard .content-wrapper > .content {
+    padding-top: 8px !important;
+}
+
+/* ===== Mobile ===== */
+@media (max-width: 1100px) {
+    .voro-dash-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 640px) {
+    .voro-dash-hero {
+        padding: 20px 18px;
+    }
+
+    .voro-dash-hero__title {
+        font-size: 1.35rem;
+    }
+
+    .voro-dash-stats {
+        grid-template-columns: 1fr 1fr;
+        max-width: none;
+        width: 100%;
+    }
+
+    .voro-stat__num {
+        font-size: 1.25rem;
+    }
+
+    .voro-dash-actions {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .voro-action {
+        flex-direction: column;
+        text-align: center;
+        padding: 14px 10px;
+        font-size: 12px;
+    }
+
+    .voro-action__icon {
+        margin: 0 auto;
+    }
+
+    .voro-modules {
+        grid-template-columns: 1fr;
+    }
+}
