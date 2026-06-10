@@ -6,6 +6,7 @@ import Cart from '../components/CartNew';
 import CheckoutNew from '../components/CheckoutNew';
 import BottomNav from '../components/BottomNav';
 import CountdownTimer from '../components/CountdownTimer';
+import { ProductCard } from '../components/CategoryProductsSection';
 
 const ProductDetail = ({ user }) => {
   const { id } = useParams();
@@ -21,6 +22,7 @@ const ProductDetail = ({ user }) => {
   useEffect(() => {
     fetchProduct();
     loadCart();
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
   }, [id]);
 
   const fetchProduct = async () => {
@@ -57,51 +59,57 @@ const ProductDetail = ({ user }) => {
     showNotification('تم إتمام طلبك بنجاح!');
   };
 
-  const addToCart = () => {
-    // التحقق من المخزون
-    if (stockCount <= 0) {
+  const addToCart = (item = null) => {
+    const target = item || product;
+    if (!target) return;
+
+    const itemPriceNum = Number(target?.price ?? 0);
+    const itemDiscountAmount = Number(target?.discount_amount ?? 0);
+    const itemFinalPrice = target?.discounted_price
+      ? Number(target.discounted_price)
+      : (itemDiscountAmount > 0 ? Math.max(itemPriceNum - itemDiscountAmount, 0) : itemPriceNum);
+    const itemStock = typeof target?.stock_quantity === 'number'
+      ? target.stock_quantity
+      : (target?.stock ?? (target?.is_in_stock ? 1 : 0));
+    const qty = item ? 1 : quantity;
+
+    if (itemStock <= 0) {
       showNotification('عذراً، هذا المنتج غير متوفر في المخزون', 'error');
       return;
     }
 
-    const existingItem = cart.find(item => item.id === product.id);
+    const existingItem = cart.find(cartItem => cartItem.id === target.id);
     let newCart;
 
     if (existingItem) {
-      // التحقق من أن الكمية الجديدة لا تتجاوز المخزون
-      const newQuantity = existingItem.quantity + quantity;
-      if (newQuantity > stockCount) {
-        showNotification(`عذراً، المخزون المتوفر فقط ${stockCount} قطعة`, 'error');
+      const newQuantity = existingItem.quantity + qty;
+      if (newQuantity > itemStock) {
+        showNotification(`عذراً، المخزون المتوفر فقط ${itemStock} قطعة`, 'error');
         return;
       }
-      newCart = cart.map(item =>
-        item.id === product.id
-          ? { ...item, quantity: newQuantity }
-          : item
+      newCart = cart.map(cartItem =>
+        cartItem.id === target.id
+          ? { ...cartItem, quantity: newQuantity }
+          : cartItem
       );
     } else {
-      // التحقق من أن الكمية المطلوبة لا تتجاوز المخزون
-      if (quantity > stockCount) {
-        showNotification(`عذراً، المخزون المتوفر فقط ${stockCount} قطعة`, 'error');
+      if (qty > itemStock) {
+        showNotification(`عذراً، المخزون المتوفر فقط ${itemStock} قطعة`, 'error');
         return;
       }
-      // حفظ المنتج مع السعر المخصوم
-      const productWithDiscountedPrice = {
-        ...product,
-        // تأكد من حفظ السعر المخصوم الصحيح
-        price: finalPrice,
-        original_price: priceNum,
-        quantity
-      };
-      newCart = [...cart, productWithDiscountedPrice];
+      newCart = [...cart, {
+        ...target,
+        price: itemFinalPrice,
+        original_price: itemPriceNum,
+        quantity: qty,
+        stock: itemStock,
+      }];
     }
 
     setCart(newCart);
     localStorage.setItem('cart', JSON.stringify(newCart));
     window.dispatchEvent(new Event('cart-updated'));
-
-    // Show success message
-    showNotification(`تم إضافة ${quantity} من ${product.name} للسلة بنجاح!`, 'success');
+    showNotification(`تم إضافة ${qty} من ${target.name} للسلة بنجاح!`, 'success');
   };
 
   const showNotification = (message, type = 'success') => {
@@ -121,6 +129,24 @@ const ProductDetail = ({ user }) => {
   const getCartItemCount = () => {
     return cart.reduce((total, item) => total + item.quantity, 0);
   };
+
+  const goBack = () => {
+    if (window.history.length > 1) {
+      navigate(-1);
+    } else {
+      navigate('/');
+    }
+  };
+
+  const normalizeSimilarProduct = (p) => ({
+    ...p,
+    image: p.image || p.main_image_url || p.main_image,
+    stock: typeof p.stock_quantity === 'number' ? p.stock_quantity : (p.stock ?? 0),
+    discounted_price: p.discounted_price ? Number(p.discounted_price) : null,
+    discount_price: p.discount_price ? Number(p.discount_price) : null,
+    price: Number(p.price || 0),
+    discount_percentage: Number(p.discount_percentage || 0),
+  });
 
   if (loading) {
     return (
@@ -160,10 +186,8 @@ const ProductDetail = ({ user }) => {
   const productImages = Array.isArray(product?.all_images) && product.all_images.length > 0
     ? product.all_images
     : [product?.main_image || product?.image || 'https://via.placeholder.com/600x400/f3f4f6/9ca3af?text=صورة+المنتج'];
-  
-  // Debug: Log product images
-  console.log('Product all_images:', product?.all_images);
-  console.log('Product images to display:', productImages);
+
+  const similarProducts = Array.isArray(product?.similar_products) ? product.similar_products : [];
 
   return (
     <div className="min-h-screen bg-gray-50 pb-16 md:pb-0">
@@ -173,19 +197,19 @@ const ProductDetail = ({ user }) => {
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-4 space-x-reverse">
               <button
-                onClick={() => navigate(-1)}
+                onClick={goBack}
                 className="p-2 text-gray-600 hover:text-primary-600 transition-colors"
               >
                 <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                 </svg>
               </button>
-              <Link to="/" className="flex items-center space-x-2 space-x-reverse">
+              <button type="button" onClick={goBack} className="flex items-center space-x-2 space-x-reverse">
                 <div className="bg-gradient-to-r from-primary-500 to-secondary-500 text-white w-8 h-8 rounded-lg flex items-center justify-center font-bold">
                   V
                 </div>
                 <span className="text-xl font-bold text-primary-600">voro</span>
-              </Link>
+              </button>
             </div>
 
             <div className="flex items-center space-x-4 space-x-reverse">
@@ -215,9 +239,9 @@ const ProductDetail = ({ user }) => {
           <nav className="flex" aria-label="Breadcrumb">
             <ol className="flex items-center space-x-4 space-x-reverse">
               <li>
-                <Link to="/" className="text-gray-500 hover:text-primary-600 transition-colors">
+                <button type="button" onClick={goBack} className="text-gray-500 hover:text-primary-600 transition-colors">
                   الرئيسية
-                </Link>
+                </button>
               </li>
               <li>
                 <svg className="flex-shrink-0 h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
@@ -421,7 +445,7 @@ const ProductDetail = ({ user }) => {
             {/* Action Buttons */}
             <div className="flex space-x-4 space-x-reverse">
               <button
-                onClick={addToCart}
+                onClick={() => addToCart()}
                 disabled={stockCount === 0}
                 className={`flex-1 py-4 px-6 rounded-lg font-semibold text-lg transition-all ${stockCount === 0
                   ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
@@ -481,15 +505,23 @@ const ProductDetail = ({ user }) => {
         </div>
       </div>
 
-      {/* Related Products */}
-      <div className="bg-white py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-8 text-center">منتجات مشابهة</h2>
-          <div className="text-center text-gray-500">
-            <p>سيتم عرض المنتجات المشابهة هنا</p>
+      {/* Similar Products (admin-selected) */}
+      {similarProducts.length > 0 && (
+        <div className="bg-white py-12 border-t border-gray-100">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 className="text-2xl font-bold text-gray-900 mb-8 text-right">منتجات مشابهة</h2>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
+              {similarProducts.map((item) => (
+                <ProductCard
+                  key={item.id}
+                  product={normalizeSimilarProduct(item)}
+                  onAddToCart={(p) => addToCart(p)}
+                />
+              ))}
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Cart Component */}
       {isCartOpen && (

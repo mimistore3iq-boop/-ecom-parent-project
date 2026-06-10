@@ -116,6 +116,14 @@ class Product(models.Model):
     is_featured = models.BooleanField('منتج مميز', default=False)
     show_on_homepage = models.BooleanField('إظهار في الواجهة الرئيسية', default=True)
     display_order = models.PositiveIntegerField('ترتيب العرض', default=0, help_text='المنتجات ذات الترتيب الأقل تظهر أولاً')
+    similar_products = models.ManyToManyField(
+        'self',
+        blank=True,
+        symmetrical=False,
+        related_name='similar_to',
+        verbose_name='منتجات مشابهة',
+        help_text='المنتجات التي تظهر في أسفل صفحة هذا المنتج للزبون'
+    )
     
     # Timestamps
     created_at = models.DateTimeField('تاريخ الإنشاء', auto_now_add=True)

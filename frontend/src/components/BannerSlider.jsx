@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { api, endpoints } from '../api';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { getScrollKey, navigateWithScrollSave } from '../utils/scrollRestore';
 
 const BannerSlider = () => {
   const [banners, setBanners] = useState([]);
@@ -9,6 +10,8 @@ const BannerSlider = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
+  const location = useLocation();
+  const scrollKey = getScrollKey(location.pathname, location.search, location.hash);
 
   useEffect(() => {
     const fetchBanners = async () => {
@@ -64,7 +67,7 @@ const BannerSlider = () => {
     } else if (banner.product_id) {
       // Fallback to product_id if link is not available
       console.log('Navigating to product by ID:', banner.product_id);
-      navigate(`/product/${banner.product_id}`);
+      navigateWithScrollSave(navigate, `/product/${banner.product_id}`, scrollKey);
     } else if (banner.category_id) {
       // Fallback to category_id if available
       console.log('Navigating to category by ID:', banner.category_id);

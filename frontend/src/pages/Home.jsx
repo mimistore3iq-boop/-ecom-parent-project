@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { api, endpoints } from '../api';
 import BottomNav from '../components/BottomNav';
 import Footer from '../components/Footer';
@@ -10,6 +10,7 @@ import BannerSlider from '../components/BannerSlider';
 import CategorySlider from '../components/CategorySlider';
 import CategoryProductsSection, { ProductCard } from '../components/CategoryProductsSection';
 import { formatCurrency } from '../utils/currency';
+import { getScrollKey, navigateWithScrollSave } from '../utils/scrollRestore';
 
 const Home = ({ user, setUser }) => {
   const [products, setProducts] = useState([]);
@@ -23,6 +24,9 @@ const Home = ({ user, setUser }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+  const scrollKey = getScrollKey(location.pathname, location.search, location.hash);
+  const goToProduct = (productId) => navigateWithScrollSave(navigate, `/product/${productId}`, scrollKey);
 
   useEffect(() => {
     fetchProducts();
@@ -400,7 +404,7 @@ const Home = ({ user, setUser }) => {
                       <button
                         key={product.id}
                         onClick={() => {
-                          navigate(`/product/${product.id}`);
+                          goToProduct(product.id);
                           setSearchTerm('');
                         }}
                         className="w-full text-right p-3 hover:bg-indigo-50 flex items-center gap-3 border-b border-gray-50 last:border-0 transition-colors"
@@ -475,7 +479,7 @@ const Home = ({ user, setUser }) => {
                     <button
                       key={product.id}
                       onClick={() => {
-                        navigate(`/product/${product.id}`);
+                        goToProduct(product.id);
                         setSearchTerm('');
                         setIsSearchOpen(false);
                       }}

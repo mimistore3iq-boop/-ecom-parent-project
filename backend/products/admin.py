@@ -67,6 +67,16 @@ class ProductAdmin(admin.ModelAdmin):
     list_per_page = 25
     ordering = ('display_order', '-created_at')
     save_on_top = True
+    filter_horizontal = ('similar_products',)
+
+    def formfield_for_manytomym(self, db_field, request, **kwargs):
+        if db_field.name == 'similar_products':
+            qs = Product.objects.filter(is_active=True).order_by('name')
+            object_id = request.resolver_match.kwargs.get('object_id')
+            if object_id:
+                qs = qs.exclude(pk=object_id)
+            kwargs['queryset'] = qs
+        return super().formfield_for_manytomym(db_field, request, **kwargs)
 
     def formfield_for_dbfield(self, db_field, request, **kwargs):
         field = super().formfield_for_dbfield(db_field, request, **kwargs)
@@ -128,6 +138,10 @@ class ProductAdmin(admin.ModelAdmin):
         }),
         ('⚡ الحالة والمميزات', {
             'fields': ('is_active', 'is_featured', 'show_on_homepage', 'display_order')
+        }),
+        ('🔗 منتجات مشابهة', {
+            'fields': ('similar_products',),
+            'description': 'اختر المنتجات التي تظهر في أسفل صفحة هذا المنتج للزبون.',
         }),
     )
 

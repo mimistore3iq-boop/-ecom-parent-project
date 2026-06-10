@@ -80,6 +80,7 @@ class ProductSerializer(serializers.ModelSerializer):
     is_on_sale = serializers.SerializerMethodField()
     time_left = serializers.IntegerField(read_only=True)
     stock = serializers.IntegerField(source='stock_quantity', read_only=True)
+    similar_products = serializers.SerializerMethodField()
 
     class Meta:
         model = Product
@@ -89,7 +90,7 @@ class ProductSerializer(serializers.ModelSerializer):
             'discount_percentage', 'discounted_price', 'is_on_sale', 'time_left',
             'stock_quantity', 'stock', 'low_stock_threshold',
             'main_image', 'image_2', 'image_3', 'image_4', 'image_5', 'image_6', 'image_7', 'image_8',
-            'main_image_url', 'image', 'all_images',
+            'main_image_url', 'image', 'all_images', 'similar_products',
             'brand', 'model', 'color', 'size', 'weight',
             'slug', 'meta_description', 'tags',
             'is_active', 'is_featured', 'show_on_homepage', 'display_order',
@@ -131,6 +132,11 @@ class ProductSerializer(serializers.ModelSerializer):
     def get_is_on_sale(self, obj):
         """Get is_on_sale from model property"""
         return obj.is_on_sale
+
+    def get_similar_products(self, obj):
+        """Products chosen by admin for the similar section"""
+        qs = obj.similar_products.filter(is_active=True).order_by('display_order', '-created_at')
+        return ProductListSerializer(qs, many=True, context=self.context).data
     
     def to_representation(self, instance):
         """تحسين تمثيل البيانات - تأكد من أن الصور موجودة"""

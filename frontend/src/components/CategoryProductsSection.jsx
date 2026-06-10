@@ -1,14 +1,25 @@
 import React, { useRef, memo } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { formatCurrency } from '../utils/currency';
+import { getScrollKey, navigateWithScrollSave } from '../utils/scrollRestore';
 
 export const ProductCard = ({ product, onAddToCart }) => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const scrollKey = getScrollKey(location.pathname, location.search, location.hash);
+
+  const goToProduct = () => {
+    navigateWithScrollSave(navigate, `/product/${product.id}`, scrollKey);
+  };
+
+  const discountPct = Math.round(
+    Number(product.discount_percentage ?? product.discount ?? 0)
+  );
   
   return (
     <div
       className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 group cursor-pointer border border-gray-100 h-full flex flex-col relative transform hover:-translate-y-2"
-      onClick={() => navigate(`/product/${product.id}`)}
+      onClick={goToProduct}
       style={{ 
         animation: 'cardAppear 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards'
       }}
@@ -38,12 +49,10 @@ export const ProductCard = ({ product, onAddToCart }) => {
           }}
         />
 
-        {/* Discount Badge */}
-        {product.discount_percentage > 0 && (
+        {/* Discount Badge — percentage only */}
+        {(product.is_on_sale || discountPct > 0) && discountPct > 0 && (
           <div className="absolute top-2 right-2 bg-gradient-to-r from-red-600 to-pink-600 text-white text-[10px] font-bold px-2 py-1 rounded-lg z-20 shadow-md">
-            {Number(product.discount_amount) > 0
-              ? `-${formatCurrency(product.discount_amount)}`
-              : `${product.discount_percentage}% خصم`}
+            {discountPct}% خصم
           </div>
         )}
 
@@ -86,7 +95,7 @@ export const ProductCard = ({ product, onAddToCart }) => {
           <button
             onClick={(e) => {
               e.stopPropagation();
-              navigate(`/product/${product.id}`);
+              goToProduct();
             }}
             className="flex-1 py-2.5 rounded-xl font-bold transition-all text-[11px] flex items-center justify-center gap-1 bg-gray-50 text-gray-700 border border-gray-200 hover:bg-gray-100 active:scale-95 shadow-sm"
           >

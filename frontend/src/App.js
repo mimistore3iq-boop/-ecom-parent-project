@@ -7,6 +7,7 @@ import Login from './pages/Login';
 import ProductDetail from './pages/ProductDetail';
 import SpecialOffers from './pages/SpecialOffers';
 import Categories from './pages/Categories';
+import ScrollRestoration from './components/ScrollRestoration';
 
 // ErrorBoundary to catch rendering errors and suggest reload
 class ErrorBoundary extends Component {
@@ -116,6 +117,7 @@ function App() {
   return (
     <ErrorBoundary>
       <Router>
+        <ScrollRestoration />
         <div className="App min-h-screen bg-gray-50 flex flex-col">
           {/* Instagram Browser Warning */}
           {showInstagramWarning && (
