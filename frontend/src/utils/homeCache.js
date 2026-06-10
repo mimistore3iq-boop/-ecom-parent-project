@@ -6,9 +6,10 @@ export function getCachedHomeData() {
 }
 
 export function setCachedHomeData(products, categories) {
+  const prev = homeDataCache;
   homeDataCache = {
-    products: products || [],
-    categories: categories || [],
+    products: products?.length ? products : (prev?.products || []),
+    categories: categories?.length ? categories : (prev?.categories || []),
     cachedAt: Date.now(),
   };
 }

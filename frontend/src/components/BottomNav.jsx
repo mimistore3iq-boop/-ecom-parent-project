@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const readCartCount = () => {
     try {
@@ -54,15 +54,15 @@ const BottomNav = ({ onCartClick, cartCount: cartCountProp }) => {
     return (
         <nav className="fixed bottom-0 left-0 right-0 bg-white border-t shadow-[0_-2px_10px_rgba(0,0,0,0.05)] md:hidden z-50 safe-area-pb">
             <div className="grid grid-cols-5 text-center">
-                <a
-                    href="/"
+                <Link
+                    to="/"
                     className="py-3 flex flex-col items-center justify-center text-gray-700 hover:text-primary-600"
                 >
                     <svg className="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0h6" />
                     </svg>
                     <span className="text-xs">الرئيسية</span>
-                </a>
+                </Link>
 
                 <button
                     type="button"

@@ -11,8 +11,9 @@ import CategorySlider from '../components/CategorySlider';
 import CategoryProductsSection, { ProductCard } from '../components/CategoryProductsSection';
 import { formatCurrency } from '../utils/currency';
 import {
-  consumePendingScrollRestore,
+  clearPendingScrollRestore,
   getScrollKey,
+  hasPendingScrollRestore,
   navigateWithScrollSave,
   restoreScrollPosition,
 } from '../utils/scrollRestore';
@@ -34,18 +35,28 @@ const Home = ({ user, setUser }) => {
   const scrollKey = getScrollKey(location.pathname, location.search, location.hash);
   const goToProduct = (productId) => navigateWithScrollSave(navigate, `/product/${productId}`, scrollKey);
   const scrollRestoreCancelRef = useRef(null);
+  const restoreSessionRef = useRef(false);
 
   useLayoutEffect(() => {
     if (loading) return undefined;
 
-    if (!consumePendingScrollRestore(scrollKey)) return undefined;
+    if (hasPendingScrollRestore(scrollKey)) {
+      restoreSessionRef.current = true;
+    }
+    if (!restoreSessionRef.current) return undefined;
 
     if (scrollRestoreCancelRef.current) {
       scrollRestoreCancelRef.current();
     }
+
     scrollRestoreCancelRef.current = restoreScrollPosition(scrollKey, {
-      maxAttempts: 30,
-      intervalMs: 100,
+      intervalMs: 80,
+      stableChecks: 4,
+      maxDurationMs: 12000,
+      onComplete: (success) => {
+        restoreSessionRef.current = false;
+        if (success) clearPendingScrollRestore(scrollKey);
+      },
     });
 
     return () => {
@@ -54,7 +65,7 @@ const Home = ({ user, setUser }) => {
         scrollRestoreCancelRef.current = null;
       }
     };
-  }, [loading, products.length, categories.length, scrollKey]);
+  }, [loading, scrollKey, products.length, categories.length]);
 
   useEffect(() => {
     const hasCache = Boolean(getCachedHomeData()?.products?.length);
