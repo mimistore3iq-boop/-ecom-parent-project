@@ -1,7 +1,8 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useLayoutEffect, useRef } from 'react';
 import { useLocation, useNavigationType } from 'react-router-dom';
 import {
   getScrollKey,
+  hasPendingScrollRestore,
   restoreScrollPosition,
   saveScrollPosition,
 } from '../utils/scrollRestore';
@@ -10,7 +11,6 @@ export default function ScrollRestoration() {
   const location = useLocation();
   const navigationType = useNavigationType();
   const scrollKey = getScrollKey(location.pathname, location.search, location.hash);
-  const prevKeyRef = useRef(scrollKey);
   const cancelRestoreRef = useRef(null);
 
   useEffect(() => {
@@ -19,7 +19,7 @@ export default function ScrollRestoration() {
     }
   }, []);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (cancelRestoreRef.current) {
       cancelRestoreRef.current();
       cancelRestoreRef.current = null;
@@ -27,6 +27,18 @@ export default function ScrollRestoration() {
 
     if (navigationType === 'PUSH' && location.pathname.startsWith('/product/')) {
       window.scrollTo(0, 0);
+      return undefined;
+    }
+
+    const shouldRestore =
+      location.pathname === '/' && hasPendingScrollRestore(scrollKey);
+
+    if (shouldRestore) {
+      cancelRestoreRef.current = restoreScrollPosition(scrollKey, {
+        intervalMs: 80,
+        stableChecks: 4,
+        maxDurationMs: 12000,
+      });
     }
 
     return () => {
@@ -38,18 +50,9 @@ export default function ScrollRestoration() {
   }, [scrollKey, navigationType, location.pathname]);
 
   useEffect(() => {
-    const prevKey = prevKeyRef.current;
-    if (prevKey && prevKey !== scrollKey) {
-      saveScrollPosition(prevKey);
-    }
-    prevKeyRef.current = scrollKey;
-
     const onScroll = () => saveScrollPosition(scrollKey);
     window.addEventListener('scroll', onScroll, { passive: true });
-    return () => {
-      window.removeEventListener('scroll', onScroll);
-      saveScrollPosition(scrollKey);
-    };
+    return () => window.removeEventListener('scroll', onScroll);
   }, [scrollKey]);
 
   return null;

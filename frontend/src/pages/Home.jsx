@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { api, endpoints } from '../api';
 import BottomNav from '../components/BottomNav';
@@ -10,13 +10,7 @@ import BannerSlider from '../components/BannerSlider';
 import CategorySlider from '../components/CategorySlider';
 import CategoryProductsSection, { ProductCard } from '../components/CategoryProductsSection';
 import { formatCurrency } from '../utils/currency';
-import {
-  clearPendingScrollRestore,
-  getScrollKey,
-  hasPendingScrollRestore,
-  navigateWithScrollSave,
-  restoreScrollPosition,
-} from '../utils/scrollRestore';
+import { getScrollKey, navigateWithScrollSave } from '../utils/scrollRestore';
 import { getCachedHomeData, setCachedHomeData } from '../utils/homeCache';
 
 const Home = ({ user, setUser }) => {
@@ -34,38 +28,6 @@ const Home = ({ user, setUser }) => {
   const location = useLocation();
   const scrollKey = getScrollKey(location.pathname, location.search, location.hash);
   const goToProduct = (productId) => navigateWithScrollSave(navigate, `/product/${productId}`, scrollKey);
-  const scrollRestoreCancelRef = useRef(null);
-  const restoreSessionRef = useRef(false);
-
-  useLayoutEffect(() => {
-    if (loading) return undefined;
-
-    if (hasPendingScrollRestore(scrollKey)) {
-      restoreSessionRef.current = true;
-    }
-    if (!restoreSessionRef.current) return undefined;
-
-    if (scrollRestoreCancelRef.current) {
-      scrollRestoreCancelRef.current();
-    }
-
-    scrollRestoreCancelRef.current = restoreScrollPosition(scrollKey, {
-      intervalMs: 80,
-      stableChecks: 4,
-      maxDurationMs: 12000,
-      onComplete: (success) => {
-        restoreSessionRef.current = false;
-        if (success) clearPendingScrollRestore(scrollKey);
-      },
-    });
-
-    return () => {
-      if (scrollRestoreCancelRef.current) {
-        scrollRestoreCancelRef.current();
-        scrollRestoreCancelRef.current = null;
-      }
-    };
-  }, [loading, scrollKey, products.length, categories.length]);
 
   useEffect(() => {
     const hasCache = Boolean(getCachedHomeData()?.products?.length);
