@@ -6,21 +6,35 @@ import {
   saveScrollPosition,
 } from '../utils/scrollRestore';
 
-/**
- * Saves scroll per route; restores on browser back (POP).
- */
 export default function ScrollRestoration() {
   const location = useLocation();
   const navigationType = useNavigationType();
   const scrollKey = getScrollKey(location.pathname, location.search, location.hash);
   const prevKeyRef = useRef(scrollKey);
+  const cancelRestoreRef = useRef(null);
 
   useEffect(() => {
-    if (navigationType === 'POP') {
-      restoreScrollPosition(scrollKey);
-    } else if (navigationType === 'PUSH' && location.pathname.startsWith('/product/')) {
-      window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+    if ('scrollRestoration' in window.history) {
+      window.history.scrollRestoration = 'manual';
     }
+  }, []);
+
+  useEffect(() => {
+    if (cancelRestoreRef.current) {
+      cancelRestoreRef.current();
+      cancelRestoreRef.current = null;
+    }
+
+    if (navigationType === 'PUSH' && location.pathname.startsWith('/product/')) {
+      window.scrollTo(0, 0);
+    }
+
+    return () => {
+      if (cancelRestoreRef.current) {
+        cancelRestoreRef.current();
+        cancelRestoreRef.current = null;
+      }
+    };
   }, [scrollKey, navigationType, location.pathname]);
 
   useEffect(() => {

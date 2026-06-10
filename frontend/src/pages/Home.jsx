@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useLayoutEffect, useState, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { api, endpoints } from '../api';
 import BottomNav from '../components/BottomNav';
@@ -10,27 +10,56 @@ import BannerSlider from '../components/BannerSlider';
 import CategorySlider from '../components/CategorySlider';
 import CategoryProductsSection, { ProductCard } from '../components/CategoryProductsSection';
 import { formatCurrency } from '../utils/currency';
-import { getScrollKey, navigateWithScrollSave } from '../utils/scrollRestore';
+import {
+  consumePendingScrollRestore,
+  getScrollKey,
+  navigateWithScrollSave,
+  restoreScrollPosition,
+} from '../utils/scrollRestore';
+import { getCachedHomeData, setCachedHomeData } from '../utils/homeCache';
 
 const Home = ({ user, setUser }) => {
-  const [products, setProducts] = useState([]);
-  const [categories, setCategories] = useState([]);
+  const [products, setProducts] = useState(() => getCachedHomeData()?.products || []);
+  const [categories, setCategories] = useState(() => getCachedHomeData()?.categories || []);
   const [selectedCategory, setSelectedCategory] = useState('');
   const [cart, setCart] = useState([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(() => !getCachedHomeData()?.products?.length);
   const [searchTerm, setSearchTerm] = useState('');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const scrollKey = getScrollKey(location.pathname, location.search, location.hash);
   const goToProduct = (productId) => navigateWithScrollSave(navigate, `/product/${productId}`, scrollKey);
+  const scrollRestoreCancelRef = useRef(null);
+
+  useLayoutEffect(() => {
+    if (loading) return undefined;
+
+    if (!consumePendingScrollRestore(scrollKey)) return undefined;
+
+    if (scrollRestoreCancelRef.current) {
+      scrollRestoreCancelRef.current();
+    }
+    scrollRestoreCancelRef.current = restoreScrollPosition(scrollKey, {
+      maxAttempts: 30,
+      intervalMs: 100,
+    });
+
+    return () => {
+      if (scrollRestoreCancelRef.current) {
+        scrollRestoreCancelRef.current();
+        scrollRestoreCancelRef.current = null;
+      }
+    };
+  }, [loading, products.length, categories.length, scrollKey]);
 
   useEffect(() => {
-    fetchProducts();
-    fetchCategories();
+    const hasCache = Boolean(getCachedHomeData()?.products?.length);
+    fetchProducts(hasCache);
+    fetchCategories(hasCache);
     loadCart();
     // Show welcome message if exists
     const welcomeMessage = localStorage.getItem('welcome_message');
@@ -70,7 +99,8 @@ const Home = ({ user, setUser }) => {
     };
   }, [isMenuOpen]);
 
-  const fetchProducts = async () => {
+  const fetchProducts = async (silent = false) => {
+    if (!silent) setLoading(true);
     try {
       const response = await api.get(endpoints.products);
       console.log('📡 API Response:', response);
@@ -99,15 +129,17 @@ const Home = ({ user, setUser }) => {
       
       console.log('✅ منتجات معالجة:', normalized);
       setProducts(normalized);
+      const cachedCategories = getCachedHomeData()?.categories || categories;
+      setCachedHomeData(normalized, cachedCategories.length ? cachedCategories : categories);
     } catch (error) {
       console.error('❌ خطأ في جلب المنتجات:', error);
-      setProducts([]);
+      if (!silent) setProducts([]);
     } finally {
       setLoading(false);
     }
   };
 
-  const fetchCategories = async () => {
+  const fetchCategories = async (silent = false) => {
     try {
       const response = await api.get(endpoints.categories);
       console.log('Categories API Response:', response);
@@ -115,9 +147,11 @@ const Home = ({ user, setUser }) => {
       const list = Array.isArray(data) ? data : (data?.results || []);
       console.log('Categories list:', list);
       setCategories(list);
+      const cachedProducts = getCachedHomeData()?.products || [];
+      setCachedHomeData(cachedProducts.length ? cachedProducts : products, list);
     } catch (error) {
       console.error('Error fetching categories:', error);
-      setCategories([]);
+      if (!silent) setCategories([]);
     }
   };
 

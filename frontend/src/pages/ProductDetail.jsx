@@ -7,6 +7,7 @@ import CheckoutNew from '../components/CheckoutNew';
 import BottomNav from '../components/BottomNav';
 import CountdownTimer from '../components/CountdownTimer';
 import { ProductCard } from '../components/CategoryProductsSection';
+import { markPendingScrollRestore } from '../utils/scrollRestore';
 
 const ProductDetail = ({ user }) => {
   const { id } = useParams();
@@ -131,6 +132,7 @@ const ProductDetail = ({ user }) => {
   };
 
   const goBack = () => {
+    markPendingScrollRestore('/');
     if (window.history.length > 1) {
       navigate(-1);
     } else {
