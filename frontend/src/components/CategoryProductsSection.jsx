@@ -3,13 +3,21 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { formatCurrency } from '../utils/currency';
 import { getScrollKey, navigateWithScrollSave } from '../utils/scrollRestore';
 
-export const ProductCard = ({ product, onAddToCart }) => {
+export const ProductCard = ({ product, onAddToCart, categoryId = null }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const scrollKey = getScrollKey(location.pathname, location.search, location.hash);
 
   const goToProduct = () => {
-    navigateWithScrollSave(navigate, `/product/${product.id}`, scrollKey);
+    const carouselContext = categoryId
+      ? { categoryId, productId: product.id }
+      : null;
+    navigateWithScrollSave(
+      navigate,
+      `/product/${product.id}`,
+      scrollKey,
+      carouselContext
+    );
   };
 
   const discountPct = Math.round(
@@ -191,6 +199,7 @@ const CategoryProductsSection = ({
         <div className="relative">
           <div 
             ref={gridRef}
+            data-category-carousel={category.id}
             className="flex overflow-x-auto gap-3 pb-6 hide-scrollbar horizontal-scroll-fix px-1"
             style={{ 
               scrollbarWidth: 'none',
@@ -201,9 +210,14 @@ const CategoryProductsSection = ({
             {products.map((product) => (
               <div
                 key={product.id}
+                data-product-id={product.id}
                 className="flex-shrink-0 w-[46.5%] sm:w-[45%] md:w-[30%] lg:w-[22%] snap-start transition-transform duration-300 active:scale-95"
               >
-                <ProductCard product={product} onAddToCart={onAddToCart} />
+                <ProductCard
+                  product={product}
+                  onAddToCart={onAddToCart}
+                  categoryId={category.id}
+                />
               </div>
             ))}
           </div>
