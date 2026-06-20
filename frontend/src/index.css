@@ -41,6 +41,17 @@ body::before {
   z-index: -1;
 }
 
+/* منع التكبير التلقائي في متصفحات الجوال (خاصة iOS Safari) عند التركيز على أي حقل إدخال.
+   iOS يكبّر الشاشة إذا كان حجم خط الحقل أقل من 16px — هذه القاعدة تضمن 16px على أجهزة اللمس
+   فقط، فتُصلح كل الحقول (الكوبون، البحث، النماذج...) دون تغيير مظهر سطح المكتب. */
+@media (hover: none) and (pointer: coarse) {
+  input,
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+}
+
 /* Custom Components */
 @layer components {
   .btn-primary {
