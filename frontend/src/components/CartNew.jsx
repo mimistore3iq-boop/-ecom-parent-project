@@ -3,7 +3,7 @@ import { formatCurrency, getFreeShippingThreshold } from '../utils/currency';
 import { api } from '../api';
 
 const Cart = ({ cart, onCartChange, onClose, handleCheckout }) => {
-  const [notification, setNotification] = useState({ show: false, message: '', type: 'success' });
+  const [notification, setNotification] = useState({ show: false, message: '', type: 'success', subMessage: '' });
   const [couponCode, setCouponCode] = useState('');
   const [appliedCoupon, setAppliedCoupon] = useState(null);
   const [couponDiscount, setCouponDiscount] = useState(0);
@@ -12,11 +12,11 @@ const Cart = ({ cart, onCartChange, onClose, handleCheckout }) => {
   const telegramLink = "https://t.me/mimi_store10";
   const phoneLink = "tel:07737698219";
 
-  const showNotification = (message, type = 'success') => {
-    setNotification({ show: true, message, type });
+  const showNotification = (message, type = 'success', subMessage = '') => {
+    setNotification({ show: true, message, type, subMessage });
     setTimeout(() => {
-      setNotification({ show: false, message: '', type: 'success' });
-    }, 3000);
+      setNotification({ show: false, message: '', type: 'success', subMessage: '' });
+    }, subMessage ? 6000 : 3000);
   };
 
   const handleQuantityChange = (product, newQuantity) => {
@@ -82,12 +82,23 @@ const Cart = ({ cart, onCartChange, onClose, handleCheckout }) => {
       if (response.data.valid) {
         setAppliedCoupon(response.data);
         setCouponDiscount(response.data.discount_amount);
-        showNotification(`تم تطبيق الكوبون بنجاح! خصم: ${response.data.discount_amount}`, 'success');
+        if (response.data.warning) {
+          // حالة 3: بعض المنتجات مخفّضة - يُطبَّق على غير المخفّضة فقط
+          showNotification('تم تطبيق الكوبون بنجاح', 'success', response.data.warning);
+        } else {
+          // حالة 1: لا يوجد منتج مخفّض - السلوك الحالي
+          showNotification(`تم تطبيق الكوبون بنجاح! خصم: ${response.data.discount_amount}`, 'success');
+        }
       } else {
-        showNotification(response.data.message || 'الكوبون غير صحيح', 'error');
+        showNotification(response.data.message || 'الكوبون غير صحيح', 'error', response.data.warning);
       }
     } catch (error) {
-      showNotification(error.response?.data?.message || 'خطأ في تطبيق الكوبون', 'error');
+      // حالة 2: جميع المنتجات مخفّضة تُعاد بالحالة 400 وتصل إلى هنا
+      showNotification(
+        error.response?.data?.message || 'خطأ في تطبيق الكوبون',
+        'error',
+        error.response?.data?.warning
+      );
     } finally {
       setLoadingCoupon(false);
     }
@@ -112,6 +123,9 @@ const Cart = ({ cart, onCartChange, onClose, handleCheckout }) => {
         {notification.show && (
           <div className={`mx-4 mt-4 p-3 rounded-md ${notification.type === 'error' ? 'bg-red-100 text-red-700 border border-red-300' : 'bg-green-100 text-green-700 border border-green-300'}`}>
             <p className="text-sm text-center font-medium">{notification.message}</p>
+            {notification.subMessage && (
+              <p className="text-xs text-center text-red-600 mt-1">{notification.subMessage}</p>
+            )}
           </div>
         )}
         
@@ -161,17 +175,22 @@ const Cart = ({ cart, onCartChange, onClose, handleCheckout }) => {
                   </button>
                 </div>
               ) : (
-                <div className="flex items-center justify-between bg-green-50 p-2 rounded-md">
-                  <div>
-                    <p className="text-sm font-medium text-green-700">✓ تم تطبيق الكوبون</p>
-                    <p className="text-xs text-green-600">{appliedCoupon.code}</p>
+                <div className="bg-green-50 p-2 rounded-md">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-green-700">✓ تم تطبيق الكوبون</p>
+                      <p className="text-xs text-green-600">{appliedCoupon.code}</p>
+                    </div>
+                    <button
+                      onClick={removeCoupon}
+                      className="text-red-600 hover:text-red-800 text-sm"
+                    >
+                      إزالة
+                    </button>
                   </div>
-                  <button
-                    onClick={removeCoupon}
-                    className="text-red-600 hover:text-red-800 text-sm"
-                  >
-                    إزالة
-                  </button>
+                  {appliedCoupon.warning && (
+                    <p className="text-xs text-red-600 mt-2">{appliedCoupon.warning}</p>
+                  )}
                 </div>
               )}
             </div>

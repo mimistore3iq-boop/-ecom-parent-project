@@ -37,6 +37,11 @@ def user_coupons(request):
 def apply_coupon(request):
     """
     تطبيق كوبون خصم على سلة التسوق
+
+    لا يُطبَّق الكوبون على المنتجات المخفضة:
+    - حالة 1: لا يوجد منتج مخفّض  -> يُطبَّق الكوبون بشكل طبيعي (السلوك الحالي).
+    - حالة 2: جميع المنتجات مخفّضة -> لا يُطبَّق الكوبون وتظهر رسالة حمراء.
+    - حالة 3: بعض المنتجات مخفّضة  -> يُطبَّق على غير المخفّضة فقط مع تنبيه.
     """
     serializer = CouponApplySerializer(data=request.data)
     if not serializer.is_valid():
@@ -52,20 +57,72 @@ def apply_coupon(request):
     cart_items = request.data.get('cart_items', [])
     cart_total = Decimal(str(request.data.get('total', request.data.get('cart_total', 0))))
 
-    # حساب قيمة الخصم
-    discount_amount, message = coupon.calculate_discount(cart_items, cart_total)
+    # تحديد المنتجات المخفّضة (المعتمدة على خاصية is_on_sale في المنتج)
+    from .models import Product
+    product_ids = [item.get('product') for item in cart_items if item.get('product')]
+    on_sale_ids = set()
+    if product_ids:
+        for product in Product.objects.filter(id__in=product_ids):
+            if product.is_on_sale:
+                on_sale_ids.add(str(product.id))
+
+    def _is_discounted(item):
+        pid = item.get('product')
+        return pid is not None and str(pid) in on_sale_ids
+
+    discounted_items = [item for item in cart_items if _is_discounted(item)]
+    non_discounted_items = [item for item in cart_items if not _is_discounted(item)]
+    has_discounted = len(discounted_items) > 0
+    has_non_discounted = len(non_discounted_items) > 0
+
+    # حالة 2: جميع المنتجات مخفّضة -> لا يُطبَّق الكوبون
+    if has_discounted and not has_non_discounted:
+        return Response({
+            'valid': False,
+            'message': 'لا يمكن تطبيق الكوبون',
+            'warning': 'لا يمكن استخدام الكوبون على المنتجات المخفضة.',
+            'discount_amount': 0,
+            'code': coupon.code
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+    # حساب قيمة الخصم على المنتجات غير المخفّضة فقط
+    if cart_items:
+        non_discounted_total = sum(
+            (Decimal(str(item.get('price', 0))) * int(item.get('quantity', 1))
+             for item in non_discounted_items),
+            Decimal(0)
+        )
+    else:
+        # سلة بدون تفاصيل عناصر -> استخدم الإجمالي المُرسَل (السلوك الحالي)
+        non_discounted_total = cart_total
+
+    discount_amount, message = coupon.calculate_discount(non_discounted_items, non_discounted_total)
 
     if discount_amount <= 0:
         return Response({
             'valid': False,
             'message': message,
+            'warning': None,
             'discount_amount': 0,
             'code': coupon.code
         }, status=status.HTTP_400_BAD_REQUEST)
 
+    # حالة 3: بعض المنتجات مخفّضة وبعضها غير مخفّض
+    if has_discounted:
+        return Response({
+            'valid': True,
+            'message': 'تم تطبيق الكوبون بنجاح',
+            'warning': 'لا يمكن استخدام الكوبون على المنتجات المخفضة، وتم تطبيقه فقط على المنتجات غير المخفضة.',
+            'discount_amount': float(discount_amount),
+            'code': coupon.code,
+            'coupon_id': str(coupon.id)
+        }, status=status.HTTP_200_OK)
+
+    # حالة 1: لا يوجد منتج مخفّض -> السلوك الطبيعي الحالي
     return Response({
         'valid': True,
         'message': message,
+        'warning': None,
         'discount_amount': float(discount_amount),
         'code': coupon.code,
         'coupon_id': str(coupon.id)
