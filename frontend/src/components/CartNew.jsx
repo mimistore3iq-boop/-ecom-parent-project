@@ -8,6 +8,8 @@ const Cart = ({ cart, onCartChange, onClose, handleCheckout }) => {
   const [appliedCoupon, setAppliedCoupon] = useState(null);
   const [couponDiscount, setCouponDiscount] = useState(0);
   const [loadingCoupon, setLoadingCoupon] = useState(false);
+  // رسالة الكوبون الثابتة: تظهر تحت الحقل ولا تختفي
+  const [couponFeedback, setCouponFeedback] = useState(null); // { type: 'success' | 'error', message, subMessage }
   const whatsappLink = "https://wa.me/9647737698219";
   const telegramLink = "https://t.me/mimi_store10";
   const phoneLink = "tel:07737698219";
@@ -60,7 +62,7 @@ const Cart = ({ cart, onCartChange, onClose, handleCheckout }) => {
 
   const applyCoupon = async () => {
     if (!couponCode.trim()) {
-      showNotification('برجاء إدخال رمز الكوبون', 'error');
+      setCouponFeedback({ type: 'error', message: 'يرجى إدخال رمز الكوبون' });
       return;
     }
 
@@ -80,25 +82,23 @@ const Cart = ({ cart, onCartChange, onClose, handleCheckout }) => {
       });
 
       if (response.data.valid) {
+        // نجاح: رسالة واحدة فقط داخل صندوق "تم تطبيق الكوبون" (والتنبيه داخله للحالة 3)
         setAppliedCoupon(response.data);
         setCouponDiscount(response.data.discount_amount);
-        if (response.data.warning) {
-          // حالة 3: بعض المنتجات مخفّضة - يُطبَّق على غير المخفّضة فقط
-          showNotification('تم تطبيق الكوبون بنجاح', 'success', response.data.warning);
-        } else {
-          // حالة 1: لا يوجد منتج مخفّض - السلوك الحالي
-          showNotification(`تم تطبيق الكوبون بنجاح! خصم: ${response.data.discount_amount}`, 'success');
-        }
+        setCouponFeedback(null);
+      } else if (response.data.warning) {
+        // حالة 2: جميع المنتجات مخفّضة
+        setCouponFeedback({ type: 'error', message: 'لا يمكن استخدام الكوبون على المنتجات المخفّضة' });
       } else {
-        showNotification(response.data.message || 'الكوبون غير صحيح', 'error', response.data.warning);
+        setCouponFeedback({ type: 'error', message: response.data.message || 'كوبون غير صالح' });
       }
     } catch (error) {
-      // حالة 2: جميع المنتجات مخفّضة تُعاد بالحالة 400 وتصل إلى هنا
-      showNotification(
-        error.response?.data?.message || 'خطأ في تطبيق الكوبون',
-        'error',
-        error.response?.data?.warning
-      );
+      const data = error.response?.data || {};
+      // حالة 2 تُعاد بالحالة 400 وتصل إلى هنا
+      setCouponFeedback({
+        type: 'error',
+        message: data.warning ? 'لا يمكن استخدام الكوبون على المنتجات المخفّضة' : (data.message || 'تعذّر تطبيق الكوبون')
+      });
     } finally {
       setLoadingCoupon(false);
     }
@@ -108,7 +108,7 @@ const Cart = ({ cart, onCartChange, onClose, handleCheckout }) => {
     setAppliedCoupon(null);
     setCouponDiscount(0);
     setCouponCode('');
-    showNotification('تم إزالة الكوبون', 'success');
+    setCouponFeedback(null);
   };
 
   return (
@@ -189,8 +189,15 @@ const Cart = ({ cart, onCartChange, onClose, handleCheckout }) => {
                     </button>
                   </div>
                   {appliedCoupon.warning && (
-                    <p className="text-xs text-red-600 mt-2">{appliedCoupon.warning}</p>
+                    <p className="text-xs text-red-600 mt-2">تم تطبيقه على المنتجات غير المخفّضة فقط</p>
                   )}
+                </div>
+              )}
+
+              {/* رسالة رفض الكوبون: إشعار واحد بالتصميم القديم، تحت الحقل وثابت لا يختفي */}
+              {couponFeedback && (
+                <div className="mt-3 p-3 rounded-md bg-red-100 text-red-700 border border-red-300">
+                  <p className="text-sm text-center font-medium">{couponFeedback.message}</p>
                 </div>
               )}
             </div>
