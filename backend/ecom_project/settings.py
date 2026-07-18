@@ -186,6 +186,24 @@ STORAGES = {
 MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/"
 MEDIA_ROOT = BASE_DIR / 'media'
 
+# --- تخزين محلي أثناء التطوير ------------------------------------------------
+# مفاتيح R2 في .env المحلي قيم وهمية (local-dummy)، فأي رفع صورة يفشل بـ
+# "Credential access key has length 11, should be 32" — أي أن رفع الصور غير قابل
+# للاختبار محلياً إطلاقاً. هنا نُبدّل إلى تخزين الملفات على القرص في وضع التطوير فقط.
+#
+# الشرط مزدوج عمداً (DEBUG *و* مفاتيح غير حقيقية): لو اكتفينا بفحص المفاتيح لكان
+# خطأ في إعدادات الإنتاج سيكتب الصور بصمت على قرص Render المؤقّت ثم تختفي بعد
+# إعادة النشر. بهذا الشرط يفشل الإنتاج بصوت عالٍ بدلاً من أن يفقد الصور بصمت.
+_R2_KEYS_LOOK_REAL = len(AWS_ACCESS_KEY_ID or '') >= 20 and len(AWS_SECRET_ACCESS_KEY or '') >= 40
+
+if DEBUG and not _R2_KEYS_LOOK_REAL:
+    STORAGES['default'] = {'BACKEND': 'django.core.files.storage.FileSystemStorage'}
+    MEDIA_URL = '/media/'  # يخدمها urls.py عبر static() في وضع DEBUG
+    import logging as _logging
+    _logging.getLogger(__name__).warning(
+        'R2 credentials look like placeholders — falling back to local filesystem media storage (DEBUG only).'
+    )
+
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 

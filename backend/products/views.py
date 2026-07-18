@@ -6,6 +6,7 @@ from .models_coupons import Coupon, CouponUsage
 from .serializers import ProductSerializer, CategorySerializer, BannerSerializer
 from .serializers_coupons import CouponSerializer, CouponUsageSerializer
 from django.conf import settings
+from django.core.files.storage import default_storage
 import requests
 import logging
 
@@ -21,40 +22,62 @@ class IsProjectAdmin(BasePermission):
             return False
         return bool(getattr(user, 'is_staff', False) or getattr(user, 'is_staff_member', False) or getattr(user, 'is_superuser', False))
 
+# الصيغ المسموح بها، ولكل صيغة امتدادها المعتمد.
+# الامتداد يُشتق من محتوى الملف المتحقَّق منه، لا من اسمه: اسم الملف وContent-Type
+# يتحكم بهما العميل، ورفع ملف باسم ‎.html/.svg‎ على نطاق الوسائط يعني XSS مخزَّن.
+ALLOWED_IMAGE_FORMATS = {'JPEG': '.jpg', 'PNG': '.png', 'WEBP': '.webp', 'GIF': '.gif'}
+MAX_UPLOAD_BYTES = 5 * 1024 * 1024  # 5 ميغابايت
+
+
 @csrf_exempt
 @api_view(['POST'])
 @permission_classes([IsProjectAdmin])
 def upload_image_to_voro(request):
     """
-    Upload image directly to Cloudflare R2
+    رفع صورة من جهاز المشرف إلى تخزين المشروع (Cloudflare R2 عبر default_storage).
+    يُرجع {'url': ...} وهو الرابط الذي يُحفظ في image_url للقسم/البنر/المنتج.
     """
-    if 'image' not in request.FILES:
-        return Response({'error': 'No image file provided'}, status=400)
+    image_file = request.FILES.get('image')
+    if not image_file:
+        return Response({'error': 'لم يتم إرسال أي صورة'}, status=400)
 
-    image_file = request.FILES['image']
-    
+    if image_file.size > MAX_UPLOAD_BYTES:
+        return Response(
+            {'error': f'حجم الصورة يتجاوز الحد المسموح ({MAX_UPLOAD_BYTES // (1024 * 1024)} ميغابايت)'},
+            status=400,
+        )
+
+    # نتحقق من البايتات نفسها. verify() يُبطل الكائن بعد استدعائه، لذا نفتح مرة ثانية للصيغة.
     try:
-        from django.core.files.storage import default_storage
-        from django.core.files.base import ContentFile
+        from PIL import Image
+        Image.open(image_file).verify()
+        image_file.seek(0)
+        image_format = Image.open(image_file).format
+        image_file.seek(0)
+    except Exception:
+        return Response({'error': 'الملف ليس صورة صالحة'}, status=400)
+
+    ext = ALLOWED_IMAGE_FORMATS.get(image_format)
+    if not ext:
+        return Response(
+            {'error': 'صيغة غير مدعومة. الصيغ المسموحة: JPG، PNG، WEBP، GIF'},
+            status=400,
+        )
+
+    try:
         import uuid
-        import os
-
-        # Generate unique filename
-        ext = os.path.splitext(image_file.name)[1]
-        filename = f"{uuid.uuid4()}{ext}"
-        
-        # Save file using default_storage (configured to R2)
-        path = default_storage.save(filename, ContentFile(image_file.read()))
+        # نمرّر الملف نفسه (لا ContentFile(read())) حتى يُبَثّ بدل تحميله كاملاً في الذاكرة
+        path = default_storage.save(f'{uuid.uuid4()}{ext}', image_file)
         url = default_storage.url(path)
-
-        return Response({
-            'url': url,
-            'path': path
-        })
-
-    except Exception as e:
-        print(f"❌ Error uploading to R2: {str(e)}")
-        return Response({'error': f'Failed to upload to R2: {str(e)}'}, status=500)
+        # التخزين المحلي (وضع التطوير) يُرجع مساراً نسبياً مثل /media/x.jpg، وحقول
+        # image_url في النماذج من نوع URLField فترفض المسار النسبي. نجعله مطلقاً دائماً.
+        if not url.startswith('http'):
+            url = request.build_absolute_uri(url)
+        return Response({'url': url, 'path': path})
+    except Exception:
+        # لا نُسرّب نص الاستثناء (قد يحوي تفاصيل التخزين/المفاتيح)
+        logger.exception('upload_image_to_voro: storage write failed')
+        return Response({'error': 'تعذّر حفظ الصورة. راجع سجلات الخادم.'}, status=500)
 
 from django.core.management import call_command
 from django.http import HttpResponse

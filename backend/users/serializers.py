@@ -13,7 +13,10 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ['id', 'username', 'name', 'email', 'first_name', 'last_name',
                  'phone', 'address', 'governorate', 'is_customer', 'is_staff_member',
                  'is_admin', 'date_joined']
-        read_only_fields = ['id', 'date_joined']
+        # حقول الصلاحيات يتحكّم بها الخادم فقط. بدون هذا يستطيع أي مستخدم مسجَّل
+        # أن يرسل is_staff_member=true إلى /users/update_profile/ فيمنح نفسه صلاحية
+        # المشرف (IsProjectAdmin يقبلها)، وهي ترقية امتيازات مباشرة.
+        read_only_fields = ['id', 'date_joined', 'is_customer', 'is_staff_member', 'is_admin']
 
     def get_is_admin(self, obj):
         return bool(getattr(obj, 'is_staff', False) or getattr(obj, 'is_staff_member', False) or getattr(obj, 'is_superuser', False))
