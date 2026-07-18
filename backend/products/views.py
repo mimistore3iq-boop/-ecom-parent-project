@@ -1,5 +1,5 @@
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import AllowAny, IsAdminUser
+from rest_framework.permissions import AllowAny, BasePermission
 from rest_framework.response import Response
 from .models import Product, Category, Banner
 from .models_coupons import Coupon, CouponUsage
@@ -7,12 +7,23 @@ from .serializers import ProductSerializer, CategorySerializer, BannerSerializer
 from .serializers_coupons import CouponSerializer, CouponUsageSerializer
 from django.conf import settings
 import requests
+import logging
 
 from django.views.decorators.csrf import csrf_exempt
 
+logger = logging.getLogger(__name__)
+
+
+class IsProjectAdmin(BasePermission):
+    def has_permission(self, request, view):
+        user = getattr(request, 'user', None)
+        if not user or not user.is_authenticated:
+            return False
+        return bool(getattr(user, 'is_staff', False) or getattr(user, 'is_staff_member', False) or getattr(user, 'is_superuser', False))
+
 @csrf_exempt
 @api_view(['POST'])
-@permission_classes([IsAdminUser])
+@permission_classes([IsProjectAdmin])
 def upload_image_to_voro(request):
     """
     Upload image directly to Cloudflare R2
@@ -49,26 +60,29 @@ from django.core.management import call_command
 from django.http import HttpResponse
 import io
 
-@api_view(['GET'])
-@permission_classes([AllowAny])
+@api_view(['POST'])
+@permission_classes([IsProjectAdmin])
 def run_migration_view(request):
     """
-    Run the migration command from a web request
+    تشغيل أمر تهجير الصور — مقصور على المشرفين وعبر POST فقط.
     URL: /api/products/run-migration-secret-123/
+    ملاحظة: يُفضّل تشغيل أوامر الإدارة عبر CLI/CI؛ هذه النقطة أداة صيانة محمية.
     """
     # نستخدم StringIO لالتقاط مخرجات الأمر (stdout)
     out = io.StringIO()
     try:
         # 1. تهجير الصور من ImgBB إلى R2
         call_command('migrate_images_to_r2', stdout=out)
-        
+
         # 2. إصلاح المسارات بإزالة uploads/
         call_command('fix_image_paths', stdout=out)
-        
+
         result = out.getvalue()
         return HttpResponse(f"<h1>voro Image Migration & Path Fix Result</h1><pre>{result}</pre>", content_type="text/html")
-    except Exception as e:
-        return HttpResponse(f"<h1>Error during migration</h1><pre>{str(e)}</pre>", status=500)
+    except Exception:
+        # لا نُسرّب نص الاستثناء الداخلي للعميل
+        logger.exception("run_migration_view failed")
+        return HttpResponse("<h1>Error during migration</h1><p>حدث خطأ داخلي. راجع سجلات الخادم.</p>", status=500)
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
@@ -102,12 +116,22 @@ def product_detail(request, pk):
     except Product.DoesNotExist:
         return Response({'error': 'المنتج غير موجود'}, status=404)
 
-@api_view(['GET'])
+@api_view(['GET', 'POST'])
 @permission_classes([AllowAny])
 def category_list(request):
     """
-    قائمة الفئات الرئيسية (الأب فقط) مع فئاتها الفرعية مرتبة حسب display_order
+    GET: قائمة الفئات الرئيسية (الأب فقط) مع فئاتها الفرعية مرتبة حسب display_order
+    POST: إنشاء قسم جديد (للمشرف فقط)
     """
+    if request.method == 'POST':
+        if not (request.user and request.user.is_authenticated and request.user.is_staff):
+            return Response({'error': 'غير مصرّح لك بهذا الإجراء'}, status=403)
+        serializer = CategorySerializer(data=request.data, context={'request': request})
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=201)
+        return Response(serializer.errors, status=400)
+
     # Return only parent categories (where parent is None), ordered by display_order
     categories = Category.objects.filter(parent__isnull=True).order_by('display_order', 'name')
     print(f"Found {categories.count()} parent categories")
@@ -120,6 +144,37 @@ def category_list(request):
     serializer = CategorySerializer(categories, many=True)
     print(f"Returning {len(serializer.data)} categories with their subcategories")
     return Response(serializer.data)
+
+@api_view(['GET', 'PUT', 'PATCH', 'DELETE'])
+@permission_classes([AllowAny])
+def category_detail(request, pk):
+    """
+    GET: تفاصيل قسم واحد.
+    PUT/PATCH: تحديث القسم (بما فيها صورته) — للمشرف فقط.
+    DELETE: حذف القسم — للمشرف فقط.
+    """
+    try:
+        category = Category.objects.get(pk=pk)
+    except Category.DoesNotExist:
+        return Response({'error': 'القسم غير موجود'}, status=404)
+
+    if request.method == 'GET':
+        return Response(CategorySerializer(category, context={'request': request}).data)
+
+    # طرق الكتابة — للمشرف فقط
+    if not (request.user and request.user.is_authenticated and request.user.is_staff):
+        return Response({'error': 'غير مصرّح لك بهذا الإجراء'}, status=403)
+
+    if request.method in ('PUT', 'PATCH'):
+        serializer = CategorySerializer(category, data=request.data, partial=True, context={'request': request})
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=400)
+
+    # DELETE
+    category.delete()
+    return Response(status=204)
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
@@ -168,14 +223,13 @@ def search_products(request):
 @permission_classes([AllowAny])
 def banner_list(request):
     """
-    قائمة جميع البانرات
+    قائمة البانرات النشطة. تدعم الفلترة حسب مكان الظهور:
+    ‏/api/products/banners/?placement=home  أو  ?placement=offers
+    (بدون بارامتر تُرجِع بنرات الرئيسية للحفاظ على السلوك السابق.)
     """
-    banners = Banner.objects.filter(is_active=True)
-    print(f"Found {banners.count()} active banners")
-    for banner in banners:
-        print(f"Banner: {banner.title}, Product: {banner.product}, Image URL: {banner.get_image_url()}")
+    placement = request.query_params.get('placement', Banner.PLACEMENT_HOME)
+    banners = Banner.objects.filter(is_active=True, placement=placement)
     serializer = BannerSerializer(banners, many=True, context={'request': request})
-    print(f"Serialized banners data: {serializer.data}")
     return Response(serializer.data)
 
 
@@ -229,7 +283,7 @@ def validate_coupon(request):
 # ============ ADMIN ENDPOINTS ============
 
 @api_view(['GET', 'POST'])
-@permission_classes([IsAdminUser])
+@permission_classes([IsProjectAdmin])
 def admin_products_list(request):
     """
     Admin endpoint for managing products
@@ -277,7 +331,7 @@ def admin_products_list(request):
 
 
 @api_view(['GET', 'PUT', 'DELETE'])
-@permission_classes([IsAdminUser])
+@permission_classes([IsProjectAdmin])
 def admin_product_detail(request, pk):
     """
     Admin endpoint for managing a specific product
@@ -315,4 +369,48 @@ def admin_product_detail(request, pk):
     elif request.method == 'DELETE':
         product.delete()
         return Response({'message': 'تم حذف المنتج بنجاح'}, status=204)
+
+
+@api_view(['GET', 'POST'])
+@permission_classes([IsProjectAdmin])
+def admin_banners_list(request):
+    """
+    إدارة البنرات (مشرف فقط).
+    GET: كل البنرات (الرئيسية والعروض، نشطة وغير نشطة) مرتّبة حسب المكان ثم الترتيب.
+    POST: إنشاء بنر جديد.
+    """
+    if request.method == 'GET':
+        banners = Banner.objects.all().order_by('placement', 'display_order', '-created_at')
+        serializer = BannerSerializer(banners, many=True, context={'request': request})
+        return Response(serializer.data)
+
+    serializer = BannerSerializer(data=request.data, context={'request': request})
+    if serializer.is_valid():
+        banner = serializer.save()
+        return Response(BannerSerializer(banner, context={'request': request}).data, status=201)
+    return Response(serializer.errors, status=400)
+
+
+@api_view(['GET', 'PUT', 'DELETE'])
+@permission_classes([IsProjectAdmin])
+def admin_banner_detail(request, pk):
+    """إدارة بنر محدّد (مشرف فقط): عرض / تعديل / حذف."""
+    try:
+        banner = Banner.objects.get(pk=pk)
+    except Banner.DoesNotExist:
+        return Response({'error': 'البنر غير موجود'}, status=404)
+
+    if request.method == 'GET':
+        serializer = BannerSerializer(banner, context={'request': request})
+        return Response(serializer.data)
+
+    if request.method == 'PUT':
+        serializer = BannerSerializer(banner, data=request.data, partial=True, context={'request': request})
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=400)
+
+    banner.delete()
+    return Response({'message': 'تم حذف البنر بنجاح'}, status=204)
 

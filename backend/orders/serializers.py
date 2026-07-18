@@ -44,8 +44,21 @@ class OrderSerializer(serializers.ModelSerializer):
             'payment_method', 'status', 'subtotal', 'delivery_fee', 
             'coupon_code', 'coupon_discount', 'total', 'created_at', 'updated_at', 'items'
         ]
-        read_only_fields = ['id', 'status', 'created_at', 'updated_at']
-    
+        # الحالة قابلة للتعديل — التحديث مقصور على المشرفين عبر صلاحيات OrderViewSet
+        read_only_fields = ['id', 'created_at', 'updated_at']
+
+    def update(self, instance, validated_data):
+        """
+        دفاع في العمق: حالة الطلب لا يغيّرها إلا مشرف.
+        صلاحيات OrderViewSet تمنع غير المشرفين أصلاً، لكن هذا الحارس يبقى
+        صالحاً لو استُخدم السيريلايزر مستقبلاً من مسار بصلاحيات أضعف.
+        """
+        request = self.context.get('request')
+        user = getattr(request, 'user', None)
+        if 'status' in validated_data and not (user and user.is_authenticated and user.is_staff):
+            validated_data.pop('status')
+        return super().update(instance, validated_data)
+
     def get_items(self, obj):
         """Return items with context"""
         items = obj.items.all()

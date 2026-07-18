@@ -317,11 +317,24 @@ class ProductView(models.Model):
 
 
 class Banner(models.Model):
-    """Banner/Advertisement model for homepage slider"""
+    """Banner/Advertisement model for homepage & offers-page sliders"""
+    PLACEMENT_HOME = 'home'
+    PLACEMENT_OFFERS = 'offers'
+    PLACEMENT_CHOICES = [
+        (PLACEMENT_HOME, 'الصفحة الرئيسية'),
+        (PLACEMENT_OFFERS, 'صفحة العروض'),
+    ]
+
     title = models.CharField('عنوان الإعلان', max_length=200)
     description = models.TextField('وصف الإعلان', blank=True)
     image = models.ImageField('صورة الإعلان (قديمة - استخدم image_url بدلاً منها)', upload_to='banners/', blank=True, null=True)
     image_url = models.URLField('رابط صورة الإعلان من voro', blank=True, null=True)
+    placement = models.CharField(
+        'مكان الظهور',
+        max_length=20,
+        choices=PLACEMENT_CHOICES,
+        default=PLACEMENT_HOME,
+    )
     product = models.ForeignKey(
         Product,
         on_delete=models.CASCADE,

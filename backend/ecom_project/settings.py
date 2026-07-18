@@ -253,9 +253,10 @@ if RENDER_FRONTEND_URL and RENDER_FRONTEND_URL not in CORS_ALLOWED_ORIGINS:
 if DEBUG:
     CORS_ALLOW_ALL_ORIGINS = True  # For development only
 else:
-    # In production, allow specific origins
+    # في الإنتاج: نعتمد فقط على القائمة البيضاء الصريحة أعلاه.
+    # دمج allow-all مع allow-credentials ثغرة أمنية (يسمح لأي موقع بطلبات مصادَقة).
     CORS_ALLOWED_ORIGINS = list(set(CORS_ALLOWED_ORIGINS))  # Remove duplicates
-    CORS_ALLOW_ALL_ORIGINS = True  # Temporary fix for production
+    CORS_ALLOW_ALL_ORIGINS = False
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_ALL_HEADERS = True
 CORS_ALLOW_METHODS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS']

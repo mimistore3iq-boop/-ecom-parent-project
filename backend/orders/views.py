@@ -1,7 +1,7 @@
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.permissions import IsAdminUser, AllowAny
 from .models import Order, OrderItem
 from .serializers import OrderSerializer, CreateOrderSerializer
 from notifications.firebase_service import send_notification_to_topic, subscribe_to_topic
@@ -13,8 +13,16 @@ from utils.telegram_service import send_telegram_order_notification
 class OrderViewSet(viewsets.ModelViewSet):
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
-    permission_classes = [AllowAny]
     http_method_names = ['get', 'post', 'put', 'patch', 'delete', 'head', 'options']
+
+    # الطلبات تحوي بيانات عملاء حسّاسة. الإنشاء متاح للزائر (العميل غير مسجّل)،
+    # أمّا الاطّلاع والتعديل والحذف فمقصورة على المشرفين (لوحة التحكم ترسل توكِن المشرف).
+    PUBLIC_ACTIONS = {'create', 'create_order', 'register_admin_token'}
+
+    def get_permissions(self):
+        if self.action in self.PUBLIC_ACTIONS:
+            return [AllowAny()]
+        return [IsAdminUser()]
 
     def get_serializer_class(self):
         if self.action == 'create' or self.action == 'create_order':

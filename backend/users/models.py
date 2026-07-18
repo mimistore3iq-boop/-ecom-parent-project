@@ -19,5 +19,10 @@ class User(AbstractUser):
         verbose_name = "مستخدم"
         verbose_name_plural = "المستخدمون"
 
+    @property
+    def is_admin(self):
+        """صلاحية الإدارة — مشتقّة من is_staff، ويعتمدها الباكند والواجهة معاً."""
+        return self.is_staff
+
     def __str__(self):
         return self.username

@@ -15,6 +15,7 @@ urlpatterns = [
     # Categories
     path('categories/', views.category_list, name='category_list'),
     path('categories/<int:category_id>/products/', views.products_by_category, name='products_by_category'),
+    path('categories/<int:pk>/', views.category_detail, name='category_detail'),
     
     # Banners
     path('banners/', views.banner_list, name='banner_list'),
@@ -33,5 +34,9 @@ urlpatterns = [
     # Admin Products Management
     path('admin/products/', views.admin_products_list, name='admin_products_list'),
     path('admin/products/<int:pk>/', views.admin_product_detail, name='admin_product_detail'),
+
+    # Admin Banners Management
+    path('admin/banners/', views.admin_banners_list, name='admin_banners_list'),
+    path('admin/banners/<int:pk>/', views.admin_banner_detail, name='admin_banner_detail'),
 ]
 

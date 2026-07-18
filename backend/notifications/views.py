@@ -14,13 +14,18 @@ class NotificationViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        # Check if admin wants to see all notifications
-        if self.request.query_params.get('all') == 'true' and self.request.user.is_admin:
-            # Return all notifications for admin
+        user = self.request.user
+        is_admin = getattr(user, 'is_admin', False)
+        wants_all = self.request.query_params.get('all') == 'true'
+
+        # المشرف يحتاج الوصول لأي إشعار — إشعارات الطلبات مُسجّلة باسم صاحب الطلب،
+        # فبدون هذا لا يستطيع تعليمها كمقروءة (كانت ترجع 404).
+        # أمّا القائمة فتبقى مقيَّدة بـ all=true حتى لا تختلط إشعارات المستخدم بغيره.
+        detail_actions = ('retrieve', 'mark_as_read', 'update', 'partial_update', 'destroy')
+        if is_admin and (wants_all or self.action in detail_actions):
             return Notification.objects.all()
-        else:
-            # Only return notifications for the current user
-            return Notification.objects.filter(recipient=self.request.user)
+
+        return Notification.objects.filter(recipient=user)
 
     @action(detail=True, methods=['post'])
     def mark_as_read(self, request, pk=None):

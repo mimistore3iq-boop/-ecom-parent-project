@@ -5,12 +5,18 @@ from .models import User
 
 class UserSerializer(serializers.ModelSerializer):
     name = serializers.CharField(source='username', read_only=True)
-    
+    # صلاحية الأدمن للواجهة الأمامية — تُشتق من is_staff أو is_staff_member
+    is_admin = serializers.SerializerMethodField()
+
     class Meta:
         model = User
         fields = ['id', 'username', 'name', 'email', 'first_name', 'last_name',
-                 'phone', 'address', 'governorate', 'is_customer', 'is_staff_member', 'date_joined']
+                 'phone', 'address', 'governorate', 'is_customer', 'is_staff_member',
+                 'is_admin', 'date_joined']
         read_only_fields = ['id', 'date_joined']
+
+    def get_is_admin(self, obj):
+        return bool(getattr(obj, 'is_staff', False) or getattr(obj, 'is_staff_member', False) or getattr(obj, 'is_superuser', False))
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):

@@ -77,10 +77,6 @@ def api_info(request):
                 'update_profile': '/api/users/profile/update/',
             }
         },
-        'admin_credentials': {
-            'phone': 'admin',
-            'password': 'admin123'
-        },
         'stats': {
             'total_products': 0,
             'total_categories': 0,

@@ -255,3 +255,8 @@ staticfiles/
 # Backup files
 *.bak
 *.backup
+# Local DB backups / data dumps (contain real data — never commit)
+backend/backups/
+
+# Playwright MCP temp snapshots/screenshots
+.playwright-mcp/
