@@ -1,15 +1,72 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import {
+  Package, FolderTree, ShoppingCart, Image, Bell, Store, LogOut, LayoutGrid,
+  Home, Tag, Plus, Pencil, Trash2, AlertTriangle, PackageCheck, X, GripVertical,
+  RefreshCw, ArrowLeft,
+} from 'lucide-react';
+
 import { api } from '../api';
 import NotificationManager from '../components/NotificationManager';
+
+// وقت نسبي مقروء ("قبل ٥ دقائق") — أوضح من طابع زمني كامل في قائمة إشعارات
+const timeAgo = (iso) => {
+  const ts = new Date(iso).getTime();
+  if (!ts) return '';
+  const diff = (Date.now() - ts) / 1000;
+  if (diff < 60) return 'الآن';
+  if (diff < 3600) return `قبل ${Math.floor(diff / 60)} دقيقة`;
+  if (diff < 86400) return `قبل ${Math.floor(diff / 3600)} ساعة`;
+  if (diff < 604800) return `قبل ${Math.floor(diff / 86400)} يوم`;
+  return new Date(ts).toLocaleDateString('ar-IQ');
+};
+
+// أقسام لوحة التحكم — أيقونات lucide احترافية موحّدة
+const ADMIN_TABS = [
+  { id: 'products', name: 'المنتجات', Icon: Package },
+  { id: 'categories', name: 'الأقسام', Icon: FolderTree },
+  { id: 'orders', name: 'الطلبات', Icon: ShoppingCart },
+  { id: 'banners', name: 'البنرات', Icon: Image },
+  { id: 'notifications', name: 'الإشعارات', Icon: Bell },
+];
+
+// حالات الطلب — مطابقة تمامًا لـ Order.STATUS_CHOICES في الباكند
+const ORDER_STATUSES = [
+  { value: 'pending', label: 'قيد الانتظار', tint: 'bg-amber-50 text-amber-700 border-amber-200' },
+  { value: 'confirmed', label: 'مؤكد', tint: 'bg-blue-50 text-blue-700 border-blue-200' },
+  { value: 'preparing', label: 'قيد التحضير', tint: 'bg-indigo-50 text-indigo-700 border-indigo-200' },
+  { value: 'shipped', label: 'قيد الشحن', tint: 'bg-purple-50 text-purple-700 border-purple-200' },
+  { value: 'delivered', label: 'تم التسليم', tint: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
+  { value: 'cancelled', label: 'ملغي', tint: 'bg-red-50 text-red-700 border-red-200' },
+];
+
+const getOrderStatusMeta = (status) =>
+  ORDER_STATUSES.find((s) => s.value === status) ||
+  // توافق مع بيانات قديمة قد تحمل 'completed'
+  (status === 'completed'
+    ? ORDER_STATUSES.find((s) => s.value === 'delivered')
+    : { value: status, label: status || 'غير معروف', tint: 'bg-gray-100 text-gray-600 border-gray-200' });
+
+// خريطة أيقونات ونبرة ألوان أنواع الإشعارات
+const NOTIF_META = {
+  new_order: { Icon: ShoppingCart, tint: 'bg-emerald-50 text-emerald-600' },
+  order_status_changed: { Icon: PackageCheck, tint: 'bg-blue-50 text-blue-600' },
+  low_stock: { Icon: AlertTriangle, tint: 'bg-amber-50 text-amber-600' },
+  default: { Icon: Bell, tint: 'bg-gray-100 text-gray-500' },
+};
 
 const AdminPanel = ({ user, setUser }) => {
   const [activeTab, setActiveTab] = useState('products');
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [orders, setOrders] = useState([]);
+  const [banners, setBanners] = useState([]);
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [notifRefreshing, setNotifRefreshing] = useState(false);
+  const [notifTotal, setNotifTotal] = useState(0);
+  const [notifNext, setNotifNext] = useState(null);
+  const [notifLoadingMore, setNotifLoadingMore] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [modalType, setModalType] = useState(''); // 'product', 'category'
@@ -44,12 +101,45 @@ const AdminPanel = ({ user, setUser }) => {
 
   const [categoryForm, setCategoryForm] = useState({
     name: '',
-    description: ''
+    description: '',
+    image_url: ''
   });
+  const [uploadingCategoryImage, setUploadingCategoryImage] = useState(false);
+
+  // Banner Modal States
+  const emptyBannerForm = {
+    id: null,
+    title: '',
+    image_url: '',
+    placement: 'home',
+    link_url: '',
+    display_order: 0,
+    is_active: true,
+  };
+  const [showBannerModal, setShowBannerModal] = useState(false);
+  const [editingBanner, setEditingBanner] = useState(null);
+  const [bannerForm, setBannerForm] = useState(emptyBannerForm);
+  const [bannerPreviewUrl, setBannerPreviewUrl] = useState('');
+  const [bannerImageInputKey, setBannerImageInputKey] = useState(0);
+  const [bannerUploading, setBannerUploading] = useState(false);
+  const [bannerSaving, setBannerSaving] = useState(false);
 
   // Order Details Modal States
   const [showOrderDetailsModal, setShowOrderDetailsModal] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [updatingOrderId, setUpdatingOrderId] = useState(null);
+
+  // منع أي تمرير أفقي عرضي على مستوى الصفحة أثناء وجود لوحة التحكم
+  useEffect(() => {
+    const prevHtml = document.documentElement.style.overflowX;
+    const prevBody = document.body.style.overflowX;
+    document.documentElement.style.overflowX = 'hidden';
+    document.body.style.overflowX = 'hidden';
+    return () => {
+      document.documentElement.style.overflowX = prevHtml;
+      document.body.style.overflowX = prevBody;
+    };
+  }, []);
 
   useEffect(() => {
     if (activeTab === 'products') {
@@ -59,11 +149,126 @@ const AdminPanel = ({ user, setUser }) => {
       fetchCategories();
     } else if (activeTab === 'orders') {
       fetchOrders();
+    } else if (activeTab === 'banners') {
+      fetchBanners();
     } else if (activeTab === 'notifications') {
       fetchNotifications();
       fetchUnreadCount();
     }
   }, [activeTab]);
+
+  const fetchBanners = async () => {
+    setLoading(true);
+    try {
+      const response = await api.get('/products/admin/banners/');
+      setBanners(Array.isArray(response.data) ? response.data : []);
+    } catch (error) {
+      console.error('Error fetching banners:', error);
+      setBanners([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const openBannerModal = (banner = null) => {
+    if (banner) {
+      setEditingBanner(banner);
+      setBannerForm({
+        id: banner.id ?? null,
+        title: banner.title || '',
+        image_url: banner.image_url || banner.image || '',
+        placement: banner.placement || 'home',
+        link_url: banner.link_url || '',
+        display_order: banner.display_order ?? 0,
+        is_active: banner.is_active ?? true,
+      });
+      setBannerPreviewUrl(banner.image_url || banner.image || '');
+    } else {
+      setEditingBanner(null);
+      setBannerForm(emptyBannerForm);
+      setBannerPreviewUrl('');
+    }
+    setBannerImageInputKey((value) => value + 1);
+    setShowBannerModal(true);
+  };
+
+  const closeBannerModal = () => {
+    if (bannerPreviewUrl && bannerPreviewUrl.startsWith('blob:')) {
+      URL.revokeObjectURL(bannerPreviewUrl);
+    }
+    setShowBannerModal(false);
+    setEditingBanner(null);
+    setBannerForm(emptyBannerForm);
+    setBannerPreviewUrl('');
+    setBannerImageInputKey((value) => value + 1);
+  };
+
+  const handleBannerRemoveImage = () => {
+    if (bannerPreviewUrl && bannerPreviewUrl.startsWith('blob:')) {
+      URL.revokeObjectURL(bannerPreviewUrl);
+    }
+    setBannerPreviewUrl('');
+    setBannerForm((prev) => ({ ...prev, image_url: '' }));
+    setBannerImageInputKey((value) => value + 1);
+  };
+
+  // رفع صورة البنر إلى ImgBB (نفس آلية المنتجات) ثم تخزين الرابط في النموذج
+  const handleBannerImageUpload = async (file) => {
+    if (!file) return;
+    setBannerUploading(true);
+    setBannerPreviewUrl((current) => {
+      if (current && current.startsWith('blob:')) {
+        URL.revokeObjectURL(current);
+      }
+      return URL.createObjectURL(file);
+    });
+    try {
+      const url = await handleImageUpload(file);
+      if (url) {
+        setBannerForm((prev) => ({ ...prev, image_url: url }));
+      } else {
+        alert('تعذّر رفع الصورة. حاول مرة أخرى.');
+      }
+    } finally {
+      setBannerUploading(false);
+    }
+  };
+
+  const handleBannerDelete = async (id) => {
+    if (!window.confirm('هل أنت متأكد من حذف هذا البنر؟')) return;
+    try {
+      await api.delete(`/products/admin/banners/${id}/`);
+      fetchBanners();
+    } catch (error) {
+      console.error('Error deleting banner:', error);
+      alert('تعذّر حذف البنر.');
+    }
+  };
+
+  // حفظ البنر: إنشاء جديد (POST) أو تعديل قائم (PUT). يتطلب صورة مرفوعة أولاً.
+  const handleBannerSubmit = async (e) => {
+    e.preventDefault();
+    if (!bannerForm.image_url && !editingBanner) {
+      alert('يرجى رفع صورة للبنر أولاً.');
+      return;
+    }
+    setBannerSaving(true);
+    try {
+      const bannerId = editingBanner?.id ?? bannerForm.id;
+      if (bannerId) {
+        await api.put(`/products/admin/banners/${bannerId}/`, bannerForm);
+      } else {
+        await api.post('/products/admin/banners/', bannerForm);
+      }
+      await fetchBanners();
+      closeBannerModal();
+    } catch (error) {
+      console.error('Error saving banner:', error);
+      alert('تعذّر حفظ البنر. تأكّد من صلاحياتك وحاول مجدداً.');
+    } finally {
+      setBannerSaving(false);
+    }
+  };
 
   const fetchProducts = async () => {
     setLoading(true);
@@ -119,7 +324,9 @@ const AdminPanel = ({ user, setUser }) => {
     setLoading(true);
     try {
       const response = await api.get('/orders/');
-      setOrders(response.data);
+      // الاستجابة قد تكون مصفوفة مباشرة أو مقسّمة صفحات ({results}) — نطبّعها لمصفوفة دائماً
+      const data = response.data;
+      setOrders(Array.isArray(data) ? data : (data?.results || []));
     } catch (error) {
       console.error('Error fetching orders:', error);
     } finally {
@@ -127,22 +334,74 @@ const AdminPanel = ({ user, setUser }) => {
     }
   };
 
-  const fetchNotifications = async () => {
-    setLoading(true);
+  // تحديث حالة الطلب — تحديث تفاؤلي فوري مع تراجع تلقائي إن فشل الطلب
+  const updateOrderStatus = async (orderId, newStatus) => {
+    const target = orders.find((o) => o.id === orderId);
+    if (!target || target.status === newStatus) return;
+
+    if (newStatus === 'cancelled' && !window.confirm('هل أنت متأكد من إلغاء هذا الطلب؟')) return;
+
+    const previousStatus = target.status;
+    setUpdatingOrderId(orderId);
+    // تحديث فوري بالواجهة قبل ردّ الخادم
+    setOrders((prev) => prev.map((o) => (o.id === orderId ? { ...o, status: newStatus } : o)));
+    setSelectedOrder((prev) => (prev && prev.id === orderId ? { ...prev, status: newStatus } : prev));
+
     try {
-      console.log('Fetching notifications...');
+      await api.patch(`/orders/${orderId}/`, { status: newStatus });
+    } catch (error) {
+      console.error('Error updating order status:', error);
+      // تراجع عن التحديث التفاؤلي
+      setOrders((prev) => prev.map((o) => (o.id === orderId ? { ...o, status: previousStatus } : o)));
+      setSelectedOrder((prev) => (prev && prev.id === orderId ? { ...prev, status: previousStatus } : prev));
+      alert('تعذّر تحديث حالة الطلب. تأكّد من صلاحياتك وحاول مجدداً.');
+    } finally {
+      setUpdatingOrderId(null);
+    }
+  };
+
+  // silent = تحديث بدون إخفاء القائمة (يُستخدم لزر التحديث)
+  const fetchNotifications = async ({ silent = false } = {}) => {
+    if (!silent) setLoading(true);
+    try {
       const response = await api.get('/notifications/notifications/?all=true');
-      console.log('Notifications response:', response.data);
-      setNotifications(response.data);
+      // الاستجابة قد تكون مصفوفة أو مقسّمة صفحات ({results}) — نطبّعها لمصفوفة دائماً
+      const data = response.data;
+      const list = Array.isArray(data) ? data : (data?.results || []);
+      setNotifications(list);
+      setNotifTotal(Array.isArray(data) ? list.length : (data?.count ?? list.length));
+      setNotifNext(Array.isArray(data) ? null : (data?.next || null));
     } catch (error) {
       console.error('Error fetching notifications:', error);
-      if (error.response) {
-        console.error('Error response:', error.response);
-        console.error('Error status:', error.response.status);
-        console.error('Error data:', error.response.data);
-      }
+      if (!silent) setNotifications([]);
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
+    }
+  };
+
+  // تحميل الصفحة التالية وإلحاقها بالقائمة (الإشعارات مقسّمة ٢٠ لكل صفحة)
+  const loadMoreNotifications = async () => {
+    if (!notifNext) return;
+    setNotifLoadingMore(true);
+    try {
+      const response = await api.get(notifNext);
+      const data = response.data;
+      const list = Array.isArray(data) ? data : (data?.results || []);
+      setNotifications((prev) => [...prev, ...list]);
+      setNotifNext(Array.isArray(data) ? null : (data?.next || null));
+    } catch (error) {
+      console.error('Error loading more notifications:', error);
+    } finally {
+      setNotifLoadingMore(false);
+    }
+  };
+
+  const refreshNotifications = async () => {
+    setNotifRefreshing(true);
+    try {
+      await Promise.all([fetchNotifications({ silent: true }), fetchUnreadCount()]);
+    } finally {
+      setNotifRefreshing(false);
     }
   };
 
@@ -172,7 +431,7 @@ const AdminPanel = ({ user, setUser }) => {
 
   const markAsRead = async (id) => {
     try {
-      await api.post(`/api/notifications/${id}/mark_as_read/`);
+      await api.post(`/notifications/notifications/${id}/mark_as_read/`);
       // Update the notification in the state
       setNotifications(notifications.map(notification => 
         notification.id === id ? { ...notification, is_read: true } : notification
@@ -181,18 +440,6 @@ const AdminPanel = ({ user, setUser }) => {
       setUnreadCount(prev => Math.max(0, prev - 1));
     } catch (error) {
       console.error('Error marking notification as read:', error);
-    }
-  };
-
-  const markAllAsRead = async () => {
-    try {
-      await api.post('/api/notifications/mark_all_as_read/');
-      // Update all notifications in the state
-      setNotifications(notifications.map(notification => ({ ...notification, is_read: true })));
-      // Reset unread count
-      setUnreadCount(0);
-    } catch (error) {
-      console.error('Error marking all notifications as read:', error);
     }
   };
 
@@ -363,7 +610,8 @@ const AdminPanel = ({ user, setUser }) => {
       setEditingItem(null);
       setCategoryForm({
         name: '',
-        description: ''
+        description: '',
+        image_url: ''
       });
     } catch (error) {
       console.error('Error saving category:', error);
@@ -499,12 +747,14 @@ const AdminPanel = ({ user, setUser }) => {
       if (item) {
         setCategoryForm({
           name: item.name,
-          description: item.description
+          description: item.description || '',
+          image_url: item.image_url || item.image || ''
         });
       } else {
         setCategoryForm({
           name: '',
-          description: ''
+          description: '',
+          image_url: ''
         });
       }
     }
@@ -524,81 +774,134 @@ const AdminPanel = ({ user, setUser }) => {
     navigate('/login');
   };
 
-  return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 py-4 md:h-16">
-              <Link to="/" className="flex items-center space-x-2 space-x-reverse">
-                <div className="bg-gradient-to-r from-primary-500 to-secondary-500 text-white w-10 h-10 rounded-lg flex items-center justify-center font-bold text-xl flex-shrink-0">
-                  V
-                </div>
-                <h1 className="text-xl md:text-2xl font-bold bg-gradient-to-r from-primary-600 to-secondary-600 bg-clip-text text-transparent truncate">
-                  voro - لوحة الإدارة
-                </h1>
-              </Link>
+  const activeTabMeta = ADMIN_TABS.find((t) => t.id === activeTab) || ADMIN_TABS[0];
 
-              <div className="flex items-center justify-between md:justify-end space-x-4 space-x-reverse border-t md:border-t-0 pt-4 md:pt-0">
-                <div className="flex items-center space-x-3 space-x-reverse">
-                  <span className="text-gray-700 text-sm hidden sm:inline">مرحباً، {user?.phone}</span>
-                  <Link
-                    to="/"
-                    className="text-primary-600 hover:text-primary-700 transition-colors text-sm font-medium"
-                  >
-                    المتجر
-                  </Link>
-                </div>
-                <div className="flex items-center space-x-3 space-x-reverse">
+  return (
+    <div className="min-h-screen bg-gray-50 flex overflow-x-hidden max-w-full" dir="rtl">
+      {/* ===== Sidebar (سطح المكتب فقط) — عمود التنقّل الثابت يمينًا ===== */}
+      <aside className="hidden lg:flex lg:flex-col w-64 shrink-0 bg-white border-l border-gray-200 sticky top-0 h-screen">
+        {/* هوية اللوحة */}
+        <Link to="/" className="flex items-center gap-2.5 h-16 px-5 border-b border-gray-100 cursor-pointer">
+          <div className="bg-gray-900 text-white w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0">
+            <LayoutGrid className="h-[18px] w-[18px]" strokeWidth={2} />
+          </div>
+          <div className="leading-tight">
+            <div className="text-base font-extrabold tracking-[0.16em] text-gray-900">VORO</div>
+            <div className="text-[11px] text-gray-400 -mt-0.5">لوحة الإدارة</div>
+          </div>
+        </Link>
+
+        {/* أقسام التنقّل */}
+        <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
+          {ADMIN_TABS.map(({ id, name, Icon }) => {
+            const active = activeTab === id;
+            const showBadge = id === 'notifications' && unreadCount > 0;
+            return (
+              <button
+                key={id}
+                onClick={() => setActiveTab(id)}
+                aria-current={active ? 'page' : undefined}
+                className={`group relative w-full flex items-center gap-3 h-11 px-3.5 rounded-xl text-[15px] font-medium transition-all duration-200 cursor-pointer ${
+                  active ? 'bg-gray-900 text-white shadow-sm' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                }`}
+              >
+                <Icon className="h-[19px] w-[19px] shrink-0" strokeWidth={active ? 2 : 1.75} />
+                <span className="flex-1 text-right">{name}</span>
+                {showBadge && (
+                  <span className={`min-w-[20px] h-5 px-1.5 rounded-full text-[11px] leading-none font-bold flex items-center justify-center ${active ? 'bg-white text-gray-900' : 'bg-red-500 text-white'}`}>
+                    {unreadCount}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </nav>
+
+        {/* أسفل الشريط: المتجر + خروج */}
+        <div className="p-3 border-t border-gray-100 space-y-1">
+          <Link to="/" className="w-full flex items-center gap-3 h-10 px-3.5 rounded-xl text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors cursor-pointer">
+            <Store className="h-[18px] w-[18px]" strokeWidth={1.75} />
+            عرض المتجر
+          </Link>
+          <button onClick={logout} className="w-full flex items-center gap-3 h-10 px-3.5 rounded-xl text-sm font-medium text-gray-500 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer">
+            <LogOut className="h-[18px] w-[18px]" strokeWidth={1.75} />
+            تسجيل الخروج
+          </button>
+        </div>
+      </aside>
+
+      {/* ===== منطقة المحتوى ===== */}
+      <div className="flex-1 min-w-0 flex flex-col overflow-x-hidden">
+        {/* الشريط العلوي: عنوان القسم الحالي يمينًا، الحساب يسارًا */}
+        <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-gray-200 min-w-0 overflow-x-hidden">
+          <div className="w-full max-w-[1400px] mx-auto flex items-center justify-between h-16 px-4 sm:px-6 lg:px-8">
+            {/* يمين: هوية الموبايل + عنوان القسم */}
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="lg:hidden bg-gray-900 text-white w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0">
+                <LayoutGrid className="h-[18px] w-[18px]" strokeWidth={2} />
+              </div>
+              <div className="flex items-center gap-2 min-w-0">
+                <activeTabMeta.Icon className="h-5 w-5 text-gray-400 shrink-0 hidden lg:block" strokeWidth={1.75} />
+                <h1 className="text-lg font-bold text-gray-900 truncate">{activeTabMeta.name}</h1>
+              </div>
+            </div>
+
+            {/* يسار: تحديث الإشعارات (عند فتح تبويبها) + بيانات المستخدم */}
+            <div className="flex items-center gap-3 shrink-0">
+              {activeTab === 'notifications' && (
+                <button
+                  onClick={refreshNotifications}
+                  disabled={notifRefreshing}
+                  title="تحديث"
+                  aria-label="تحديث الإشعارات"
+                  className="inline-flex items-center gap-2 h-9 px-3 rounded-lg text-sm font-medium border border-gray-200 text-gray-700 hover:bg-gray-100 disabled:opacity-60 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                >
+                  <RefreshCw className={`h-4 w-4 ${notifRefreshing ? 'animate-spin' : ''}`} strokeWidth={1.75} />
+                  <span className="hidden sm:inline">تحديث</span>
+                </button>
+              )}
+              <div className="text-left leading-tight hidden sm:block">
+                <div className="text-[13px] font-semibold text-gray-800">{user?.phone}</div>
+                <div className="text-[11px] text-gray-400">مشرف</div>
+              </div>
+              <div className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 font-bold text-sm shrink-0">
+                {user?.phone?.slice(-2) || 'م'}
+              </div>
+            </div>
+          </div>
+
+          {/* شريط الأقسام الأفقي — الموبايل فقط (بديل الـ sidebar) */}
+          <div className="lg:hidden border-t border-gray-100 bg-gray-50/60 w-full min-w-0 overflow-hidden">
+            <nav className="flex gap-1 overflow-x-auto scrollbar-hide px-4 py-2 w-full">
+              {ADMIN_TABS.map(({ id, name, Icon }) => {
+                const active = activeTab === id;
+                const showBadge = id === 'notifications' && unreadCount > 0;
+                return (
                   <button
-                    onClick={() => setActiveTab('notifications')}
-                    className="relative text-gray-600 hover:text-gray-900 transition-colors p-1"
+                    key={id}
+                    onClick={() => setActiveTab(id)}
+                    aria-current={active ? 'page' : undefined}
+                    className={`relative inline-flex items-center gap-2 h-9 px-3.5 rounded-lg text-sm font-medium whitespace-nowrap shrink-0 transition-all duration-200 cursor-pointer ${
+                      active ? 'bg-gray-900 text-white shadow-sm' : 'text-gray-600 hover:text-gray-900 hover:bg-white'
+                    }`}
                   >
-                    <span className="text-xl">🔔</span>
-                    {unreadCount > 0 && (
-                      <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] rounded-full h-4 w-4 flex items-center justify-center font-bold">
+                    <Icon className="h-[18px] w-[18px]" strokeWidth={active ? 2 : 1.75} />
+                    {name}
+                    {showBadge && (
+                      <span className={`min-w-[18px] h-[18px] px-1 rounded-full text-[10px] leading-none font-bold flex items-center justify-center ${active ? 'bg-white text-gray-900' : 'bg-red-500 text-white'}`}>
                         {unreadCount}
                       </span>
                     )}
                   </button>
-                  <button
-                    onClick={logout}
-                    className="text-red-600 hover:text-red-700 transition-colors text-sm font-medium border border-red-100 px-3 py-1 rounded-lg hover:bg-red-50"
-                  >
-                    تسجيل خروج
-                  </button>
-                </div>
-              </div>
-            </div>
-        </div>
-      </header>
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Tabs */}
-        <div className="mb-8">
-          <div className="border-b border-gray-200 overflow-x-auto scrollbar-hide">
-            <nav className="-mb-px flex space-x-8 space-x-reverse min-w-max">
-              {[
-                { id: 'products', name: 'المنتجات', icon: '📦' },
-                { id: 'categories', name: 'الأقسام', icon: '📂' },
-                { id: 'orders', name: 'الطلبات', icon: '🛒' },
-                { id: 'notifications', name: 'الإشعارات', icon: '🔔' }
-              ].map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${activeTab === tab.id
-                      ? 'border-primary-500 text-primary-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                    }`}
-                >
-                  <span className="mr-2">{tab.icon}</span>
-                  {tab.name}
-                </button>
-              ))}
+                );
+              })}
             </nav>
           </div>
-        </div>
+        </header>
+
+        {/* تبويب الإشعارات يُعرض خارج هذه الحاوية، فنلغي حشوتها الرأسية عندها
+            حتى لا تترك فراغاً فارغاً فوق البطاقات */}
+        <div className={`w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 overflow-x-clip ${activeTab === 'notifications' ? '' : 'py-6 md:py-8'}`}>
 
         {/* Products Tab */}
         {activeTab === 'products' && (
@@ -645,9 +948,9 @@ const AdminPanel = ({ user, setUser }) => {
                   </div>
                 )}
 
-                <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden w-full min-w-0">
                   {/* Table view for desktop */}
-                  <div className="hidden md:block overflow-x-auto">
+                  <div className="hidden md:block overflow-x-auto w-full">
                     <table className="min-w-full divide-y divide-gray-200">
                       <thead className="bg-gray-900 text-white">
                         <tr>
@@ -733,19 +1036,25 @@ const AdminPanel = ({ user, setUser }) => {
                               {product.stock} قطعة
                             </span>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2 space-x-reverse">
-                            <button
-                              onClick={() => openModal('product', product)}
-                              className="text-primary-600 hover:text-primary-900"
-                            >
-                              تعديل
-                            </button>
-                            <button
-                              onClick={() => handleDelete('products', product.id)}
-                              className="text-red-600 hover:text-red-900"
-                            >
-                              حذف
-                            </button>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="flex items-center gap-1.5">
+                              <button
+                                onClick={() => openModal('product', product)}
+                                aria-label="تعديل"
+                                title="تعديل"
+                                className="w-8 h-8 inline-flex items-center justify-center rounded-lg text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition-colors cursor-pointer"
+                              >
+                                <Pencil className="h-4 w-4" strokeWidth={1.75} />
+                              </button>
+                              <button
+                                onClick={() => handleDelete('products', product.id)}
+                                aria-label="حذف"
+                                title="حذف"
+                                className="w-8 h-8 inline-flex items-center justify-center rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
+                              >
+                                <Trash2 className="h-4 w-4" strokeWidth={1.75} />
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       ))}
@@ -762,16 +1071,16 @@ const AdminPanel = ({ user, setUser }) => {
                             type="checkbox"
                             checked={selectedProducts.has(product.id)}
                             onChange={() => toggleProductSelection(product.id)}
-                            className="w-5 h-5 cursor-pointer"
+                            className="w-5 h-5 shrink-0 cursor-pointer"
                           />
                           <img
-                            className="h-16 w-16 rounded-lg object-cover border border-gray-200"
+                            className="h-16 w-16 shrink-0 rounded-lg object-cover border border-gray-200"
                             src={product.image || product.main_image || product.main_image_url || 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 80 80"%3E%3Crect fill="%23f3f4f6" width="80" height="80"/%3E%3Ctext fill="%239ca3af" font-family="sans-serif" font-size="10" dy="2.5" font-weight="bold" x="50%25" y="50%25" text-anchor="middle"%3Eلا توجد صورة%3C/text%3E%3C/svg%3E'}
                             alt={product.name}
                           />
-                          <div className="flex-1">
-                            <div className="text-sm font-bold text-gray-900">{product.name}</div>
-                            <div className="text-xs text-gray-500">{product.category?.name || 'غير محدد'}</div>
+                          <div className="flex-1 min-w-0">
+                            <div className="text-sm font-bold text-gray-900 break-words">{product.name}</div>
+                            <div className="text-xs text-gray-500 truncate">{product.category?.name || 'غير محدد'}</div>
                           </div>
                         </div>
                         <div className="flex justify-between items-center text-sm">
@@ -932,15 +1241,19 @@ const AdminPanel = ({ user, setUser }) => {
                             {order.total_amount || order.total} د.ع
                           </td>
                           <td className="px-6 py-3 whitespace-nowrap">
-                            <span className={`inline-flex px-3 py-1 text-sm font-bold rounded-lg border-2 ${order.status === 'completed' || order.status === 'delivered'
-                                ? 'bg-green-100 text-green-800 border-green-200'
-                                : order.status === 'pending'
-                                  ? 'bg-yellow-100 text-yellow-800 border-yellow-200'
-                                  : 'bg-red-100 text-red-800 border-red-200'
-                              }`}>
-                              {order.status === 'completed' || order.status === 'delivered' ? 'مكتمل' :
-                                order.status === 'pending' ? 'قيد المعالجة' : 'ملغي'}
-                            </span>
+                            <select
+                              value={order.status || 'pending'}
+                              onChange={(e) => updateOrderStatus(order.id, e.target.value)}
+                              disabled={updatingOrderId === order.id}
+                              aria-label="حالة الطلب"
+                              className={`text-sm font-bold rounded-lg border px-3 py-1.5 pl-8 cursor-pointer outline-none transition-colors disabled:opacity-50 disabled:cursor-wait focus:ring-2 focus:ring-gray-900/10 ${getOrderStatusMeta(order.status).tint}`}
+                            >
+                              {ORDER_STATUSES.map((s) => (
+                                <option key={s.value} value={s.value} className="bg-white text-gray-900 font-medium">
+                                  {s.label}
+                                </option>
+                              ))}
+                            </select>
                           </td>
                           <td className="px-6 py-3 whitespace-nowrap text-sm text-gray-700 font-medium">
                             {new Date(order.created_at).toLocaleDateString('ar-SA')}
@@ -972,20 +1285,26 @@ const AdminPanel = ({ user, setUser }) => {
                         <div className="text-xs text-gray-600">{order.customer_phone || order.user?.phone || 'غير محدد'}</div>
                       </div>
                       <div className="flex justify-between items-center">
-                        <div className="font-bold text-primary-600">{order.total_amount || order.total} د.ع</div>
-                        <span className={`px-2 py-0.5 text-[10px] font-bold rounded-full ${order.status === 'completed' || order.status === 'delivered'
-                              ? 'bg-green-100 text-green-800'
-                              : order.status === 'pending'
-                                ? 'bg-yellow-100 text-yellow-800'
-                                : 'bg-red-100 text-red-800'
-                            }`}>
-                          {order.status === 'completed' || order.status === 'delivered' ? 'مكتمل' :
-                            order.status === 'pending' ? 'قيد المعالجة' : 'ملغي'}
+                        <div className="font-bold text-gray-900">{order.total_amount || order.total} د.ع</div>
+                        <span className={`px-2.5 py-1 text-[11px] font-bold rounded-full border ${getOrderStatusMeta(order.status).tint}`}>
+                          {getOrderStatusMeta(order.status).label}
                         </span>
                       </div>
-                      <button 
+                      {/* تغيير الحالة مباشرة من البطاقة */}
+                      <select
+                        value={order.status || 'pending'}
+                        onChange={(e) => updateOrderStatus(order.id, e.target.value)}
+                        disabled={updatingOrderId === order.id}
+                        aria-label="تغيير حالة الطلب"
+                        className="w-full h-10 px-3 rounded-lg border border-gray-200 bg-white text-sm font-medium text-gray-800 cursor-pointer outline-none focus:ring-2 focus:ring-gray-900/10 disabled:opacity-50 disabled:cursor-wait"
+                      >
+                        {ORDER_STATUSES.map((s) => (
+                          <option key={s.value} value={s.value}>{s.label}</option>
+                        ))}
+                      </select>
+                      <button
                         onClick={() => showOrderDetails(order)}
-                        className="w-full py-2 bg-indigo-50 text-indigo-600 rounded-lg font-bold text-xs"
+                        className="w-full py-2 bg-gray-100 text-gray-700 rounded-lg font-bold text-xs hover:bg-gray-200 transition-colors"
                       >
                         عرض التفاصيل
                       </button>
@@ -1368,6 +1687,63 @@ const AdminPanel = ({ user, setUser }) => {
                   />
                 </div>
 
+                {/* صورة القسم — تظهر في بطاقة القسم بالمتجر */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    صورة القسم
+                  </label>
+                  <div className="flex items-center gap-4">
+                    {categoryForm.image_url ? (
+                      <div className="relative w-24 h-24 shrink-0 rounded-lg overflow-hidden border border-gray-200 bg-gray-50">
+                        <img src={categoryForm.image_url} alt="" className="w-full h-full object-cover" />
+                        <button
+                          type="button"
+                          onClick={() => setCategoryForm({ ...categoryForm, image_url: '' })}
+                          className="absolute top-1 left-1 w-6 h-6 rounded-full bg-black/60 text-white text-xs flex items-center justify-center hover:bg-black"
+                          aria-label="إزالة الصورة"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="w-24 h-24 shrink-0 rounded-lg border border-dashed border-gray-300 bg-gray-50 flex items-center justify-center text-gray-400 text-xs">
+                        لا صورة
+                      </div>
+                    )}
+                    <div className="flex-1">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+                          setUploadingCategoryImage(true);
+                          const url = await handleImageUpload(file);
+                          setUploadingCategoryImage(false);
+                          if (url) {
+                            setCategoryForm((prev) => ({ ...prev, image_url: url }));
+                          } else {
+                            alert('فشل رفع الصورة، حاول مرة أخرى');
+                          }
+                          e.target.value = '';
+                        }}
+                        className="block w-full text-sm text-gray-600 file:ml-3 file:py-2 file:px-4 file:rounded-md file:border-0 file:bg-primary-900 file:text-white file:cursor-pointer hover:file:bg-black"
+                      />
+                      {uploadingCategoryImage && (
+                        <p className="text-xs text-gray-500 mt-1">جاري رفع الصورة...</p>
+                      )}
+                      <input
+                        type="url"
+                        placeholder="أو الصق رابط صورة مباشر"
+                        value={categoryForm.image_url}
+                        onChange={(e) => setCategoryForm({ ...categoryForm, image_url: e.target.value })}
+                        className="mt-2 w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-primary-500 focus:border-primary-500"
+                        dir="ltr"
+                      />
+                    </div>
+                  </div>
+                </div>
+
                 <div className="flex justify-end space-x-4 space-x-reverse pt-4">
                   <button
                     type="button"
@@ -1390,87 +1766,403 @@ const AdminPanel = ({ user, setUser }) => {
         </div>
       )}
 
-      {/* Notifications Tab */}
-      {activeTab === 'notifications' && (
-        <div>
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold text-gray-900">إدارة الإشعارات</h2>
-            <div className="flex items-center space-x-4 space-x-reverse">
-              {unreadCount > 0 && (
-                <span className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
-                  {unreadCount} غير مقروء
-                </span>
-              )}
-              <button
-                onClick={markAllAsRead}
-                className="btn-secondary"
-                disabled={unreadCount === 0}
-              >
-                تعريف الكل كمقروء
+      {/* Banners Tab */}
+      {activeTab === 'banners' && (
+        <div className="space-y-6">
+          <div className="rounded-3xl border border-gray-200 bg-gradient-to-br from-white to-gray-50 p-5 sm:p-6 shadow-sm">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+              <div className="max-w-2xl">
+                <h2 className="text-2xl font-bold text-gray-900">إدارة البنرات</h2>
+                <p className="mt-2 text-sm leading-6 text-gray-500">
+                  رتّب البنرات حسب مكان الظهور، راقب الحالة والترتيب، وأضف بنرًا جديدًا بسرعة من نفس الصفحة.
+                </p>
+              </div>
+              <button onClick={() => openBannerModal()} className="w-full sm:w-auto btn-primary">
+                + إضافة بنر جديد
               </button>
+            </div>
+
+            <div className="mt-5 grid gap-3 sm:grid-cols-3">
+              {[
+                { label: 'إجمالي البنرات', value: banners.length },
+                { label: 'البنرات الفعّالة', value: banners.filter((banner) => banner.is_active).length },
+                { label: 'أماكن العرض', value: new Set(banners.map((banner) => banner.placement || 'home')).size },
+              ].map((stat) => (
+                <div key={stat.label} className="rounded-2xl border border-gray-200 bg-white px-4 py-3 shadow-sm">
+                  <div className="text-xs font-medium text-gray-400">{stat.label}</div>
+                  <div className="mt-1 text-2xl font-bold text-gray-900">{stat.value}</div>
+                </div>
+              ))}
             </div>
           </div>
 
           {loading ? (
-            <div className="flex justify-center py-12">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500"></div>
+            <div className="flex justify-center py-16">
+              <div className="animate-spin rounded-full h-10 w-10 border-2 border-gray-200 border-t-gray-900"></div>
             </div>
           ) : (
-            <div className="bg-white rounded-lg shadow overflow-hidden">
-              {notifications.length === 0 ? (
-                <div className="text-center py-12">
-                  <div className="text-gray-400 text-5xl mb-4">🔔</div>
-                  <h3 className="text-lg font-medium text-gray-900 mb-1">لا توجد إشعارات</h3>
-                  <p className="text-gray-500">ستظهر هنا جميع الإشعارات عند توفرها</p>
-                </div>
-              ) : (
-                <ul className="divide-y divide-gray-200">
-                  {notifications.map((notification) => (
-                    <li key={notification.id} className={`p-4 hover:bg-gray-50 ${!notification.is_read ? 'bg-blue-50' : ''}`}>
-                      <div className="flex items-start">
-                        <div className="flex-shrink-0 pt-1">
-                          <span className="text-2xl">
-                            {notification.type === 'new_order' ? '🛒' : 
-                             notification.type === 'order_status_changed' ? '📦' :
-                             notification.type === 'low_stock' ? '⚠️' : '🔔'}
-                          </span>
+            <div className="space-y-6">
+              {[
+                { key: 'home', label: 'بنرات الصفحة الرئيسية', GroupIcon: Home },
+                { key: 'offers', label: 'بنرات صفحة العروض', GroupIcon: Tag },
+              ].map(({ key, label, GroupIcon }) => {
+                const group = banners
+                  .filter((b) => (b.placement || 'home') === key)
+                  .sort((a, b) => (a.display_order ?? 0) - (b.display_order ?? 0));
+                return (
+                  <section key={key} className="rounded-3xl border border-gray-200 bg-white p-5 shadow-sm">
+                    <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-10 h-10 rounded-2xl bg-gray-100 flex items-center justify-center text-gray-600 shrink-0">
+                          <GroupIcon className="h-[18px] w-[18px]" strokeWidth={1.75} />
                         </div>
-                        <div className="mr-4 flex-1">
-                          <div className="flex items-center justify-between">
-                            <h3 className="text-lg font-medium text-gray-900">{notification.title}</h3>
-                            <div className="flex items-center space-x-2 space-x-reverse">
-                              <span className="text-xs text-gray-500">
-                                {new Date(notification.created_at).toLocaleDateString('ar-SA')} {new Date(notification.created_at).toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' })}
-                              </span>
-                              {!notification.is_read && (
-                                <span className="h-2 w-2 rounded-full bg-blue-500"></span>
-                              )}
-                            </div>
-                          </div>
-                          <p className="mt-1 text-gray-600">{notification.message}</p>
-                          {notification.type === 'new_order' && notification.data && (
-                            <div className="mt-2 p-3 bg-gray-50 rounded-md">
-                              <div className="flex justify-between text-sm">
-                                <span className="text-gray-500">العميل: {notification.data.customer_name}</span>
-                                <span className="text-gray-900 font-medium">المبلغ: {notification.data.total} د.ع</span>
-                              </div>
-                            </div>
-                          )}
-                          <div className="mt-3 flex justify-end">
-                            {!notification.is_read && (
-                              <button
-                                onClick={() => markAsRead(notification.id)}
-                                className="text-sm text-primary-600 hover:text-primary-800"
-                              >
-                                تعريف كمقروء
-                              </button>
-                            )}
-                          </div>
+                        <div>
+                          <h3 className="text-[15px] font-bold text-gray-900">{label}</h3>
+                          <p className="mt-0.5 text-xs text-gray-500">رتّب البنرات داخل هذا المكان، وراجِع الحالة والظهور بسرعة.</p>
                         </div>
                       </div>
-                    </li>
-                  ))}
-                </ul>
+                      <span className="self-start text-xs font-medium text-gray-500 bg-gray-100 rounded-full px-2.5 py-1">{group.length} بنر</span>
+                    </div>
+
+                    {group.length === 0 ? (
+                      <button
+                        onClick={openBannerModal}
+                        className="mt-4 w-full flex flex-col items-center justify-center gap-2 py-11 rounded-2xl border-2 border-dashed border-gray-200 text-gray-400 hover:border-gray-900 hover:text-gray-900 hover:bg-gray-50 transition-colors cursor-pointer"
+                      >
+                        <Plus className="h-6 w-6" strokeWidth={1.75} />
+                        <span className="text-sm font-medium">أضف أول بنر لهذا المكان</span>
+                        <span className="text-xs text-gray-400">سيظهر هنا بعد حفظه مباشرة</span>
+                      </button>
+                    ) : (
+                      <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
+                        {group.map((banner) => (
+                          <div key={banner.id} className="group overflow-hidden rounded-2xl border border-gray-200 bg-gray-50 shadow-sm transition-all hover:border-gray-300 hover:shadow-md">
+                            <div className="relative aspect-[16/9] bg-gray-100">
+                              {(banner.image || banner.image_url) ? (
+                                <img
+                                  src={banner.image || banner.image_url}
+                                  alt={banner.title}
+                                  className="w-full h-full object-cover"
+                                  onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                                />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center text-gray-300">
+                                  <Image className="h-9 w-9" strokeWidth={1.5} />
+                                </div>
+                              )}
+                              <span className="absolute top-2.5 left-2.5 inline-flex items-center rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-semibold text-gray-700 backdrop-blur-sm">
+                                {key === 'home' ? 'الرئيسية' : 'العروض'}
+                              </span>
+                              <span className={`absolute top-2.5 right-2.5 inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-1 rounded-full backdrop-blur-sm ${
+                                banner.is_active ? 'bg-white/90 text-emerald-600' : 'bg-gray-900/80 text-white'
+                              }`}>
+                                <span className={`w-1.5 h-1.5 rounded-full ${banner.is_active ? 'bg-emerald-500' : 'bg-gray-300'}`}></span>
+                                {banner.is_active ? 'ظاهر' : 'مخفي'}
+                              </span>
+                            </div>
+                            <div className="p-4">
+                              <div className="flex items-start justify-between gap-3">
+                                <div className="min-w-0">
+                                  <h4 className="font-bold text-sm text-gray-900 truncate">{banner.title || 'بدون عنوان'}</h4>
+                                  {banner.link_url && (
+                                    <p className="mt-1 truncate text-xs text-gray-500">{banner.link_url}</p>
+                                  )}
+                                </div>
+                                <span className="shrink-0 inline-flex items-center gap-1 rounded-full bg-white px-2 py-1 text-[11px] font-medium text-gray-500 border border-gray-200">
+                                  <GripVertical className="h-3.5 w-3.5" strokeWidth={2} />
+                                  {banner.display_order ?? 0}
+                                </span>
+                              </div>
+                              <div className="mt-4 grid grid-cols-2 gap-2">
+                                <button
+                                  onClick={() => openBannerModal(banner)}
+                                  className="inline-flex items-center justify-center gap-1.5 h-9 rounded-lg text-sm font-medium text-gray-700 bg-white border border-gray-200 hover:bg-gray-50 transition-colors cursor-pointer"
+                                >
+                                  <Pencil className="h-4 w-4" strokeWidth={1.75} />
+                                  تعديل
+                                </button>
+                                <button
+                                  onClick={() => handleBannerDelete(banner.id)}
+                                  aria-label="حذف البنر"
+                                  className="inline-flex items-center justify-center gap-1.5 h-9 rounded-lg text-sm font-medium text-red-600 bg-red-50 border border-red-100 hover:bg-red-100 transition-colors cursor-pointer"
+                                >
+                                  <Trash2 className="h-4 w-4" strokeWidth={1.75} />
+                                  حذف
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </section>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Banner Modal */}
+      {showBannerModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={closeBannerModal}>
+          <div className="bg-white rounded-3xl w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between p-5 border-b border-gray-100">
+              <h3 className="text-lg font-bold text-gray-900">{editingBanner ? 'تعديل البنر' : 'بنر جديد'}</h3>
+              <button onClick={closeBannerModal} aria-label="إغلاق" className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-gray-900 hover:bg-gray-100 transition-colors cursor-pointer">
+                <X className="h-5 w-5" strokeWidth={2} />
+              </button>
+            </div>
+            <div className="grid gap-0 md:grid-cols-[1.15fr_0.85fr]">
+              <form onSubmit={handleBannerSubmit} className="p-5 space-y-4 border-b md:border-b-0 md:border-r border-gray-100">
+                {/* الصورة */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">صورة البنر</label>
+                  <div className="rounded-2xl border border-dashed border-gray-200 bg-gray-50 p-4">
+                    <input
+                      key={bannerImageInputKey}
+                      id="banner-image-upload"
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => handleBannerImageUpload(e.target.files?.[0])}
+                      className="sr-only"
+                    />
+                    <label
+                      htmlFor="banner-image-upload"
+                      className="flex cursor-pointer flex-col items-center justify-center gap-3 rounded-xl border border-gray-200 bg-white px-4 py-6 text-center transition-colors hover:border-gray-300 hover:bg-gray-50"
+                    >
+                      <span className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-gray-900 text-white shadow-sm">
+                        <Plus className="h-5 w-5" strokeWidth={2} />
+                      </span>
+                      <span className="text-sm font-medium text-gray-900">اختيار صورة من اللابتوب</span>
+                      <span className="text-xs text-gray-500">PNG أو JPG أو WEBP. اضغط هنا لفتح مستعرض الملفات.</span>
+                    </label>
+                    {(bannerPreviewUrl || bannerForm.image_url) && (
+                      <div className="mt-3 space-y-2">
+                        <img
+                          src={bannerPreviewUrl || bannerForm.image_url}
+                          alt="معاينة البنر"
+                          className="w-full h-40 object-cover rounded-2xl border border-gray-100"
+                        />
+                        <div className="flex justify-end">
+                          <button
+                            type="button"
+                            onClick={handleBannerRemoveImage}
+                            className="text-xs font-medium text-red-600 hover:text-red-700"
+                          >
+                            إزالة الصورة
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  {bannerUploading && <p className="text-xs text-gray-600 mt-1.5">جارٍ رفع الصورة…</p>}
+                </div>
+
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {/* المكان */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">مكان الظهور</label>
+                    <select
+                      value={bannerForm.placement}
+                      onChange={(e) => setBannerForm({ ...bannerForm, placement: e.target.value })}
+                      className="input-field"
+                    >
+                      <option value="home">الصفحة الرئيسية</option>
+                      <option value="offers">صفحة العروض</option>
+                    </select>
+                  </div>
+                  {/* الترتيب */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">ترتيب العرض</label>
+                    <input type="number" value={bannerForm.display_order} onChange={(e) => setBannerForm({ ...bannerForm, display_order: Number(e.target.value) })} className="input-field" />
+                  </div>
+                </div>
+
+                {/* العنوان */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">العنوان</label>
+                  <input type="text" value={bannerForm.title} onChange={(e) => setBannerForm({ ...bannerForm, title: e.target.value })} className="input-field" placeholder="عنوان البنر" />
+                </div>
+
+                {/* رابط التوجيه */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">رابط التوجيه (اختياري)</label>
+                  <input type="text" value={bannerForm.link_url} onChange={(e) => setBannerForm({ ...bannerForm, link_url: e.target.value })} className="input-field" placeholder="/offers أو https://…" />
+                </div>
+
+                {/* التفعيل */}
+                <label className="flex items-center gap-2 cursor-pointer rounded-xl border border-gray-200 px-3 py-3 bg-gray-50">
+                  <input type="checkbox" checked={bannerForm.is_active} onChange={(e) => setBannerForm({ ...bannerForm, is_active: e.target.checked })} className="w-5 h-5" />
+                  <span className="text-sm text-gray-700">مفعّل</span>
+                </label>
+
+                <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                  <button type="submit" disabled={bannerSaving || bannerUploading} className="flex-1 btn-primary disabled:opacity-50">
+                    {bannerSaving ? 'جارٍ الحفظ…' : (editingBanner ? 'حفظ التعديلات' : 'إضافة البنر')}
+                  </button>
+                  <button type="button" onClick={closeBannerModal} className="px-5 py-2 rounded-lg border border-gray-200 hover:bg-gray-50">إلغاء</button>
+                </div>
+              </form>
+
+              <aside className="p-5 bg-gray-50/80">
+                <div className="flex items-center justify-between gap-3">
+                  <h4 className="text-sm font-bold text-gray-900">معاينة سريعة</h4>
+                  <span className="text-[11px] font-semibold px-2 py-1 rounded-full bg-white border border-gray-200 text-gray-600">
+                    {bannerForm.placement === 'home' ? 'الرئيسية' : 'العروض'}
+                  </span>
+                </div>
+
+                <div className="mt-4 rounded-2xl border border-dashed border-gray-200 bg-white overflow-hidden">
+                  {(bannerPreviewUrl || bannerForm.image_url) ? (
+                    <div className="space-y-2 p-2">
+                      <img src={bannerPreviewUrl || bannerForm.image_url} alt="معاينة البنر" className="w-full h-44 object-cover rounded-xl" />
+                      <div className="flex justify-end px-1 pb-1">
+                        <button
+                          type="button"
+                          onClick={handleBannerRemoveImage}
+                          className="text-xs font-medium text-red-600 hover:text-red-700"
+                        >
+                          إزالة الصورة
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="h-44 flex flex-col items-center justify-center text-gray-400 gap-2">
+                      <Image className="h-8 w-8" strokeWidth={1.5} />
+                      <span className="text-sm">أضف صورة لتظهر هنا</span>
+                    </div>
+                  )}
+                </div>
+
+                <div className="mt-4 space-y-2 rounded-2xl border border-gray-200 bg-white p-4 text-sm text-gray-600">
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-gray-400">العنوان</span>
+                    <span className="font-medium text-gray-900 truncate text-left">{bannerForm.title || 'بدون عنوان'}</span>
+                  </div>
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-gray-400">الترتيب</span>
+                    <span className="font-medium text-gray-900">{bannerForm.display_order ?? 0}</span>
+                  </div>
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-gray-400">الحالة</span>
+                    <span className={`font-medium ${bannerForm.is_active ? 'text-emerald-600' : 'text-gray-500'}`}>
+                      {bannerForm.is_active ? 'مفعّل' : 'مخفي'}
+                    </span>
+                  </div>
+                </div>
+
+                <p className="mt-4 text-xs leading-6 text-gray-500">
+                  نصيحة: ابدأ بالصورة، ثم اضبط المكان والترتيب، وبعدها تأكد من ظهور عنوان واضح ورابط صحيح قبل الحفظ.
+                </p>
+              </aside>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Notifications Tab */}
+      {activeTab === 'notifications' && (
+        <div className="w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-8">
+          {loading ? (
+            <div className="flex justify-center py-16">
+              <div className="animate-spin rounded-full h-10 w-10 border-2 border-gray-200 border-t-gray-900"></div>
+            </div>
+          ) : notifications.length === 0 ? (
+            <div className="bg-white rounded-2xl border border-gray-200 flex flex-col items-center justify-center text-center py-16 px-6">
+              <div className="w-14 h-14 rounded-2xl bg-gray-100 flex items-center justify-center text-gray-400 mb-4">
+                <Bell className="h-7 w-7" strokeWidth={1.5} />
+              </div>
+              <h3 className="text-base font-bold text-gray-900 mb-1">لا توجد إشعارات</h3>
+              <p className="text-sm text-gray-500">ستظهر هنا الطلبات الجديدة والتنبيهات عند وصولها</p>
+            </div>
+          ) : (
+            <div className="space-y-2.5">
+              {notifications.map((notification) => {
+                const meta = NOTIF_META[notification.type] || NOTIF_META.default;
+                const NotifIcon = meta.Icon;
+                return (
+                  <div
+                    key={notification.id}
+                    onClick={() => { if (!notification.is_read) markAsRead(notification.id); }}
+                    className={`relative bg-white rounded-2xl border transition-colors p-4 ${
+                      notification.is_read
+                        ? 'border-gray-200'
+                        : 'border-gray-300 bg-gray-50/60 cursor-pointer hover:bg-gray-50'
+                    }`}
+                  >
+                    {!notification.is_read && (
+                      <span className="absolute top-4 right-4 w-2 h-2 rounded-full bg-red-500" aria-label="غير مقروء"></span>
+                    )}
+                    <div className="flex items-start gap-3.5">
+                      {/* أيقونة النوع */}
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${meta.tint}`}>
+                        <NotifIcon className="h-5 w-5" strokeWidth={1.75} />
+                      </div>
+
+                      <div className="flex-1 min-w-0 pl-3">
+                        <div className="flex items-baseline justify-between gap-3">
+                          <h4 className={`text-sm truncate ${notification.is_read ? 'font-semibold text-gray-800' : 'font-bold text-gray-900'}`}>
+                            {notification.title}
+                          </h4>
+                          <span
+                            className="shrink-0 text-[11px] text-gray-400"
+                            title={new Date(notification.created_at).toLocaleString('ar-IQ')}
+                          >
+                            {timeAgo(notification.created_at)}
+                          </span>
+                        </div>
+                        <p className="mt-1 text-sm text-gray-600 leading-relaxed">{notification.message}</p>
+
+                        {notification.type === 'new_order' && notification.data && (
+                          <div className="mt-2.5 inline-flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs bg-gray-50 border border-gray-100 rounded-xl px-3 py-2">
+                            <span className="text-gray-500">العميل: <span className="text-gray-800 font-medium">{notification.data.customer_name || '—'}</span></span>
+                            <span className="text-gray-500">المبلغ: <span className="text-gray-900 font-bold tabular-nums">{Number(notification.data.total || 0).toLocaleString('en-US')} د.ع</span></span>
+                            {notification.data.order_id && (
+                              <span className="text-gray-400 font-mono" dir="ltr">#{String(notification.data.order_id).slice(0, 8)}</span>
+                            )}
+                          </div>
+                        )}
+
+                        {notification.type === 'new_order' && (
+                          <div className="mt-3">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (!notification.is_read) markAsRead(notification.id);
+                                setActiveTab('orders');
+                              }}
+                              className="inline-flex items-center gap-1.5 text-xs font-semibold text-gray-900 hover:text-black transition-colors cursor-pointer"
+                            >
+                              عرض الطلبات
+                              <ArrowLeft className="h-3.5 w-3.5" strokeWidth={2} />
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+
+              {/* تحميل المزيد — الإشعارات تُجلب ٢٠ لكل صفحة */}
+              {notifNext && (
+                <div className="pt-2 flex justify-center">
+                  <button
+                    onClick={loadMoreNotifications}
+                    disabled={notifLoadingMore}
+                    className="inline-flex items-center gap-2 h-10 px-5 rounded-lg text-sm font-medium border border-gray-200 bg-white text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                  >
+                    {notifLoadingMore ? (
+                      <>
+                        <RefreshCw className="h-4 w-4 animate-spin" strokeWidth={1.75} />
+                        جاري التحميل…
+                      </>
+                    ) : (
+                      <>عرض المزيد ({notifications.length} من {notifTotal})</>
+                    )}
+                  </button>
+                </div>
               )}
             </div>
           )}
@@ -1512,19 +2204,45 @@ const AdminPanel = ({ user, setUser }) => {
                 </p>
               </div>
               <div>
-                <p className="text-sm text-gray-600">الحالة</p>
-                <p className="font-semibold text-gray-900">
-                  {selectedOrder.status === 'pending' ? 'قيد الانتظار' :
-                   selectedOrder.status === 'confirmed' ? 'مؤكد' :
-                   selectedOrder.status === 'preparing' ? 'قيد التحضير' :
-                   selectedOrder.status === 'shipped' ? 'قيد الشحن' :
-                   selectedOrder.status === 'delivered' ? 'تم التسليم' : 'ملغي'}
-                </p>
+                <p className="text-sm text-gray-600 mb-1">الحالة</p>
+                <select
+                  value={selectedOrder.status || 'pending'}
+                  onChange={(e) => updateOrderStatus(selectedOrder.id, e.target.value)}
+                  disabled={updatingOrderId === selectedOrder.id}
+                  aria-label="تغيير حالة الطلب"
+                  className={`w-full h-10 px-3 rounded-lg border text-sm font-bold cursor-pointer outline-none focus:ring-2 focus:ring-gray-900/10 disabled:opacity-50 disabled:cursor-wait ${getOrderStatusMeta(selectedOrder.status).tint}`}
+                >
+                  {ORDER_STATUSES.map((s) => (
+                    <option key={s.value} value={s.value} className="bg-white text-gray-900 font-medium">
+                      {s.label}
+                    </option>
+                  ))}
+                </select>
+                {updatingOrderId === selectedOrder.id && (
+                  <p className="text-xs text-gray-500 mt-1">جارٍ الحفظ…</p>
+                )}
               </div>
               <div>
                 <p className="text-sm text-gray-600">التاريخ</p>
-                <p className="font-semibold text-gray-900">{new Date(selectedOrder.created_at).toLocaleDateString('ar-SA')}</p>
+                <p className="font-semibold text-gray-900">{new Date(selectedOrder.created_at).toLocaleDateString('ar-IQ')}</p>
               </div>
+
+              {/* العنوان — يمتد على العمودين لأنه نص طويل */}
+              <div className="md:col-span-2">
+                <p className="text-sm text-gray-600">العنوان</p>
+                <p className="font-semibold text-gray-900 break-words whitespace-pre-wrap">
+                  {selectedOrder.customer_address || '—'}
+                </p>
+              </div>
+
+              {selectedOrder.additional_info && (
+                <div className="md:col-span-2">
+                  <p className="text-sm text-gray-600">ملاحظات إضافية</p>
+                  <p className="font-semibold text-gray-900 break-words whitespace-pre-wrap">
+                    {selectedOrder.additional_info}
+                  </p>
+                </div>
+              )}
             </div>
 
             {/* Order Items with Images */}
@@ -1611,6 +2329,7 @@ const AdminPanel = ({ user, setUser }) => {
 
       {/* Include NotificationManager component */}
       <NotificationManager isAdmin={true} />
+      </div>
     </div>
   );
 };
