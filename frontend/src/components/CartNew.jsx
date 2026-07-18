@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { CreditCard, Phone } from 'lucide-react';
 import { formatCurrency, getFreeShippingThreshold } from '../utils/currency';
 import { api } from '../api';
 
@@ -169,7 +170,7 @@ const Cart = ({ cart, onCartChange, onClose, handleCheckout }) => {
                   <button
                     onClick={applyCoupon}
                     disabled={loadingCoupon}
-                    className="px-3 py-2 bg-indigo-600 text-white rounded-md text-sm hover:bg-indigo-700 disabled:bg-gray-400 transition-colors"
+                    className="px-3 py-2 bg-primary-600 text-white rounded-md text-sm hover:bg-primary-700 disabled:bg-gray-400 transition-colors"
                   >
                     {loadingCoupon ? 'جاري...' : 'تطبيق'}
                   </button>
@@ -234,11 +235,9 @@ const Cart = ({ cart, onCartChange, onClose, handleCheckout }) => {
             <div className="flex flex-col space-y-3">
               <button 
                 onClick={handleCheckoutWithCoupon}
-                className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-center py-3 rounded-md font-medium hover:from-indigo-700 hover:to-purple-700 transition-all shadow-md hover:shadow-lg flex items-center justify-center"
+                className="bg-gradient-to-r from-primary-600 to-primary-600 text-white text-center py-3 rounded-md font-medium hover:from-primary-700 hover:to-primary-700 transition-all shadow-md hover:shadow-lg flex items-center justify-center"
               >
-                <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                </svg>
+                <CreditCard className="w-5 h-5 ml-2" strokeWidth={2} />
                 إتمام الطلب
               </button>
               <p className="text-center text-sm text-gray-600 mb-2">أو تواصل معنا عبر:</p>
@@ -256,9 +255,7 @@ const Cart = ({ cart, onCartChange, onClose, handleCheckout }) => {
                   <span className="text-xs">تيليجرام</span>
                 </a>
                 <a href={phoneLink} className="bg-gray-700 text-white text-center py-2 rounded-md hover:bg-gray-800 flex flex-col items-center justify-center">
-                  <svg className="w-5 h-5 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                  </svg>
+                  <Phone className="w-5 h-5 mb-1" strokeWidth={2} />
                   <span className="text-xs">اتصال</span>
                 </a>
               </div>

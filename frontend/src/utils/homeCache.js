@@ -13,7 +13,3 @@ export function setCachedHomeData(products, categories) {
     cachedAt: Date.now(),
   };
 }
-
-export function clearHomeCache() {
-  homeDataCache = null;
-}

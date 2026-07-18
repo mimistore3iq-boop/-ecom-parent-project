@@ -1,17 +1,13 @@
 import { useEffect, useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { api, endpoints } from '../api';
-import BottomNav from '../components/BottomNav';
 import Footer from '../components/Footer';
 import Cart from '../components/CartNew';
 import Checkout from '../components/CheckoutNew';
-import TopBar from '../components/TopBar';
 import BannerSlider from '../components/BannerSlider';
-import CategorySlider from '../components/CategorySlider';
 import CategoryProductsSection, { ProductCard } from '../components/CategoryProductsSection';
-import { formatCurrency } from '../utils/currency';
-import { getScrollKey, navigateWithScrollSave } from '../utils/scrollRestore';
 import { getCachedHomeData, setCachedHomeData } from '../utils/homeCache';
+import SiteHeader from '../components/SiteHeader';
+import BottomTabBar from '../components/BottomTabBar';
 
 const Home = ({ user, setUser }) => {
   const [products, setProducts] = useState(() => getCachedHomeData()?.products || []);
@@ -19,15 +15,8 @@ const Home = ({ user, setUser }) => {
   const [selectedCategory, setSelectedCategory] = useState('');
   const [cart, setCart] = useState([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [loading, setLoading] = useState(() => !getCachedHomeData()?.products?.length);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const navigate = useNavigate();
-  const location = useLocation();
-  const scrollKey = getScrollKey(location.pathname, location.search, location.hash);
-  const goToProduct = (productId) => navigateWithScrollSave(navigate, `/product/${productId}`, scrollKey);
 
   useEffect(() => {
     const hasCache = Boolean(getCachedHomeData()?.products?.length);
@@ -52,25 +41,6 @@ const Home = ({ user, setUser }) => {
     window.addEventListener('voro:open-cart', openCart);
     return () => window.removeEventListener('voro:open-cart', openCart);
   }, []);
-
-  const refreshData = () => {
-    fetchProducts();
-    fetchCategories();
-  };
-
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (isMenuOpen && !event.target.closest('.relative')) {
-        setIsMenuOpen(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [isMenuOpen]);
 
   const fetchProducts = async (silent = false) => {
     if (!silent) setLoading(true);
@@ -201,13 +171,6 @@ const Home = ({ user, setUser }) => {
     }, 3000);
   };
 
-  const logout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    setUser(null);
-    navigate('/login');
-  };
-
   const toggleCart = () => {
     setIsCartOpen(!isCartOpen);
   };
@@ -223,24 +186,15 @@ const Home = ({ user, setUser }) => {
     window.location.reload();
   };
 
+  // منتجات القسم المختار (لعرض الشبكة عند اختيار قسم من الهيدر)
   const filteredProducts = products.filter(product => {
-    // التحقق مما إذا كان المنتج ينتمي للقسم المختار أو أي من أبنائه
     const isDirectMatch = !selectedCategory || product.category === selectedCategory;
-    
-    // جلب القسم المختار مع أبنائه
+
     const selectedCatObj = categories.find(c => c.id === selectedCategory);
     const childIds = selectedCatObj?.children?.map(child => child.id) || [];
     const isChildMatch = childIds.includes(product.category);
 
-    const matchesCategory = isDirectMatch || isChildMatch;
-
-    const matchesSearch = searchTerm === '' || 
-      (product.name && product.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      (product.description && product.description.toLowerCase().includes(searchTerm.toLowerCase()));
-    
-    const matchesHomepage = selectedCategory ? true : (product.show_on_homepage !== false);
-    
-    return matchesCategory && matchesSearch && matchesHomepage;
+    return isDirectMatch || isChildMatch;
   });
 
   // دالة جلب منتجات القسم مع كافة أبنائه (للعرض في الصفحة الرئيسية)
@@ -253,10 +207,6 @@ const Home = ({ user, setUser }) => {
       const isActive = product.is_active !== false;
       return matchesCategory && isActive;
     });
-  };
-
-  const getCartItemCount = () => {
-    return cart.reduce((total, item) => total + item.quantity, 0);
   };
 
   if (loading) {
@@ -272,271 +222,23 @@ const Home = ({ user, setUser }) => {
   const couponDiscount = localStorage.getItem('couponDiscount') ? parseFloat(localStorage.getItem('couponDiscount')) : 0;
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-16">{/* pb for bottom nav */}
+    <div className="min-h-screen bg-gray-50 pb-16 lg:pb-0">
       {isCartOpen && <Cart cart={cart} onCartChange={handleCartChange} onClose={toggleCart} handleCheckout={handleCheckout} />}
       {isCheckoutOpen && <Checkout cart={cart} onCheckout={handleCheckoutComplete} onClose={() => setIsCheckoutOpen(false)} appliedCoupon={appliedCoupon} couponDiscount={couponDiscount} />}
-      {/* Top bar */}
-      <TopBar />
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b border-gray-100 sticky top-0 z-40 backdrop-blur-sm bg-opacity-95">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            {/* Logo and Title */}
-            <div className="flex items-center space-x-2 md:space-x-4 space-x-reverse">
-              <div className="relative">
-                <div className="w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg shadow-md flex items-center justify-center">
-                  <svg className="w-6 h-6 md:w-8 md:h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                  </svg>
-                </div>
-                <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
-              </div>
-              <div>
-                <h1 className="text-lg md:text-2xl font-bold gradient-text">voro</h1>
-              </div>
-            </div>
-
-            {/* Search + Icons */}
-            <div className="flex items-center gap-2 md:gap-4">
-              {/* Search icon (mobile) */}
-              <button 
-                onClick={() => {
-                  setIsSearchOpen(!isSearchOpen);
-                  if (!isSearchOpen) {
-                    setTimeout(() => {
-                      const searchInput = document.getElementById('mobile-search-input');
-                      if (searchInput) searchInput.focus();
-                    }, 100);
-                  }
-                }}
-                className={`p-2 transition-colors rounded-lg md:hidden ${isSearchOpen ? 'text-indigo-600 bg-indigo-50' : 'text-gray-600 hover:text-indigo-600 hover:bg-indigo-50'}`}
-              >
-                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-              </button>
-              {/* Cart */}
-              <div className="relative">
-                <button onClick={toggleCart} className="p-2.5 text-gray-600 hover:text-indigo-600 transition-colors rounded-lg hover:bg-indigo-50 relative">
-                  <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m0 0h8" />
-                  </svg>
-                  {getCartItemCount() > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-gradient-to-r from-red-500 to-red-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium shadow-md">
-                      {getCartItemCount()}
-                    </span>
-                  )}
-                </button>
-              </div>
-              {/* Refresh */}
-              <button
-                onClick={refreshData}
-                className="p-2 text-gray-600 hover:text-indigo-600 transition-colors rounded-lg hover:bg-indigo-50"
-                title="تحديث البيانات"
-              >
-                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                </svg>
-              </button>
-              {/* Menu */}
-              <div className="relative">
-                <button 
-                  onClick={() => setIsMenuOpen(!isMenuOpen)} 
-                  className="p-2 text-gray-600 hover:text-indigo-600 transition-colors rounded-lg hover:bg-indigo-50"
-                >
-                  <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                  </svg>
-                </button>
-                
-                {/* Categories Dropdown */}
-                {isMenuOpen && (
-                  <div className="absolute left-0 mt-2 w-56 bg-white rounded-xl shadow-xl py-2 z-50 border border-gray-100 overflow-hidden transition-all duration-300 transform origin-top-left">
-                    <div className="bg-gradient-to-r from-indigo-500 to-purple-500 px-4 py-2 text-white text-sm font-medium">
-                      تصفح حسب الفئة
-                    </div>
-                    <button
-                      onClick={() => {
-                        setSelectedCategory('');
-                        setIsMenuOpen(false);
-                      }}
-                      className="block w-full text-right px-4 py-3 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors flex items-center justify-start"
-                    >
-                      <span className="ml-2">جميع المنتجات</span>
-                      <svg className="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                      </svg>
-                    </button>
-                    <div className="border-t border-gray-100 my-1"></div>
-                    {categories.filter(c => !c.parent).map(category => (
-                      <button
-                        key={category.id}
-                        onClick={() => {
-                          setSelectedCategory(category.id);
-                          setIsMenuOpen(false);
-                        }}
-                        className="block w-full text-right px-4 py-3 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors flex items-center justify-start"
-                      >
-                        <span className="ml-2">{category.name}</span>
-                        <svg className="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        </svg>
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* Desktop search */}
-              <div className="hidden md:block w-72 relative">
-                <div className="relative">
-                  <input
-                    type="text"
-                    placeholder="ابحث عن منتج..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full px-4 py-2.5 pr-11 bg-gray-50 border-none rounded-xl focus:ring-2 focus:ring-indigo-500 text-sm transition-all"
-                  />
-                  <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
-                    <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
-                  </div>
-                </div>
-
-                {/* Desktop Search Results Dropdown */}
-                {searchTerm && (
-                  <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-2xl border border-gray-100 z-50 overflow-hidden max-h-96 overflow-y-auto animate-fadeIn">
-                    {filteredProducts.slice(0, 6).map(product => (
-                      <button
-                        key={product.id}
-                        onClick={() => {
-                          goToProduct(product.id);
-                          setSearchTerm('');
-                        }}
-                        className="w-full text-right p-3 hover:bg-indigo-50 flex items-center gap-3 border-b border-gray-50 last:border-0 transition-colors"
-                      >
-                        <div className="w-12 h-12 shrink-0 bg-gray-50 rounded-lg overflow-hidden">
-                          <img src={product.image} alt="" className="w-full h-full object-contain" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="font-bold text-xs text-gray-800 truncate">{product.name}</div>
-                          <div className="text-indigo-600 font-extrabold text-sm">{formatCurrency(product.discounted_price || product.price)}</div>
-                        </div>
-                      </button>
-                    ))}
-                    {filteredProducts.length === 0 && (
-                      <div className="p-4 text-center text-gray-500 text-sm">لا توجد نتائج</div>
-                    )}
-                  </div>
-                )}
-              </div>
-
-              {/* User */}
-              {user ? (
-                <div className="flex flex-col md:flex-row md:items-center md:space-x-4 md:space-x-reverse">
-                  <span className="text-gray-700 text-sm mb-2 md:mb-0">مرحباً، {user.phone}</span>
-                  {user.is_admin && (
-                    <Link to="/admin" className="btn-secondary py-2 px-3 text-sm mb-2 md:mb-0">لوحة الإدارة</Link>
-                  )}
-                  <button onClick={logout} className="text-red-600 hover:text-red-700 text-sm">تسجيل خروج</button>
-                </div>
-              ) : (
-                <div className="flex flex-col md:flex-row">
-                  <Link to="/login" className="btn-primary py-2 px-4 text-sm">تسجيل دخول</Link>
-                </div>
-              )}
-            </div>
-          </div>
-          
-          {/* Mobile search bar */}
-          {isSearchOpen && (
-            <div className="md:hidden pb-4 px-2 animate-fadeIn">
-              <div className="relative">
-                <input
-                  type="text"
-                  id="mobile-search-input"
-                  placeholder="ابحث عن منتج..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full px-4 py-3 pr-11 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-indigo-500 text-sm shadow-inner"
-                />
-                <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
-                  <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                  </svg>
-                </div>
-                {searchTerm && (
-                  <button 
-                    onClick={() => setSearchTerm('')}
-                    className="absolute inset-y-0 left-0 pl-3 flex items-center"
-                  >
-                    <svg className="h-4 w-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                    </svg>
-                  </button>
-                )}
-              </div>
-              
-              {/* Mobile Search Results */}
-              {searchTerm && (
-                <div className="mt-2 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden max-h-[60vh] overflow-y-auto z-50">
-                  <div className="bg-indigo-50 px-4 py-2 text-[10px] font-bold text-indigo-600 uppercase tracking-wider">نتائج البحث</div>
-                  {filteredProducts.slice(0, 10).map(product => (
-                    <button
-                      key={product.id}
-                      onClick={() => {
-                        goToProduct(product.id);
-                        setSearchTerm('');
-                        setIsSearchOpen(false);
-                      }}
-                      className="w-full text-right p-3 hover:bg-indigo-50/50 flex items-center gap-3 border-b border-gray-50 last:border-0 active:bg-indigo-100 transition-colors"
-                    >
-                      <div className="w-12 h-12 shrink-0 bg-white rounded-xl overflow-hidden border border-gray-100 p-1">
-                        <img src={product.image} alt="" className="w-full h-full object-contain" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="font-bold text-[13px] text-gray-800 truncate">{product.name}</div>
-                        <div className="flex items-center gap-2 mt-0.5">
-                          <span className="text-xs text-indigo-600 font-bold">{formatCurrency(product.discounted_price || product.price)}</span>
-                        </div>
-                      </div>
-                      <div className="text-gray-300">
-                        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        </svg>
-                      </div>
-                    </button>
-                  ))}
-                  {filteredProducts.length === 0 && (
-                    <div className="p-8 text-center bg-gray-50">
-                      <p className="text-gray-400 text-xs">لا توجد منتجات تطابق بحثك</p>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-      </header>
-      {/* Banner Slider */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-        <BannerSlider />
-      </div>
-
-      {/* Category Slider */}
-      <CategorySlider 
-        categories={categories.filter(c => !c.parent)} 
-        selectedCategory={selectedCategory} 
-        onCategorySelect={setSelectedCategory} 
+      <SiteHeader
+        user={user}
+        setUser={setUser}
+        onSelectCategory={(id) => { setSelectedCategory(id); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
       />
+      {/* Banner Slider — full-bleed (يغطّي كامل العرض بلا حواف) */}
+      <BannerSlider />
 
       {/* Products by Category Sections */}
       <div className="bg-gradient-to-b from-white to-gray-50">
         {selectedCategory ? (
           // If a specific category is selected, show grid view with filter
           <section className="py-12">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
                 <div>
                   <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight">
@@ -548,7 +250,7 @@ const Home = ({ user, setUser }) => {
                 </div>
               </div>
               
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6 px-2">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4 md:gap-6 px-2">
                 {filteredProducts.map(product => (
                   <ProductCard 
                     key={product.id} 
@@ -579,9 +281,7 @@ const Home = ({ user, setUser }) => {
 
       {/* Footer */}
       <Footer />
-
-      {/* Bottom Navigation */}
-      <BottomNav onCartClick={toggleCart} cartCount={getCartItemCount()} />
+      <BottomTabBar />
     </div>
   );
 };

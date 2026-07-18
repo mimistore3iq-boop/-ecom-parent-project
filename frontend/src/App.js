@@ -122,7 +122,7 @@ function App() {
           {/* Instagram Browser Warning */}
           {showInstagramWarning && (
             <div className="fixed top-0 left-0 right-0 z-50 bg-yellow-50 border-b-2 border-yellow-300">
-              <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+              <div className="max-w-[1920px] mx-auto px-4 py-3 flex items-center justify-between">
                 <div className="flex-1">
                   <p className="text-yellow-800 text-sm md:text-base">
                     ⚠️ لتجربة أفضل، يرجى فتح المتجر في متصفح خارجي
@@ -143,10 +143,10 @@ function App() {
           >
             <Routes>
               <Route path="/" element={<Home user={user} setUser={setUser} />} />
-              <Route path="/product/:id" element={<ProductDetail user={user} />} />
-              <Route path="/offers" element={<SpecialOffers user={user} />} />
-              <Route path="/categories" element={<Categories user={user} />} />
-              <Route path="/categories/:id" element={<Categories user={user} />} />
+              <Route path="/product/:id" element={<ProductDetail user={user} setUser={setUser} />} />
+              <Route path="/offers" element={<SpecialOffers user={user} setUser={setUser} />} />
+              <Route path="/categories" element={<Categories user={user} setUser={setUser} />} />
+              <Route path="/categories/:id" element={<Categories user={user} setUser={setUser} />} />
               <Route
                 path="/login"
                 element={

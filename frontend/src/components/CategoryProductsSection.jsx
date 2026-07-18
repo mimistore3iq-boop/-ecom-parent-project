@@ -1,5 +1,6 @@
-import React, { useRef, memo } from 'react';
+import React, { useRef, useEffect, memo } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { ChevronLeft, ChevronRight, Eye, ShoppingCart, Clock } from 'lucide-react';
 import { formatCurrency } from '../utils/currency';
 import { getScrollKey, navigateWithScrollSave } from '../utils/scrollRestore';
 
@@ -9,62 +10,42 @@ export const ProductCard = ({ product, onAddToCart, categoryId = null }) => {
   const scrollKey = getScrollKey(location.pathname, location.search, location.hash);
 
   const goToProduct = () => {
-    const carouselContext = categoryId
-      ? { categoryId, productId: product.id }
-      : null;
-    navigateWithScrollSave(
-      navigate,
-      `/product/${product.id}`,
-      scrollKey,
-      carouselContext
-    );
+    const carouselContext = categoryId ? { categoryId, productId: product.id } : null;
+    navigateWithScrollSave(navigate, `/product/${product.id}`, scrollKey, carouselContext);
   };
 
-  const discountPct = Math.round(
-    Number(product.discount_percentage ?? product.discount ?? 0)
-  );
-  
+  const discountPct = Math.round(Number(product.discount_percentage ?? product.discount ?? 0));
+
   return (
     <div
       className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 group cursor-pointer border border-gray-100 h-full flex flex-col relative transform hover:-translate-y-2"
       onClick={goToProduct}
-      style={{ 
-        animation: 'cardAppear 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards'
-      }}
+      style={{ animation: 'cardAppear 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards' }}
     >
-      {/* Time Left Badge - Top Left */}
+      {/* شارة الوقت المتبقّي */}
       {product.is_on_sale && product.time_left > 0 && (
-        <div 
-          className="absolute top-2 left-2 bg-red-500 text-white px-2 py-1 rounded-lg text-[10px] font-bold shadow-md z-30 flex items-center gap-1"
-        >
-          <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
+        <div className="absolute top-2 left-2 bg-red-500 text-white px-2 py-1 rounded-lg text-[10px] font-bold shadow-md z-30 flex items-center gap-1">
+          <Clock className="h-3 w-3" strokeWidth={2.5} />
           {Math.ceil(product.time_left / 86400)} يوم
         </div>
       )}
 
-      {/* Product Image Wrapper */}
+      {/* صورة المنتج */}
       <div className={`relative h-44 sm:h-56 md:h-64 bg-white overflow-hidden shrink-0 border-b border-gray-50 transition-opacity duration-300 ${product.stock === 0 ? 'opacity-40' : 'opacity-100'}`}>
         <img
           src={product.image || product.main_image_url || '/placeholder-product.png'}
           alt={product.name}
           className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-700 p-3"
           loading="lazy"
-          onError={(e) => {
-            e.target.onerror = null;
-            e.target.src = 'https://media.voroiq.com/placeholder-product.png';
-          }}
+          onError={(e) => { e.target.onerror = null; e.target.src = 'https://media.voroiq.com/placeholder-product.png'; }}
         />
 
-        {/* Discount Badge — percentage only */}
         {(product.is_on_sale || discountPct > 0) && discountPct > 0 && (
-          <div className="absolute top-2 right-2 bg-gradient-to-r from-red-600 to-pink-600 text-white text-[10px] font-bold px-2 py-1 rounded-lg z-20 shadow-md">
+          <div className="absolute top-2 right-2 bg-gradient-to-r from-red-600 to-red-700 text-white text-[10px] font-bold px-2 py-1 rounded-lg z-20 shadow-md">
             {discountPct}% خصم
           </div>
         )}
 
-        {/* Out of Stock Overlay */}
         {product.stock === 0 && (
           <div className="absolute inset-0 bg-black/5 backdrop-blur-[0.5px] flex items-center justify-center z-20">
             <span className="text-white font-extrabold text-[12px] bg-gray-800/90 px-3 py-1.5 rounded-xl shadow-lg border border-gray-700 uppercase tracking-wider">نفد المخزون</span>
@@ -72,13 +53,13 @@ export const ProductCard = ({ product, onAddToCart, categoryId = null }) => {
         )}
       </div>
 
-      {/* Product Info */}
+      {/* معلومات المنتج */}
       <div className="p-3 sm:p-4 bg-white flex-1 flex flex-col justify-between">
         <div className="mb-3">
           <h4 className="font-bold text-[13px] sm:text-sm text-gray-800 line-clamp-2 text-right leading-relaxed min-h-[2.5rem]">
             {product.name}
           </h4>
-          
+
           <div className="flex flex-col items-end mt-2">
             {product.is_on_sale ? (
               <>
@@ -97,39 +78,26 @@ export const ProductCard = ({ product, onAddToCart, categoryId = null }) => {
           </div>
         </div>
 
-        {/* Action Buttons Row */}
+        {/* أزرار الإجراء */}
         <div className="flex gap-2 mt-auto">
-          {/* View Button */}
           <button
-            onClick={(e) => {
-              e.stopPropagation();
-              goToProduct();
-            }}
+            onClick={(e) => { e.stopPropagation(); goToProduct(); }}
             className="flex-1 py-2.5 rounded-xl font-bold transition-all text-[11px] flex items-center justify-center gap-1 bg-gray-50 text-gray-700 border border-gray-200 hover:bg-gray-100 active:scale-95 shadow-sm"
           >
-            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-            </svg>
+            <Eye className="h-4 w-4" strokeWidth={2} />
             <span>عرض</span>
           </button>
 
-          {/* Add to Cart Button */}
           <button
-            onClick={(e) => {
-              e.stopPropagation();
-              if (product.stock > 0) onAddToCart(product);
-            }}
+            onClick={(e) => { e.stopPropagation(); if (product.stock > 0) onAddToCart(product); }}
             disabled={product.stock === 0}
             className={`flex-[1.5] py-2.5 rounded-xl font-bold transition-all text-[11px] flex items-center justify-center gap-1 shadow-md ${
               product.stock > 0
-                ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:shadow-indigo-200 active:scale-95'
+                ? 'bg-primary-900 text-white hover:bg-black active:scale-95'
                 : 'bg-gray-100 text-gray-400 cursor-not-allowed'
             }`}
           >
-            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m0 0h8" />
-            </svg>
+            <ShoppingCart className="h-4 w-4" strokeWidth={2} />
             <span>السلة</span>
           </button>
         </div>
@@ -138,86 +106,94 @@ export const ProductCard = ({ product, onAddToCart, categoryId = null }) => {
   );
 };
 
-const CategoryProductsSection = ({ 
-  category, 
-  products, 
-  onAddToCart,
-  onViewDetails 
-}) => {
+const CategoryProductsSection = ({ category, products, onAddToCart, onViewDetails }) => {
   const gridRef = useRef(null);
 
-  if (!products || products.length === 0) {
-    return null;
-  }
+  // عجلة الماوس تحرّك الكاروسيل أفقياً عند التأشير عليه (مع دعم RTL)
+  useEffect(() => {
+    const el = gridRef.current;
+    if (!el) return;
+    const onWheel = (e) => {
+      if (el.scrollWidth <= el.clientWidth) return;            // لا يوجد فائض للتمرير
+      if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;     // تمرير أفقي أصلاً (تاتش‌باد)
+      const isRTL = getComputedStyle(el).direction === 'rtl';
+      const before = el.scrollLeft;
+      el.scrollLeft += (isRTL ? -1 : 1) * e.deltaY;
+      if (el.scrollLeft !== before) e.preventDefault();        // امنع تمرير الصفحة فقط عند تحرّك الكاروسيل فعلاً
+    };
+    el.addEventListener('wheel', onWheel, { passive: false });
+    return () => el.removeEventListener('wheel', onWheel);
+  }, []);
+
+  const scrollByPage = (dir) => {
+    const el = gridRef.current;
+    if (!el) return;
+    el.scrollBy({ left: dir * el.clientWidth * 0.9, behavior: 'smooth' });
+  };
+
+  if (!products || products.length === 0) return null;
 
   return (
     <>
     <style>{`
-      @keyframes cardAppear {
-        from { opacity: 0; transform: translateY(10px); }
-        to { opacity: 1; transform: translateY(0); }
-      }
-      .hide-scrollbar::-webkit-scrollbar { display: none; }
-      .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-      
-      .horizontal-scroll-fix {
-        scroll-snap-type: x mandatory;
-        scroll-behavior: smooth;
-        touch-action: pan-x pan-y; /* تفعيل السحب الأفقي والعمودي معاً */
+      @keyframes cardAppear { from { opacity: 0; transform: translateY(10px);} to { opacity: 1; transform: translateY(0);} }
+      .voro-carousel {
         display: flex;
         gap: 12px;
-        padding-bottom: 15px;
+        scroll-snap-type: x mandatory;
+        scroll-behavior: smooth;
+        touch-action: pan-x pan-y;
+        -ms-overflow-style: none;
+        scrollbar-width: none;
       }
-      .snap-center-item {
-        scroll-snap-align: start;
-        transition: all 0.5s cubic-bezier(0.22, 1, 0.36, 1);
-      }
-      .snap-center-item:active {
-        transform: scale(0.98);
-      }
-      .horizontal-scroll-fix::-webkit-scrollbar {
-        display: none;
-      }
+      .voro-carousel > * { scroll-snap-align: start; }
+      .voro-carousel::-webkit-scrollbar { display: none; }
     `}</style>
     <section className="py-6 bg-white border-b border-gray-100">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between mb-4 pr-2">
-          <h3 className="text-xl md:text-2xl font-bold text-gray-800">
-            {category.name}
-          </h3>
+          <h3 className="text-xl md:text-2xl font-bold text-gray-800">{category.name}</h3>
           <Link
             to={`/categories/${category.id}`}
-            className="text-indigo-600 hover:text-indigo-700 font-medium text-xs md:text-sm flex items-center gap-1"
+            className="text-gray-500 hover:text-primary-900 font-medium text-xs md:text-sm flex items-center gap-1 transition-colors"
           >
             عرض الكل
-            <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
+            <ChevronLeft className="h-4 w-4" strokeWidth={2} />
           </Link>
         </div>
 
-        <div className="relative">
-          <div 
+        <div className="relative group/carousel">
+          {/* التالي (يسار في RTL) */}
+          <button
+            type="button"
+            onClick={() => scrollByPage(-1)}
+            aria-label="التالي"
+            className="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 z-20 h-10 w-10 items-center justify-center rounded-full bg-white shadow-lg border border-gray-100 text-gray-700 hover:bg-primary-900 hover:text-white transition-all opacity-0 group-hover/carousel:opacity-100"
+          >
+            <ChevronLeft className="h-5 w-5" strokeWidth={2.5} />
+          </button>
+          {/* السابق (يمين في RTL) */}
+          <button
+            type="button"
+            onClick={() => scrollByPage(1)}
+            aria-label="السابق"
+            className="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 z-20 h-10 w-10 items-center justify-center rounded-full bg-white shadow-lg border border-gray-100 text-gray-700 hover:bg-primary-900 hover:text-white transition-all opacity-0 group-hover/carousel:opacity-100"
+          >
+            <ChevronRight className="h-5 w-5" strokeWidth={2.5} />
+          </button>
+
+          <div
             ref={gridRef}
             data-category-carousel={category.id}
-            className="flex overflow-x-auto gap-3 pb-6 hide-scrollbar horizontal-scroll-fix px-1"
-            style={{ 
-              scrollbarWidth: 'none',
-              msOverflowStyle: 'none',
-              scrollSnapType: 'x mandatory'
-            }}
+            className="voro-carousel overflow-x-auto pb-4"
           >
             {products.map((product) => (
               <div
                 key={product.id}
                 data-product-id={product.id}
-                className="flex-shrink-0 w-[46.5%] sm:w-[45%] md:w-[30%] lg:w-[22%] snap-start transition-transform duration-300 active:scale-95"
+                className="flex-shrink-0 w-[46.5%] sm:w-[calc((100%-12px)/2)] md:w-[calc((100%-24px)/3)] lg:w-[calc((100%-36px)/4)] xl:w-[calc((100%-48px)/5)] 2xl:w-[calc((100%-60px)/6)] transition-transform duration-300 active:scale-[0.98]"
               >
-                <ProductCard
-                  product={product}
-                  onAddToCart={onAddToCart}
-                  categoryId={category.id}
-                />
+                <ProductCard product={product} onAddToCart={onAddToCart} categoryId={category.id} />
               </div>
             ))}
           </div>

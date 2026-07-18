@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { X, Check, AlertCircle } from 'lucide-react';
 import { api, endpoints } from '../api';
 import { formatCurrency, getFreeShippingThreshold, calculateShippingFee } from '../utils/currency';
 
@@ -180,18 +181,14 @@ const Checkout = ({ cart, onCheckout, onClose, appliedCoupon, couponDiscount }) 
               onClick={onClose}
               className="text-gray-500 hover:text-gray-700 p-1 rounded-full hover:bg-gray-100"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
+              <X className="w-6 h-6" strokeWidth={2} />
             </button>
           </div>
 
           {success ? (
             <div className="text-center py-12">
               <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
+                <Check className="w-8 h-8 text-green-500" strokeWidth={2} />
               </div>
               <h3 className="text-xl font-bold text-gray-800 mb-2">تم ارسال طلبك بنجاح</h3>
               <p className="text-gray-600">سيتم التواصل معك قريباً لتأكيد تفاصيل الطلب</p>
@@ -200,9 +197,7 @@ const Checkout = ({ cart, onCheckout, onClose, appliedCoupon, couponDiscount }) 
             <>
               {error && (
                 <div className="mb-6 p-3 bg-red-50 text-red-700 rounded-lg flex items-center">
-                  <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
+                  <AlertCircle className="w-5 h-5 ml-2" strokeWidth={2} />
                   {error}
                 </div>
               )}
@@ -380,7 +375,7 @@ const Checkout = ({ cart, onCheckout, onClose, appliedCoupon, couponDiscount }) 
                   <button
                     type="submit"
                     disabled={loading}
-                    className="px-6 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg font-medium hover:from-indigo-700 hover:to-purple-700 transition-all disabled:opacity-70"
+                    className="px-6 py-2 bg-gradient-to-r from-primary-600 to-primary-600 text-white rounded-lg font-medium hover:from-primary-700 hover:to-primary-700 transition-all disabled:opacity-70"
                   >
                     {loading ? 'جاري الإرسال...' : 'إتمام الطلب'}
                   </button>

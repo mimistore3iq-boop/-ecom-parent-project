@@ -13,10 +13,6 @@ export function getScrollKey(pathname, search = '', hash = '') {
   return `${pathname}${search}${hash}`;
 }
 
-export function isScrollSaveLocked() {
-  return scrollSaveLocked;
-}
-
 export function readScrollPosition(key) {
   if (typeof window === 'undefined') return null;
   if (Object.prototype.hasOwnProperty.call(pinnedScrollY, key)) {
@@ -54,14 +50,6 @@ export function hasPendingScrollRestore(key) {
 
 export function clearPendingScrollRestore(key) {
   sessionStorage.removeItem(`${PENDING_RESTORE_PREFIX}${key}`);
-}
-
-export function consumePendingScrollRestore(key) {
-  if (hasPendingScrollRestore(key)) {
-    clearPendingScrollRestore(key);
-    return true;
-  }
-  return false;
 }
 
 /** Restore scroll with retries + ResizeObserver — waits for images/sections to load */

@@ -1,62 +1,37 @@
 import { useEffect, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import { api, endpoints } from '../api';
-import { formatCurrency } from '../utils/currency';
 import Footer from '../components/Footer';
-import CategoryProductsSection, { ProductCard } from '../components/CategoryProductsSection';
+import { ProductCard } from '../components/CategoryProductsSection';
+import { ArrowRight, Archive, Box, ChevronLeft, Package } from 'lucide-react';
+import BottomTabBar from '../components/BottomTabBar';
+import SiteHeader from '../components/SiteHeader';
 
-const Categories = ({ user }) => {
-  // const ProductCard = CategoryProductsSection.ProductCard;
+const Categories = ({ user, setUser }) => {
   const [categories, setCategories] = useState([]);
   const [products, setProducts] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState(null);
   const [loading, setLoading] = useState(true);
   const [cart, setCart] = useState([]);
-  const navigate = useNavigate();
   const { id: categoryIdParam } = useParams();
+  const navigate = useNavigate();
 
+  // مصدر الحقيقة الوحيد للقسم المختار هو رابط الصفحة (URL). هكذا يبقى العرض
+  // متطابقاً مع العنوان دائماً: /categories = شبكة الأقسام، /categories/:id = منتجات القسم.
+  // (يمنع بقاء منتجات قسم قديم ظاهرة عند الرجوع إلى /categories)
+  const selectedCategory = categoryIdParam ? parseInt(categoryIdParam, 10) : null;
+
+  // تحميل الأقسام والسلة مرّة واحدة عند فتح الصفحة
   useEffect(() => {
-    console.log('Component mounted, fetching initial data');
     fetchCategories();
     loadCart();
-    // If category ID is in URL, set it
-    if (categoryIdParam) {
-      setSelectedCategory(parseInt(categoryIdParam));
-    }
-  }, [categoryIdParam]);
-  
-  // Add a manual refresh button in the UI
-  const ManualRefreshButton = () => (
-    <button
-      onClick={refreshData}
-      className="p-2 text-gray-600 hover:text-primary-600 transition-colors"
-      title="تحديث البيانات"
-    >
-      <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-      </svg>
-    </button>
-  );
+  }, []);
 
-  const refreshData = () => {
-    console.log('Refreshing data...');
-    // Reset selected category to force refresh
-    setSelectedCategory(null);
-    setCategories([]);
-    setProducts([]);
-    
-    // Fetch fresh data
-    setTimeout(() => {
-      fetchCategories();
-      if (selectedCategory) {
-        fetchProductsByCategory(selectedCategory);
-      }
-    }, 100);
-  };
-
+  // جلب منتجات القسم كلما تغيّر القسم في الرابط؛ وتفريغها عند العودة لشبكة الأقسام
   useEffect(() => {
     if (selectedCategory) {
       fetchProductsByCategory(selectedCategory);
+    } else {
+      setProducts([]);
     }
   }, [selectedCategory]);
 
@@ -157,10 +132,6 @@ const Categories = ({ user }) => {
     }, 3000);
   };
 
-  const getCartItemCount = () => {
-    return cart.reduce((total, item) => total + item.quantity, 0);
-  };
-
   if (loading && categories.length === 0) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -170,56 +141,14 @@ const Categories = ({ user }) => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-16">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-4 space-x-reverse">
-              <button
-                onClick={() => navigate(-1)}
-                className="p-2 text-gray-600 hover:text-primary-600 transition-colors"
-              >
-                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                </svg>
-              </button>
-              <Link to="/" className="flex items-center space-x-2 space-x-reverse">
-                <div className="bg-gradient-to-r from-primary-500 to-secondary-500 text-white w-8 h-8 rounded-lg flex items-center justify-center font-bold">
-                  V
-                </div>
-                <span className="text-xl font-bold text-primary-600">voro</span>
-              </Link>
-            </div>
+    <div className="min-h-screen bg-gray-50 pb-16 lg:pb-0">
+      <SiteHeader user={user} setUser={setUser} />
 
-            <div className="flex items-center space-x-4 space-x-reverse">
-              <div className="relative">
-                <Link to="/" className="p-2 text-gray-600 hover:text-primary-600 transition-colors">
-                  <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m0 0h8" />
-                  </svg>
-                  {cart.length > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                      {getCartItemCount()}
-                    </span>
-                  )}
-                </Link>
-              </div>
-              {/* Refresh */}
-              <ManualRefreshButton />
-              {user && (
-                <span className="text-gray-700">مرحباً، {user.phone}</span>
-              )}
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* Page Title */}
-      <div className="bg-gradient-to-r from-indigo-500 to-purple-500 py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-3xl md:text-4xl font-bold text-white mb-4">تصفح الفئات</h1>
-          <p className="text-xl text-white opacity-90 max-w-2xl mx-auto">
+      {/* رأس الصفحة — بنر موحّد (أحادي اللون) مطابق لصفحة العروض */}
+      <div className="bg-gradient-to-br from-primary-600 to-primary-900 py-14">
+        <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h1 className="text-3xl md:text-4xl font-bold text-white mb-3 tracking-tight">المنتجات</h1>
+          <p className="text-base md:text-lg text-white/70 max-w-2xl mx-auto">
             اكتشف منتجاتنا المميزة المصنفة حسب الفئات
           </p>
         </div>
@@ -228,13 +157,11 @@ const Categories = ({ user }) => {
       {/* Categories Grid */}
       {!selectedCategory && (
         <section className="py-12 bg-white">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8">
             {categories.length === 0 ? (
               <div className="text-center py-16">
                 <div className="inline-block p-6 rounded-full bg-gray-100 mb-6">
-                  <svg className="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                  </svg>
+                  <Archive className="w-16 h-16 text-gray-400" strokeWidth={1.5} />
                 </div>
                 <h3 className="text-2xl font-bold text-gray-700 mb-3">لا توجد فئات</h3>
                 <p className="text-gray-600 max-w-md mx-auto mb-6">لا توجد فئات متاحة حالياً</p>
@@ -243,31 +170,33 @@ const Categories = ({ user }) => {
                 </Link>
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 2xl:grid-cols-6 gap-4 md:gap-6">
                 {categories.map((category) => (
-                  <div
+                  <button
                     key={category.id}
-                    className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-gray-100 cursor-pointer"
-                    onClick={() => setSelectedCategory(category.id)}
+                    onClick={() => navigate(`/categories/${category.id}`)}
+                    className="group bg-white rounded-2xl overflow-hidden border border-gray-100 hover:border-gray-900/25 hover:shadow-[0_14px_34px_-14px_rgba(0,0,0,0.18)] transition-all duration-300 text-right flex flex-col"
                   >
-                    <div className="p-6 text-center">
-                      <div className="w-16 h-16 bg-gradient-to-r from-indigo-100 to-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <svg className="h-8 w-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                        </svg>
+                    {/* صورة القسم — مع أيقونة بديلة عند غيابها أو فشل تحميلها */}
+                    <div className="relative aspect-square bg-gray-50 overflow-hidden">
+                      <div className="absolute inset-0 flex items-center justify-center text-gray-300">
+                        <Box className="h-12 w-12" strokeWidth={1.5} />
                       </div>
-                      <h3 className="text-lg font-semibold text-gray-800 mb-2">{category.name}</h3>
-                      <p className="text-gray-600 text-sm mb-4">
-                        {category.description || 'اكتشف منتجات هذه الفئة'}
-                      </p>
-                      <button className="text-indigo-600 font-medium hover:text-indigo-800 transition-colors flex items-center justify-center">
-                        عرض المنتجات
-                        <svg className="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        </svg>
-                      </button>
+                      {(category.image_url || category.image) && (
+                        <img
+                          src={category.image_url || category.image}
+                          alt={category.name}
+                          loading="lazy"
+                          onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                          className="relative h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        />
+                      )}
                     </div>
-                  </div>
+                    <div className="p-3.5 md:p-4 flex items-center justify-between gap-2">
+                      <h3 className="text-[14px] md:text-[15px] font-bold text-gray-900 line-clamp-1">{category.name}</h3>
+                      <ChevronLeft className="h-4 w-4 shrink-0 text-gray-400 transition-all duration-300 group-hover:text-black group-hover:-translate-x-0.5" strokeWidth={2.5} />
+                    </div>
+                  </button>
                 ))}
               </div>
             )}
@@ -278,15 +207,13 @@ const Categories = ({ user }) => {
       {/* Products Grid */}
       {selectedCategory && (
         <section className="py-12 bg-gradient-to-b from-white to-gray-50">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between mb-8">
               <button
-                onClick={() => setSelectedCategory(null)}
-                className="flex items-center text-indigo-600 hover:text-indigo-800 transition-colors"
+                onClick={() => navigate('/categories')}
+                className="flex items-center text-primary-600 hover:text-primary-800 transition-colors"
               >
-                <svg className="h-5 w-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                </svg>
+                <ArrowRight className="h-5 w-5 mr-1" strokeWidth={2} />
                 العودة للفئات
               </button>
               <h2 className="text-2xl font-bold text-gray-800">
@@ -302,21 +229,19 @@ const Categories = ({ user }) => {
             ) : products.length === 0 ? (
               <div className="text-center py-16">
                 <div className="inline-block p-6 rounded-full bg-gray-100 mb-6">
-                  <svg className="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-                  </svg>
+                  <Package className="w-16 h-16 text-gray-400" strokeWidth={1.5} />
                 </div>
                 <h3 className="text-2xl font-bold text-gray-700 mb-3">لا توجد منتجات</h3>
                 <p className="text-gray-600 max-w-md mx-auto mb-6">لا توجد منتجات في هذه الفئة حالياً</p>
                 <button
-                  onClick={() => setSelectedCategory(null)}
+                  onClick={() => navigate('/categories')}
                   className="btn-primary"
                 >
                   العودة للفئات
                 </button>
               </div>
             ) : (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 px-2">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4 md:gap-6 px-2">
                 {products.map((product) => (
                   <div key={product.id} className="h-full">
                     {ProductCard ? (
@@ -337,23 +262,7 @@ const Categories = ({ user }) => {
         </section>
       )}
       <Footer />
-
-      <style jsx>{`
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-            transform: translateY(10px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        :global(.animate-fadeIn) {
-          animation: fadeIn 0.5s ease-out forwards;
-        }
-      `}</style>
+      <BottomTabBar />
     </div>
   );
 };

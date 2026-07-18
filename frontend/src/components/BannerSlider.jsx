@@ -4,7 +4,29 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { getScrollKey, navigateWithScrollSave } from '../utils/scrollRestore';
 
-const BannerSlider = () => {
+// أصل الوسائط مشتق من عنوان الـ API الحالي (بدل ربطه يدوياً بسيرفر واحد)
+const MEDIA_BASE = (api.defaults.baseURL || '').replace(/\/api\/?$/, '');
+
+/**
+ * يُرجع رابط صورة البنر جاهزاً، أو null إن لم تكن للبنر صورة صالحة.
+ * البنر بلا صورة (image=null و image_url='') يُستبعد بدل أن يكسر العرض.
+ */
+const resolveBannerImage = (banner) => {
+  const raw = banner?.image_url || banner?.image;
+  if (!raw || typeof raw !== 'string') return null;
+  if (raw.startsWith('http')) return raw;
+  if (raw.startsWith('/media/')) return `${MEDIA_BASE}${raw}`;
+  return `${MEDIA_BASE}/media/${raw}`;
+};
+
+/**
+ * سلايدر البنرات. `placement` يحدّد أي مجموعة بنرات تُعرض:
+ *   'home'   → بنرات الصفحة الرئيسية (الافتراضي)
+ *   'offers' → بنرات صفحة العروض
+ * `fallback` عنصر يُعرَض بدل السلايدر عند عدم وجود بنرات لهذا المكان
+ * (تُستخدمه صفحة العروض لإبقاء رأسها النصّي حتى تُرفَع صورة).
+ */
+const BannerSlider = ({ placement = 'home', fallback = null }) => {
   const [banners, setBanners] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -17,9 +39,11 @@ const BannerSlider = () => {
     const fetchBanners = async () => {
       try {
         setLoading(true);
-        const response = await api.get(endpoints.banners);
-        console.log('Banners data:', response.data);
-        setBanners(response.data);
+        const response = await api.get(endpoints.banners, { params: { placement } });
+        const data = response.data;
+        const list = Array.isArray(data) ? data : (data?.results || []);
+        // نعرض فقط البنرات التي لها صورة صالحة
+        setBanners(list.filter((b) => resolveBannerImage(b)));
         setError(null);
       } catch (err) {
         console.error('Error fetching banners:', err);
@@ -29,7 +53,7 @@ const BannerSlider = () => {
       }
     };
     fetchBanners();
-  }, []);
+  }, [placement]);
 
   useEffect(() => {
     if (banners.length <= 1) return;
@@ -70,30 +94,26 @@ const BannerSlider = () => {
       navigateWithScrollSave(navigate, `/product/${banner.product_id}`, scrollKey);
     } else if (banner.category_id) {
       // Fallback to category_id if available
-      console.log('Navigating to category by ID:', banner.category_id);
-      navigate(`/category/${banner.category_id}`);
+      navigate(`/categories/${banner.category_id}`);
     } else {
       console.log('No valid link found for banner');
     }
   };
 
   if (loading) {
+    // أثناء التحميل: إن وُجد fallback نعرضه (لتفادي وميض صندوق رمادي فوق رأس الصفحة)
+    if (fallback) return fallback;
     return (
       <div className="w-full h-64 bg-gray-200 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-500"></div>
       </div>
     );
   }
 
-  if (error) {
-    return (
-      <div className="w-full h-64 bg-gray-200 flex items-center justify-center">
-        <p className="text-red-500">{error}</p>
-      </div>
-    );
-  }
-
-  if (banners.length === 0) {
+  // لا بنرات (أو خطأ) لهذا المكان: نعرض الـ fallback إن مُرِّر، وإلا لا نعرض شيئاً في مكان العروض
+  if (error || banners.length === 0) {
+    if (fallback) return fallback;
+    if (placement !== 'home') return null;
     return (
       <div className="w-full h-64 bg-gray-200 flex items-center justify-center">
         <p className="text-gray-500">No banners available</p>
@@ -102,7 +122,7 @@ const BannerSlider = () => {
   }
 
   return (
-    <div className="relative w-full h-64 md:h-96 overflow-hidden rounded-lg">
+    <div className="relative w-full h-64 md:h-96 overflow-hidden">
       {/* Banner Images */}
       <div className="relative w-full h-full">
         {banners.map((banner, index) => (
@@ -117,11 +137,7 @@ const BannerSlider = () => {
               onClick={() => handleBannerClick(banner)}
             >
               <img
-                src={banner.image.startsWith('http') 
-                  ? banner.image 
-                  : banner.image.startsWith('/media/') 
-                    ? `https://ecom-parent-project.onrender.com${banner.image}`
-                    : `https://ecom-parent-project.onrender.com/media/${banner.image}`}
+                src={resolveBannerImage(banner)}
                 onLoad={() => console.log('Banner image loaded successfully')}
                 onError={(e) => {
                   console.error('Error loading banner image:', e, banner.image);

@@ -4,12 +4,14 @@ import { api, endpoints } from '../api';
 import { formatCurrency, getFreeShippingThreshold } from '../utils/currency';
 import Cart from '../components/CartNew';
 import CheckoutNew from '../components/CheckoutNew';
-import BottomNav from '../components/BottomNav';
 import CountdownTimer from '../components/CountdownTimer';
 import { ProductCard } from '../components/CategoryProductsSection';
 import { markPendingScrollRestore } from '../utils/scrollRestore';
+import { ChevronRight, Check, Heart, Package, ShieldCheck, DollarSign, Frown } from 'lucide-react';
+import BottomTabBar from '../components/BottomTabBar';
+import SiteHeader from '../components/SiteHeader';
 
-const ProductDetail = ({ user }) => {
+const ProductDetail = ({ user, setUser }) => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [product, setProduct] = useState(null);
@@ -25,6 +27,12 @@ const ProductDetail = ({ user }) => {
     loadCart();
     window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
   }, [id]);
+
+  useEffect(() => {
+    const openCart = () => setIsCartOpen(true);
+    window.addEventListener('voro:open-cart', openCart);
+    return () => window.removeEventListener('voro:open-cart', openCart);
+  }, []);
 
   const fetchProduct = async () => {
     try {
@@ -127,10 +135,6 @@ const ProductDetail = ({ user }) => {
     }, 3000);
   };
 
-  const getCartItemCount = () => {
-    return cart.reduce((total, item) => total + item.quantity, 0);
-  };
-
   const goBack = () => {
     markPendingScrollRestore('/');
     if (window.history.length > 1) {
@@ -162,7 +166,7 @@ const ProductDetail = ({ user }) => {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="text-gray-400 text-6xl mb-4">😞</div>
+          <div className="text-gray-400 text-6xl mb-4"><Frown className="w-16 h-16 mx-auto" /></div>
           <h2 className="text-2xl font-bold text-gray-600 mb-4">المنتج غير موجود</h2>
           <Link to="/" className="btn-primary">
             العودة للرئيسية
@@ -192,52 +196,12 @@ const ProductDetail = ({ user }) => {
   const similarProducts = Array.isArray(product?.similar_products) ? product.similar_products : [];
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-16 md:pb-0">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-4 space-x-reverse">
-              <button
-                onClick={goBack}
-                className="p-2 text-gray-600 hover:text-primary-600 transition-colors"
-              >
-                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                </svg>
-              </button>
-              <button type="button" onClick={goBack} className="flex items-center space-x-2 space-x-reverse">
-                <div className="bg-gradient-to-r from-primary-500 to-secondary-500 text-white w-8 h-8 rounded-lg flex items-center justify-center font-bold">
-                  V
-                </div>
-                <span className="text-xl font-bold text-primary-600">voro</span>
-              </button>
-            </div>
-
-            <div className="flex items-center space-x-4 space-x-reverse">
-              <div className="relative">
-                <button onClick={toggleCart} className="p-2 text-gray-600 hover:text-primary-600 transition-colors">
-                  <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m0 0h8" />
-                  </svg>
-                  {getCartItemCount() > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                      {getCartItemCount()}
-                    </span>
-                  )}
-                </button>
-              </div>
-              {user && (
-                <span className="text-gray-700">مرحباً، {user.phone}</span>
-              )}
-            </div>
-          </div>
-        </div>
-      </header>
+    <div className="min-h-screen bg-gray-50 pb-16 lg:pb-0">
+      <SiteHeader user={user} setUser={setUser} />
 
       {/* Breadcrumb */}
       <div className="bg-white border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <nav className="flex" aria-label="Breadcrumb">
             <ol className="flex items-center space-x-4 space-x-reverse">
               <li>
@@ -246,9 +210,7 @@ const ProductDetail = ({ user }) => {
                 </button>
               </li>
               <li>
-                <svg className="flex-shrink-0 h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-                </svg>
+                <ChevronRight className="flex-shrink-0 h-5 w-5 text-gray-400" />
               </li>
               <li>
                 <span className="text-gray-700 font-medium">{product.name}</span>
@@ -259,7 +221,7 @@ const ProductDetail = ({ user }) => {
       </div>
 
       {/* Product Details */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           {/* Product Images */}
           <div className="space-y-4">
@@ -398,9 +360,7 @@ const ProductDetail = ({ user }) => {
                 <ul className="space-y-2">
                   {product.features.map((feature, index) => (
                     <li key={index} className="flex items-center space-x-2 space-x-reverse">
-                      <svg className="h-5 w-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
+                      <Check className="h-5 w-5 text-green-500" strokeWidth={2} />
                       <span className="text-gray-700">{feature}</span>
                     </li>
                   ))}
@@ -476,30 +436,22 @@ const ProductDetail = ({ user }) => {
                 }}
                 className="px-6 py-4 border border-primary-500 text-primary-600 rounded-lg hover:bg-primary-50 transition-colors"
               >
-                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                </svg>
+                <Heart className="h-6 w-6" strokeWidth={2} />
               </button>
             </div>
 
             {/* Shipping Info */}
             <div className="bg-gray-50 rounded-lg p-4 space-y-3">
               <div className="flex items-center space-x-3 space-x-reverse">
-                <svg className="h-5 w-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                </svg>
+                <Package className="h-5 w-5 text-green-600" strokeWidth={2} />
                 <span className="text-gray-700">توصيل مجاني في حالة صار المبلغ الكلي للطلبات {formatCurrency(getFreeShippingThreshold())}</span>
               </div>
               <div className="flex items-center space-x-3 space-x-reverse">
-                <svg className="h-5 w-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
+                <ShieldCheck className="h-5 w-5 text-blue-600" strokeWidth={2} />
                 <span className="text-gray-700">ضمان الجودة والاستبدال</span>
               </div>
               <div className="flex items-center space-x-3 space-x-reverse">
-                <svg className="h-5 w-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
-                </svg>
+                <DollarSign className="h-5 w-5 text-primary-600" strokeWidth={2} />
                 <span className="text-gray-700">دفع آمن ومضمون</span>
               </div>
             </div>
@@ -510,9 +462,9 @@ const ProductDetail = ({ user }) => {
       {/* Similar Products (admin-selected) */}
       {similarProducts.length > 0 && (
         <div className="bg-white py-12 border-t border-gray-100">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8">
             <h2 className="text-2xl font-bold text-gray-900 mb-8 text-right">منتجات مشابهة</h2>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4 md:gap-6">
               {similarProducts.map((item) => (
                 <ProductCard
                   key={item.id}
@@ -543,8 +495,7 @@ const ProductDetail = ({ user }) => {
           onClose={() => setIsCheckoutOpen(false)}
         />
       )}
-
-      <BottomNav onCartClick={toggleCart} cartCount={getCartItemCount()} />
+      <BottomTabBar />
     </div>
   );
 };

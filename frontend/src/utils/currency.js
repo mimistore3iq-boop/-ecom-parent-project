@@ -20,15 +20,6 @@ export function formatCurrency(value, { withCode = false } = {}) {
     return withCode ? `${formatted} ${CODE}` : `${formatted} ${SYMBOL}`;
 }
 
-export function formatCurrencyWithDecimals(value, { withCode = false } = {}) {
-    const num = Number(value || 0);
-    const formatted = num.toLocaleString('en-US', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-    });
-    return withCode ? `${formatted} ${CODE}` : `${formatted} ${SYMBOL}`;
-}
-
 export function getFreeShippingThreshold() {
     return FREE_SHIPPING_THRESHOLD;
 }

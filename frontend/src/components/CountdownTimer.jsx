@@ -33,7 +33,7 @@ const CountdownTimer = ({ targetDate }) => {
   Object.keys(timeLeft).forEach((interval) => {
     timerComponents.push(
       <div key={interval} className="flex flex-col items-center bg-gray-50 rounded-lg p-2 min-w-[60px] border border-gray-100 shadow-sm">
-        <span className="text-xl font-bold text-indigo-600">
+        <span className="text-xl font-bold text-primary-600">
           {timeLeft[interval] < 10 ? `0${timeLeft[interval]}` : timeLeft[interval]}
         </span>
         <span className="text-[10px] text-gray-500 font-medium">{interval}</span>
