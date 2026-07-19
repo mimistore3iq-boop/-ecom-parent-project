@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Search, ShoppingCart, ChevronDown, ChevronLeft, X, User, LogOut, LayoutDashboard } from 'lucide-react';
 import { api, endpoints } from '../api';
 import { formatCurrency } from '../utils/currency';
 import { getScrollKey, navigateWithScrollSave } from '../utils/scrollRestore';
 import { getCachedHomeData, setCachedHomeData } from '../utils/homeCache';
+import { PRODUCT_IMAGE_FALLBACK } from '../utils/imageFallback';
 import voroLogo from '../assets/voro_logo.png';
 
 const readCartCount = () => {
@@ -27,6 +28,9 @@ const SiteHeader = ({ user, setUser, onSelectCategory }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAccountOpen, setIsAccountOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  // البحث على الموبايل: أيقونة داخل صف الهيدر تتمدّد لحقل، بدل شريط يأكل صفاً كاملاً
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const mobileSearchRef = useRef(null);
   const [scrolled, setScrolled] = useState(false);
   const [cartCount, setCartCount] = useState(readCartCount);
   const [badgePop, setBadgePop] = useState(false);
@@ -134,6 +138,23 @@ const SiteHeader = ({ user, setUser, onSelectCategory }) => {
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
+
+  const closeSearch = () => {
+    setIsSearchOpen(false);
+    setSearchTerm(''); // وإلا بقيت النتائج معلّقة خلف حقل مغلق
+  };
+
+  // تركيز الحقل فور فتحه، وإغلاقه بـEscape
+  useEffect(() => {
+    if (!isSearchOpen) return undefined;
+    mobileSearchRef.current?.focus();
+    const onKey = (e) => { if (e.key === 'Escape') closeSearch(); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [isSearchOpen]);
+
+  // مغادرة الصفحة تغلق البحث — وإلا بقي مفتوحاً فوق صفحة جديدة
+  useEffect(() => { closeSearch(); }, [location.pathname]);
 
   const goToProduct = (productId) => {
     navigateWithScrollSave(navigate, `/product/${productId}`, scrollKey);
@@ -273,6 +294,18 @@ const SiteHeader = ({ user, setUser, onSelectCategory }) => {
 
             {/* الأزرار — أقصى اليمين في RTL: السلة ثم الحساب/الدخول */}
             <div className="flex items-center gap-2 md:gap-3 shrink-0 order-1">
+              {/* البحث على الموبايل — أيقونة بحجم زر السلة نفسه، تفتح الحقل داخل الصف */}
+              {isHome && (
+                <button
+                  onClick={() => setIsSearchOpen(true)}
+                  aria-label="بحث"
+                  aria-expanded={isSearchOpen}
+                  className="lg:hidden relative h-10 w-10 shrink-0 flex items-center justify-center rounded-full text-gray-800 hover:bg-gray-100 transition-colors duration-300"
+                >
+                  <Search className="h-[21px] w-[21px]" strokeWidth={1.75} />
+                </button>
+              )}
+
               {/* السلة — التوقيع البصري للهيدر (أقصى اليمين في RTL) */}
               <button
                 onClick={handleCartClick}
@@ -334,6 +367,33 @@ const SiteHeader = ({ user, setUser, onSelectCategory }) => {
                 </Link>
               )}
             </div>
+
+            {/* حقل البحث المتمدّد — يغطّي صف الهيدر نفسه فلا يضيف ارتفاعاً.
+                يُغلق بالزر أو Escape، ويُفرَّغ النص عند الإغلاق حتى لا تبقى النتائج معلّقة. */}
+            {isSearchOpen && (
+              <div className="lg:hidden voro-fade-in absolute inset-y-0 right-4 left-4 sm:right-6 sm:left-6 z-30 flex items-center gap-2 bg-white/95 backdrop-blur-md">
+                <div className="relative flex-1 min-w-0">
+                  <input
+                    ref={mobileSearchRef}
+                    type="text"
+                    placeholder="ابحث عن منتج..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full h-11 pr-11 pl-3 bg-gray-100/80 rounded-full text-[16px] text-gray-800 placeholder:text-gray-400 outline-none focus:bg-gray-100 transition-colors"
+                  />
+                  <span className="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none">
+                    <Search className="h-[18px] w-[18px] text-gray-400" strokeWidth={2} />
+                  </span>
+                </div>
+                <button
+                  onClick={closeSearch}
+                  aria-label="إغلاق البحث"
+                  className="h-10 w-10 shrink-0 flex items-center justify-center rounded-full text-gray-500 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+                >
+                  <X className="h-5 w-5" strokeWidth={2} />
+                </button>
+              </div>
+            )}
 
             {/* اللوجو — أقصى اليسار في RTL. على الموبايل ms-auto يدفعه لليسار؛
                 على الديسكتوب المجموعة الوسطى (flex-1) تتكفّل بالتوزيع فنلغي الهامش (lg:ms-0) */}
@@ -426,59 +486,34 @@ const SiteHeader = ({ user, setUser, onSelectCategory }) => {
             </div>
           )}
 
-          {/* شريط البحث للموبايل — في الصفحة الرئيسية فقط */}
-          {isHome && (
-          <div className="md:hidden pb-3 px-1">
-            <div className="relative">
-              <input
-                type="text"
-                id="mobile-search-input"
-                placeholder="ابحث عن منتج..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full px-4 py-3 pr-11 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-primary-500 text-sm shadow-inner"
-              />
-              <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
-                <Search className="h-5 w-5 text-gray-400" strokeWidth={2} />
-              </div>
-              {searchTerm && (
-                <button onClick={() => setSearchTerm('')} className="absolute inset-y-0 left-0 pl-3 flex items-center">
-                  <X className="h-4 w-4 text-gray-400" strokeWidth={2.5} />
+          {/* نتائج البحث على الموبايل — تتدلّى أسفل الهيدر ولا تدفع محتوى الصفحة */}
+          {isSearchOpen && searchTerm && (
+            <div className="lg:hidden voro-fade-in absolute inset-x-4 sm:inset-x-6 top-full z-30 mt-2 bg-white rounded-2xl shadow-[0_16px_44px_-16px_rgba(0,0,0,0.22)] border border-gray-100 overflow-hidden max-h-[65vh] overflow-y-auto">
+              {filteredProducts.slice(0, 10).map((product) => (
+                <button
+                  key={product.id}
+                  onClick={() => { goToProduct(product.id); closeSearch(); }}
+                  className="w-full text-right p-3 flex items-center gap-3 border-b border-gray-50 last:border-0 active:bg-gray-50 transition-colors"
+                >
+                  <div className="w-12 h-12 shrink-0 bg-gray-50 rounded-lg overflow-hidden">
+                    <img
+                      src={product.image || PRODUCT_IMAGE_FALLBACK}
+                      alt=""
+                      onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = PRODUCT_IMAGE_FALLBACK; }}
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="font-semibold text-[13px] text-gray-800 truncate">{product.name}</div>
+                    <div className="text-black font-bold text-sm mt-0.5">{formatCurrency(product.discounted_price || product.price)}</div>
+                  </div>
+                  <ChevronLeft className="h-4 w-4 shrink-0 text-gray-300" strokeWidth={2} />
                 </button>
+              ))}
+              {filteredProducts.length === 0 && (
+                <div className="p-6 text-center text-gray-400 text-sm">لا توجد نتائج</div>
               )}
             </div>
-
-            {searchTerm && (
-              <div className="mt-2 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden max-h-[60vh] overflow-y-auto z-50">
-                <div className="bg-primary-50 px-4 py-2 text-[10px] font-bold text-primary-600 uppercase tracking-wider">نتائج البحث</div>
-                {filteredProducts.slice(0, 10).map((product) => (
-                  <button
-                    key={product.id}
-                    onClick={() => goToProduct(product.id)}
-                    className="w-full text-right p-3 hover:bg-primary-50/50 flex items-center gap-3 border-b border-gray-50 last:border-0 active:bg-primary-100 transition-colors"
-                  >
-                    <div className="w-12 h-12 shrink-0 bg-white rounded-xl overflow-hidden border border-gray-100 p-1">
-                      <img src={product.image} alt="" className="w-full h-full object-contain" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="font-bold text-[13px] text-gray-800 truncate">{product.name}</div>
-                      <div className="flex items-center gap-2 mt-0.5">
-                        <span className="text-xs text-primary-600 font-bold">{formatCurrency(product.discounted_price || product.price)}</span>
-                      </div>
-                    </div>
-                    <div className="text-gray-300">
-                      <ChevronLeft className="h-4 w-4" strokeWidth={2} />
-                    </div>
-                  </button>
-                ))}
-                {filteredProducts.length === 0 && (
-                  <div className="p-8 text-center bg-gray-50">
-                    <p className="text-gray-400 text-xs">لا توجد منتجات تطابق بحثك</p>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
           )}
         </div>
       </header>
