@@ -47,9 +47,15 @@
         min-height: 100% !important;
         margin: 0;
         padding: 0;
-        overflow-x: hidden;
-        overflow-y: auto !important;
         touch-action: auto !important; /* Allow all touch actions including pan-y */
+      }
+      /* منع التمرير الأفقي على مستوى الصفحة فقط.
+         لا تضع overflow على body أو ‎#root‎: أي قيمة غير visible تجعلهما حاويتَي
+         تمرير، فيفقد الهيدر التصاقه (position: sticky) ويختفي مع التمرير.
+         overflow على html وحده ينتقل إلى نافذة العرض فيمنع التمرير الأفقي
+         دون أن يكسر الالتصاق. */
+      html {
+        overflow-x: hidden;
       }
       body {
         font-family: 'Cairo', 'Tajawal', sans-serif;
