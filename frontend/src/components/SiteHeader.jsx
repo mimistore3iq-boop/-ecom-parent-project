@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Search, ShoppingCart, ChevronDown, ChevronLeft, X, Tag, User, LogOut, LayoutDashboard } from 'lucide-react';
+import { Search, ShoppingCart, ChevronDown, ChevronLeft, X, User, LogOut, LayoutDashboard } from 'lucide-react';
 import { api, endpoints } from '../api';
 import { formatCurrency } from '../utils/currency';
 import { getScrollKey, navigateWithScrollSave } from '../utils/scrollRestore';
@@ -145,8 +145,17 @@ const SiteHeader = ({ user, setUser, onSelectCategory }) => {
     if (onSelectCategory) {
       onSelectCategory(id);
     } else {
-      navigate(id ? `/categories/${id}` : '/categories');
+      navigate(`/categories/${id}`);
     }
+  };
+
+  // "كل المنتجات" — صفحة تعرض منتجات المتجر كلها فعلاً.
+  // سابقاً كانت توجّه إلى /categories (شبكة الأقسام نفسها)، فلا يحدث شيء
+  // حين تُضغط من داخل صفحة الأقسام. نتجاوز onSelectCategory عمداً لأن الرئيسية
+  // تستخدمه لتصفية قسم، وهو غير معنيّ بعرض "كل المنتجات".
+  const goToAllProducts = () => {
+    setIsMenuOpen(false);
+    navigate('/categories?view=all');
   };
 
   const handleCartClick = () => {
@@ -180,6 +189,12 @@ const SiteHeader = ({ user, setUser, onSelectCategory }) => {
 
   // حقل البحث يظهر في الصفحة الرئيسية فقط
   const isHome = location.pathname === '/';
+
+  // فهرس القائمة: الأقسام الرئيسية + خانة "كل المنتجات" في النهاية.
+  // نحسب عدد الصفوف لتبقى الأعمدة ثلاثة متوازنة مهما تغيّر عدد الأقسام
+  // (١٤ قسماً + خانة = ١٥ ⇒ ٥ صفوف بالضبط، بلا عمود ناقص ولا فراغ ميت).
+  const menuCategories = categories.filter((c) => !c.parent);
+  const menuRows = Math.max(1, Math.ceil((menuCategories.length + 1) / 3));
 
   // قرص تنقّل واحد داخل المجموعة المقسّمة — النشط أبيض بظل خفيف، والبقية رمادي هادئ
   const navPill = (active) =>
@@ -327,43 +342,84 @@ const SiteHeader = ({ user, setUser, onSelectCategory }) => {
             </Link>
           </div>
 
-          {/* الـ Mega Menu — ينزلق مباشرة أسفل الهيدر، بمحاذاة الحاوية */}
+          {/* ===== الـ Mega Menu — "الفهرس": مجموعة النافيگيشن نفسها مبسوطة للأسفل =====
+              الصينية رمادية (bg-gray-100/80) تحتضن ورقة بيضاء بحاشية 4px — نفس تركيب
+              كبسولة النافيگيشن تماماً. الأنصاف قطرية مشتقّة لا مُختارة: القرص h-9 ⇒ 18px،
+              والكبسولة 36+2×4 ⇒ 22px. ولا صور هنا: قسم واحد من ١٤ يملك صورة، فعرض
+              خانة صورة يعني عرض ثلاثة عشر فراغاً. نعرض ما يملكه كل سطر فعلاً: العدد. */}
           {isMenuOpen && (
             <div data-voro-menu className="hidden lg:block absolute right-0 left-0 top-full">
               <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="voro-menu-in w-full max-w-[1100px] bg-white rounded-b-2xl shadow-[0_18px_50px_-16px_rgba(0,0,0,0.22)] border border-t-0 border-gray-100 p-6">
-                  <div className="flex items-center justify-between mb-5 pb-4 border-b border-gray-50">
-                    <h4 className="text-[15px] font-bold text-gray-900">تصفّح الأقسام</h4>
-                    <button
-                      onClick={() => handleCategoryClick('')}
-                      className="group text-sm font-medium text-gray-500 hover:text-black transition-colors flex items-center gap-1.5"
+                <div className="voro-menu-in mx-auto w-full max-w-[1040px] mt-2 rounded-[22px] bg-gray-100/80 backdrop-blur-md p-1 shadow-[0_20px_48px_-24px_rgba(0,0,0,0.18)]">
+                  <div className="rounded-[18px] bg-white shadow-[0_1px_3px_rgba(0,0,0,0.08)] px-7 py-6">
+                    <div className="flex items-baseline justify-between pb-4 mb-5 border-b border-gray-100">
+                      <h4 className="text-[15px] font-semibold text-gray-900 tracking-tight">تصفّح الأقسام</h4>
+                      <span className="text-[11px] text-gray-400 tabular-nums">{menuCategories.length} قسم</span>
+                    </div>
+
+                    {/* التعبئة عمودية (grid-flow-col) فتقرأ العين كل عمود من أعلى لأسفل
+                        كفهرس مطبوع. الصفوف تُحسب لتبقى ثلاثة أعمدة متوازنة دائماً. */}
+                    <div
+                      className="grid grid-flow-col auto-cols-fr gap-x-10 max-h-[60vh] overflow-y-auto"
+                      style={{ gridTemplateRows: `repeat(${menuRows}, minmax(0, 1fr))` }}
                     >
-                      كل المنتجات
-                      <ChevronLeft className="h-4 w-4 transition-transform duration-300 group-hover:-translate-x-0.5" strokeWidth={2.5} />
-                    </button>
-                  </div>
-                  <div className="grid grid-cols-4 gap-x-6 gap-y-1 max-h-[56vh] overflow-y-auto">
-                    {categories.filter((c) => !c.parent).map((category) => (
+                      {menuCategories.map((category) => {
+                        const isCurrent = location.pathname === `/categories/${category.id}`;
+                        const count = category.products_count ?? 0;
+                        return (
+                          <button
+                            key={category.id}
+                            onClick={() => handleCategoryClick(category.id)}
+                            title={category.name}
+                            className="group flex h-11 items-center gap-3 text-right rounded-md focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-900 focus-visible:ring-offset-2"
+                          >
+                            <span className={`text-[14px] whitespace-nowrap truncate transition-colors duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+                              isCurrent
+                                ? 'font-semibold text-gray-900'
+                                : count === 0
+                                  ? 'font-medium text-gray-400 group-hover:text-gray-900'
+                                  : 'font-medium text-gray-600 group-hover:text-gray-900'
+                            }`}>
+                              {category.name}
+                            </span>
+                            {/* خط الفهرس الواصل — يمتصّ كل التفاوت في أطوال الأسماء،
+                                ويُرسم كاملاً بالأسود عند المرور أو للقسم الحالي */}
+                            <span className="relative flex-1 min-w-[20px] h-px bg-gray-200/80">
+                              <span className={`absolute inset-0 bg-gray-900 origin-right transition-transform duration-[450ms] ease-[cubic-bezier(0.22,1,0.36,1)] ${
+                                isCurrent ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'
+                              }`} />
+                            </span>
+                            {/* الصفر يُكتب شرطة: رقم صفر في فهرس يُقرأ كعطل، والشرطة قرار */}
+                            <span className={`w-7 shrink-0 text-left text-[12px] tabular-nums transition-colors duration-300 ${
+                              count === 0 ? 'text-gray-200' : 'text-gray-300 group-hover:text-gray-900'
+                            }`}>
+                              {count === 0 ? '—' : count}
+                            </span>
+                          </button>
+                        );
+                      })}
+
+                      {/* الخانة الأخيرة: المخرج. تقع أسفل العمود الأخير (أقصى اليسار في RTL)
+                          فيصير المسار قطرياً من العنوان أعلى اليمين إليها */}
                       <button
-                        key={category.id}
-                        onClick={() => handleCategoryClick(category.id)}
-                        className="group flex items-center gap-3 min-h-[46px] px-3 rounded-[9px] hover:bg-[#f5f6f7] transition-colors duration-200 text-right"
+                        onClick={goToAllProducts}
+                        className="group flex h-11 items-center gap-3 text-right rounded-md focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-900 focus-visible:ring-offset-2"
                       >
-                        <span className="relative h-8 w-8 shrink-0 rounded-lg bg-gray-100 overflow-hidden flex items-center justify-center text-gray-400 group-hover:bg-black group-hover:text-white transition-colors duration-300">
-                          <Tag className="h-4 w-4" strokeWidth={2} />
-                          {(category.image_url || category.image) && (
-                            <img src={category.image_url || category.image} alt="" onError={(e) => { e.currentTarget.style.display = 'none'; }} className="absolute inset-0 h-full w-full object-cover" />
-                          )}
+                        <span className="text-[14px] font-semibold text-gray-900 whitespace-nowrap">كل المنتجات</span>
+                        <span className="relative flex-1 min-w-[20px] h-px bg-gray-900/25">
+                          <span className="absolute inset-0 bg-gray-900 origin-right scale-x-0 transition-transform duration-[450ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-x-100" />
                         </span>
-                        <span className="text-[13px] font-medium text-gray-700 group-hover:text-black line-clamp-1 transition-colors">{category.name}</span>
+                        <span className="w-7 shrink-0 flex justify-start">
+                          <ChevronLeft className="h-4 w-4 text-gray-900 transition-transform duration-300 group-hover:-translate-x-0.5" strokeWidth={2} />
+                        </span>
                       </button>
-                    ))}
+                    </div>
                   </div>
                 </div>
               </div>
               {/* تعتيم خفيف جداً للصفحة أسفل القائمة — يعمّق الإحساس بالطبقة */}
               <div
-                className="voro-scrim fixed inset-0 top-[72px] -z-10 bg-black/5"
+                className="voro-scrim fixed inset-0 top-[72px] -z-10 bg-black/[0.04]"
                 aria-hidden="true"
                 onClick={() => setIsMenuOpen(false)}
               />

@@ -1,11 +1,28 @@
 import { useEffect, useState } from 'react';
-import { Link, useParams, useNavigate } from 'react-router-dom';
+import { Link, useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { api, endpoints } from '../api';
 import Footer from '../components/Footer';
 import { ProductCard } from '../components/CategoryProductsSection';
 import { ArrowRight, Archive, Box, ChevronLeft, Package } from 'lucide-react';
 import BottomTabBar from '../components/BottomTabBar';
 import SiteHeader from '../components/SiteHeader';
+
+// توحيد شكل المنتج القادم من الـAPI ليطابق ما تتوقّعه ProductCard
+const normalizeProduct = (p) => {
+  const discountPct = typeof p.discount_percentage === 'number' ? p.discount_percentage : (p.discount || 0);
+  const priceNum = Number(p.price || 0);
+  return {
+    ...p,
+    id: p.id,
+    name: p.name || 'منتج بدون اسم',
+    image: p.main_image_url || p.main_image || p.image || null,
+    stock: typeof p.stock_quantity === 'number' ? p.stock_quantity : (p.is_in_stock ? 1 : 0),
+    discount: discountPct,
+    discount_percentage: discountPct,
+    price: priceNum,
+    discounted_price: p.discounted_price || Math.round(priceNum * (1 - discountPct / 100)),
+  };
+};
 
 const Categories = ({ user, setUser }) => {
   const [categories, setCategories] = useState([]);
@@ -14,11 +31,17 @@ const Categories = ({ user, setUser }) => {
   const [cart, setCart] = useState([]);
   const { id: categoryIdParam } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   // مصدر الحقيقة الوحيد للقسم المختار هو رابط الصفحة (URL). هكذا يبقى العرض
   // متطابقاً مع العنوان دائماً: /categories = شبكة الأقسام، /categories/:id = منتجات القسم.
   // (يمنع بقاء منتجات قسم قديم ظاهرة عند الرجوع إلى /categories)
   const selectedCategory = categoryIdParam ? parseInt(categoryIdParam, 10) : null;
+
+  // ‏/categories?view=all — عرض كل منتجات المتجر بلا تصفية بقسم.
+  // كان زر "كل المنتجات" في القائمة يوجّه إلى /categories فقط، أي إلى شبكة
+  // الأقسام نفسها، فلا يحدث شيء حين يُضغط من داخل صفحة الأقسام.
+  const showAllProducts = searchParams.get('view') === 'all';
 
   // تحميل الأقسام والسلة مرّة واحدة عند فتح الصفحة
   useEffect(() => {
@@ -26,14 +49,16 @@ const Categories = ({ user, setUser }) => {
     loadCart();
   }, []);
 
-  // جلب منتجات القسم كلما تغيّر القسم في الرابط؛ وتفريغها عند العودة لشبكة الأقسام
+  // جلب المنتجات حسب الوضع: قسم محدّد، أو كل المنتجات، أو لا شيء (شبكة الأقسام)
   useEffect(() => {
     if (selectedCategory) {
       fetchProductsByCategory(selectedCategory);
+    } else if (showAllProducts) {
+      fetchAllProducts();
     } else {
       setProducts([]);
     }
-  }, [selectedCategory]);
+  }, [selectedCategory, showAllProducts]);
 
   const fetchCategories = async () => {
     try {
@@ -64,25 +89,26 @@ const Categories = ({ user, setUser }) => {
       
       console.log(`Found ${list.length} products for category ${categoryId}`);
 
-      const normalized = list.map((p) => {
-        const discountPct = typeof p.discount_percentage === 'number' ? p.discount_percentage : (p.discount || 0);
-        const priceNum = Number(p.price || 0);
-        return {
-          ...p,
-          id: p.id,
-          name: p.name || 'منتج بدون اسم',
-          image: p.main_image_url || p.main_image || p.image || null,
-          stock: typeof p.stock_quantity === 'number' ? p.stock_quantity : (p.is_in_stock ? 1 : 0),
-          discount: discountPct,
-          discount_percentage: discountPct,
-          price: priceNum,
-          discounted_price: p.discounted_price || Math.round(priceNum * (1 - discountPct / 100)),
-        };
-      });
-
-      setProducts(normalized);
+      setProducts(list.map(normalizeProduct));
     } catch (error) {
       console.error('Error fetching products:', error);
+      setProducts([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // كل منتجات المتجر — يخدم رابط "كل المنتجات" في قائمة الهيدر
+  const fetchAllProducts = async () => {
+    try {
+      setLoading(true);
+      setProducts([]);
+      const response = await api.get(endpoints.products);
+      const data = response.data;
+      const list = Array.isArray(data) ? data : (data?.results || []);
+      setProducts(list.map(normalizeProduct));
+    } catch (error) {
+      console.error('Error fetching all products:', error);
       setProducts([]);
     } finally {
       setLoading(false);
@@ -154,8 +180,8 @@ const Categories = ({ user, setUser }) => {
         </div>
       </div>
 
-      {/* Categories Grid */}
-      {!selectedCategory && (
+      {/* Categories Grid — تختفي عند عرض كل المنتجات */}
+      {!selectedCategory && !showAllProducts && (
         <section className="py-12 bg-white">
           <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8">
             {categories.length === 0 ? (
@@ -204,8 +230,8 @@ const Categories = ({ user, setUser }) => {
         </section>
       )}
 
-      {/* Products Grid */}
-      {selectedCategory && (
+      {/* Products Grid — منتجات قسم محدّد، أو كل المنتجات */}
+      {(selectedCategory || showAllProducts) && (
         <section className="py-12 bg-gradient-to-b from-white to-gray-50">
           <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between mb-8">
@@ -217,7 +243,9 @@ const Categories = ({ user, setUser }) => {
                 العودة للفئات
               </button>
               <h2 className="text-2xl font-bold text-gray-800">
-                {categories.find(c => c.id === selectedCategory)?.name || 'المنتجات'}
+                {showAllProducts
+                  ? `كل المنتجات${products.length ? ` (${products.length})` : ''}`
+                  : (categories.find(c => c.id === selectedCategory)?.name || 'المنتجات')}
               </h2>
               <div></div> {/* Empty div for spacing */}
             </div>
@@ -232,7 +260,9 @@ const Categories = ({ user, setUser }) => {
                   <Package className="w-16 h-16 text-gray-400" strokeWidth={1.5} />
                 </div>
                 <h3 className="text-2xl font-bold text-gray-700 mb-3">لا توجد منتجات</h3>
-                <p className="text-gray-600 max-w-md mx-auto mb-6">لا توجد منتجات في هذه الفئة حالياً</p>
+                <p className="text-gray-600 max-w-md mx-auto mb-6">
+                  {showAllProducts ? 'لا توجد منتجات في المتجر حالياً' : 'لا توجد منتجات في هذه الفئة حالياً'}
+                </p>
                 <button
                   onClick={() => navigate('/categories')}
                   className="btn-primary"
