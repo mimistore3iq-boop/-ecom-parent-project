@@ -51,6 +51,36 @@ const getCategoryImage = (category) => category?.image_url || category?.image ||
  * رابط يعمل على جهاز المطوّر وحده. الصورة تظهر هنا بشكل طبيعي تماماً — ولهذا
  * هي أخطر من الرابط المعطوب: لا onError يكشفها، والزبون لا يرى شيئاً.
  */
+/**
+ * يحوّل خطأ الـAPI إلى سبب مفهوم بدل رسالة عامة.
+ * كانت رسالة "تأكّد من صلاحياتك" تظهر عند ترك حقل مطلوب فارغاً، فيبحث المستخدم
+ * في الصلاحيات بينما المشكلة حقل ناقص. الخادم يرسل السبب دائماً — نعرضه.
+ */
+const FIELD_LABELS = {
+  title: 'العنوان',
+  image_url: 'الصورة',
+  placement: 'مكان الظهور',
+  link_url: 'رابط التوجيه',
+  display_order: 'ترتيب العرض',
+  name: 'الاسم',
+  description: 'الوصف',
+};
+
+const describeApiError = (error, fallback) => {
+  const data = error?.response?.data;
+  if (!data) return error?.message || fallback;
+  if (typeof data === 'string') return data;
+  if (data.error) return data.error;
+  if (data.detail) return data.detail;
+
+  const parts = Object.entries(data).map(([field, messages]) => {
+    const label = FIELD_LABELS[field] || field;
+    const text = Array.isArray(messages) ? messages.join(' ') : String(messages);
+    return `• ${label}: ${text}`;
+  });
+  return parts.length ? parts.join('\n') : fallback;
+};
+
 const isLocalOnlyImage = (url) =>
   typeof url === 'string' && /^https?:\/\/(localhost|127\.0\.0\.1|0\.0\.0\.0|\[::1\])(:\d+)?\//i.test(url);
 
@@ -312,7 +342,7 @@ const AdminPanel = ({ user, setUser }) => {
       closeBannerModal();
     } catch (error) {
       console.error('Error saving banner:', error);
-      alert('تعذّر حفظ البنر. تأكّد من صلاحياتك وحاول مجدداً.');
+      alert(describeApiError(error, 'تعذّر حفظ البنر. حاول مجدداً.'));
     } finally {
       setBannerSaving(false);
     }
@@ -627,7 +657,7 @@ const AdminPanel = ({ user, setUser }) => {
       });
     } catch (error) {
       console.error('Error saving category:', error);
-      alert('حدث خطأ في حفظ القسم');
+      alert(describeApiError(error, 'حدث خطأ في حفظ القسم'));
     } finally {
       setLoading(false);
     }
@@ -2537,8 +2567,18 @@ const AdminPanel = ({ user, setUser }) => {
 
                 {/* العنوان */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">العنوان</label>
-                  <input type="text" value={bannerForm.title} onChange={(e) => setBannerForm({ ...bannerForm, title: e.target.value })} className="input-field" placeholder="عنوان البنر" />
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    العنوان <span className="text-red-600">*</span>
+                    <span className="mr-1.5 text-xs font-normal text-gray-400">مطلوب — لتمييز البنر داخل اللوحة</span>
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={bannerForm.title}
+                    onChange={(e) => setBannerForm({ ...bannerForm, title: e.target.value })}
+                    className="input-field"
+                    placeholder="مثال: بنر عروض الشتاء"
+                  />
                 </div>
 
                 {/* رابط التوجيه */}
