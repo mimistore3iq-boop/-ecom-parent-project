@@ -27,6 +27,7 @@ class IsProjectAdmin(BasePermission):
 # يتحكم بهما العميل، ورفع ملف باسم ‎.html/.svg‎ على نطاق الوسائط يعني XSS مخزَّن.
 ALLOWED_IMAGE_FORMATS = {'JPEG': '.jpg', 'PNG': '.png', 'WEBP': '.webp', 'GIF': '.gif'}
 MAX_UPLOAD_BYTES = 5 * 1024 * 1024  # 5 ميغابايت
+LOCAL_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
 
 
 @csrf_exempt
@@ -73,7 +74,16 @@ def upload_image_to_voro(request):
         # image_url في النماذج من نوع URLField فترفض المسار النسبي. نجعله مطلقاً دائماً.
         if not url.startswith('http'):
             url = request.build_absolute_uri(url)
-        return Response({'url': url, 'path': path})
+
+        # نُبلّغ الواجهة أين حُفظت الصورة فعلاً. التخزين المحلي ينتج روابط
+        # ‏127.0.0.1 تعمل على جهاز المطوّر وحده — تبدو ناجحة ولا يراها أي زبون.
+        # إخفاء هذه الحقيقة هو بالضبط ما يجعل الرفع "ينجح" ثم لا تظهر الصورة.
+        is_local = settings.STORAGES.get('default', {}).get('BACKEND') == LOCAL_FILE_STORAGE
+        return Response({
+            'url': url,
+            'path': path,
+            'storage': 'local' if is_local else 'remote',
+        })
     except Exception:
         # لا نُسرّب نص الاستثناء (قد يحوي تفاصيل التخزين/المفاتيح)
         logger.exception('upload_image_to_voro: storage write failed')

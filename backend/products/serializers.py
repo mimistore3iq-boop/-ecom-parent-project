@@ -8,11 +8,15 @@ logger = logging.getLogger(__name__)
 
 class CategorySerializer(serializers.ModelSerializer):
     children = serializers.SerializerMethodField()
-    
+    # products_count/children_count خصائص (@property) على النموذج، و fields='__all__'
+    # لا يُسلسِل الخصائص — كانت الواجهة تعرض "0 منتج" لكل قسم دائماً. نُصرّح بها هنا.
+    products_count = serializers.IntegerField(read_only=True)
+    children_count = serializers.IntegerField(read_only=True)
+
     class Meta:
         model = Category
         fields = '__all__'
-    
+
     def get_children(self, obj):
         """Get subcategories for this category"""
         if obj.children.exists():
