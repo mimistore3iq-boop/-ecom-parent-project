@@ -62,10 +62,10 @@ const ProductDetail = ({ user, setUser }) => {
   };
 
   const handleCheckoutComplete = () => {
+    // رسالة النجاح تعرضها نافذة إتمام الطلب نفسها، فلا داعي لتنبيه مكرّر هنا
     setCart([]);
     localStorage.removeItem('cart');
     setIsCheckoutOpen(false);
-    showNotification('تم إتمام طلبك بنجاح!');
   };
 
   const addToCart = (item = null) => {

@@ -140,15 +140,12 @@ const Checkout = ({ cart, onCheckout, onClose, appliedCoupon, couponDiscount }) 
       // Send order to backend using create endpoint
       const response = await api.post(endpoints.createOrder, orderData);
 
-      // Clear cart and show success message
+      // نفرّغ السلة ونعرض رسالة النجاح ونتركها حتى يضغط المستخدم "موافق".
+      // ملاحظة: لا نستدعي onCheckout() هنا — فهو يغلق النافذة ويعيد تحميل الصفحة،
+      // ما كان يمحو رسالة النجاح قبل أن يراها المستخدم.
       localStorage.removeItem('cart');
-      onCheckout();
+      window.dispatchEvent(new Event('cart-updated'));
       setSuccess(true);
-
-      // Redirect to home after 3 seconds
-      setTimeout(() => {
-        onClose();
-      }, 3000);
 
     } catch (err) {
       console.error('Error creating order:', err);
@@ -172,26 +169,46 @@ const Checkout = ({ cart, onCheckout, onClose, appliedCoupon, couponDiscount }) 
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" onClick={onClose}>
-      <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+    <div
+      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+      onClick={success ? onCheckout : onClose}
+    >
+      <div
+        className={`bg-white rounded-2xl shadow-2xl w-full max-h-[90vh] overflow-y-auto ${success ? 'max-w-md' : 'max-w-2xl'}`}
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="p-6">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold text-gray-800">إتمام الطلب</h2>
-            <button 
-              onClick={onClose}
-              className="text-gray-500 hover:text-gray-700 p-1 rounded-full hover:bg-gray-100"
-            >
-              <X className="w-6 h-6" strokeWidth={2} />
-            </button>
-          </div>
+          {!success && (
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold text-gray-800">إتمام الطلب</h2>
+              <button
+                onClick={onClose}
+                className="text-gray-500 hover:text-gray-700 p-1 rounded-full hover:bg-gray-100"
+              >
+                <X className="w-6 h-6" strokeWidth={2} />
+              </button>
+            </div>
+          )}
 
           {success ? (
-            <div className="text-center py-12">
-              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Check className="w-8 h-8 text-green-500" strokeWidth={2} />
+            <div className="text-center py-8 px-2">
+              {/* علامة صح داخل دائرة */}
+              <div className="mx-auto mb-6 w-24 h-24 rounded-full bg-green-50 flex items-center justify-center">
+                <div className="w-16 h-16 rounded-full bg-green-500 flex items-center justify-center shadow-lg shadow-green-500/30">
+                  <Check className="w-9 h-9 text-white" strokeWidth={3} />
+                </div>
               </div>
-              <h3 className="text-xl font-bold text-gray-800 mb-2">تم ارسال طلبك بنجاح</h3>
-              <p className="text-gray-600">سيتم التواصل معك قريباً لتأكيد تفاصيل الطلب</p>
+              <h3 className="text-2xl font-bold text-gray-900 mb-2">تم إرسال طلبك بنجاح</h3>
+              <p className="text-sm text-gray-500 leading-relaxed max-w-xs mx-auto mb-8">
+                سيتم التواصل معك قريباً لتأكيد تفاصيل الطلب
+              </p>
+              <button
+                type="button"
+                onClick={onCheckout}
+                className="w-full sm:w-auto sm:min-w-[200px] h-12 px-8 rounded-xl bg-primary-900 hover:bg-black text-white text-base font-bold transition-colors active:scale-[0.99] cursor-pointer"
+              >
+                موافق
+              </button>
             </div>
           ) : (
             <>
