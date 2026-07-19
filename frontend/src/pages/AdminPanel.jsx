@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
-  Package, FolderTree, ShoppingCart, Image, Bell, Store, LogOut, LayoutGrid,
-  Home, Tag, Plus, Pencil, Trash2, AlertTriangle, PackageCheck, X, GripVertical,
-  RefreshCw, ArrowLeft,
+  Package, FolderTree, ShoppingCart, Image, Store, LogOut, LayoutGrid,
+  Home, Tag, Plus, Pencil, Trash2, X, GripVertical,
+  RefreshCw, ImageOff, Unlink, Upload, Star, EyeOff,
 } from 'lucide-react';
 
 import { api } from '../api';
@@ -21,13 +21,52 @@ const timeAgo = (iso) => {
   return new Date(ts).toLocaleDateString('ar-IQ');
 };
 
+// الطلبات "الجديدة" = ما لم يطّلع عليه هذا المشرف بعد. نتتبّعها محلياً بمجموعة
+// معرّفات، لأن الباكند يُنشئ إشعاراً منفصلاً لكل مشرف فكان الطلب يظهر مرتين.
+const SEEN_ORDERS_KEY = 'voro_admin_seen_orders';
+const SEEN_ORDERS_CAP = 2000; // ~74KB من UUID — أقل بكثير من حصة localStorage
+
+const readSeenOrders = () => {
+  try {
+    const raw = localStorage.getItem(SEEN_ORDERS_KEY);
+    return raw ? new Set(JSON.parse(raw)) : null; // null = لم يُخزَّن شيء بعد
+  } catch { return null; }
+};
+
+// الأحدث دائماً في نهاية المصفوفة، فالتقليم يحذف الأقدم لا الأحدث
+const writeSeenOrders = (set) => {
+  try {
+    localStorage.setItem(SEEN_ORDERS_KEY, JSON.stringify([...set].slice(-SEEN_ORDERS_CAP)));
+  } catch { /* التخزين ممتلئ أو محظور — نتجاهل بصمت */ }
+};
+
+/**
+ * صورة القسم كما يراها الزبون فعلاً: image_url أولاً، ثم حقل image القديم (ImageField).
+ * نقرأ الحقلين للعرض فقط. لا نكتب إلا في image_url — نسخ قيمة image إلى image_url
+ * عند الحفظ كانت تُثبّت الروابط المعطوبة (404) في قاعدة البيانات إلى الأبد.
+ */
+const getCategoryImage = (category) => category?.image_url || category?.image || '';
+
+/**
+ * رابط يعمل على جهاز المطوّر وحده. الصورة تظهر هنا بشكل طبيعي تماماً — ولهذا
+ * هي أخطر من الرابط المعطوب: لا onError يكشفها، والزبون لا يرى شيئاً.
+ */
+const isLocalOnlyImage = (url) =>
+  typeof url === 'string' && /^https?:\/\/(localhost|127\.0\.0\.1|0\.0\.0\.0|\[::1\])(:\d+)?\//i.test(url);
+
+// يسطّح شجرة الأقسام لمستوى واحد حتى تظهر الأقسام الفرعية وتُدار هي أيضاً
+const flattenCategories = (list, parentName = null) =>
+  (list || []).flatMap((category) => [
+    { ...category, parentName },
+    ...flattenCategories(category.children, category.name),
+  ]);
+
 // أقسام لوحة التحكم — أيقونات lucide احترافية موحّدة
 const ADMIN_TABS = [
   { id: 'products', name: 'المنتجات', Icon: Package },
   { id: 'categories', name: 'الأقسام', Icon: FolderTree },
   { id: 'orders', name: 'الطلبات', Icon: ShoppingCart },
   { id: 'banners', name: 'البنرات', Icon: Image },
-  { id: 'notifications', name: 'الإشعارات', Icon: Bell },
 ];
 
 // حالات الطلب — مطابقة تمامًا لـ Order.STATUS_CHOICES في الباكند
@@ -47,26 +86,17 @@ const getOrderStatusMeta = (status) =>
     ? ORDER_STATUSES.find((s) => s.value === 'delivered')
     : { value: status, label: status || 'غير معروف', tint: 'bg-gray-100 text-gray-600 border-gray-200' });
 
-// خريطة أيقونات ونبرة ألوان أنواع الإشعارات
-const NOTIF_META = {
-  new_order: { Icon: ShoppingCart, tint: 'bg-emerald-50 text-emerald-600' },
-  order_status_changed: { Icon: PackageCheck, tint: 'bg-blue-50 text-blue-600' },
-  low_stock: { Icon: AlertTriangle, tint: 'bg-amber-50 text-amber-600' },
-  default: { Icon: Bell, tint: 'bg-gray-100 text-gray-500' },
-};
-
 const AdminPanel = ({ user, setUser }) => {
   const [activeTab, setActiveTab] = useState('products');
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [orders, setOrders] = useState([]);
   const [banners, setBanners] = useState([]);
-  const [notifications, setNotifications] = useState([]);
-  const [unreadCount, setUnreadCount] = useState(0);
-  const [notifRefreshing, setNotifRefreshing] = useState(false);
-  const [notifTotal, setNotifTotal] = useState(0);
-  const [notifNext, setNotifNext] = useState(null);
-  const [notifLoadingMore, setNotifLoadingMore] = useState(false);
+  const [seenOrders, setSeenOrders] = useState(() => readSeenOrders() || new Set());
+  const [ordersRefreshing, setOrdersRefreshing] = useState(false);
+  const [ordersTotal, setOrdersTotal] = useState(0);
+  const [ordersNext, setOrdersNext] = useState(null);
+  const [ordersLoadingMore, setOrdersLoadingMore] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [modalType, setModalType] = useState(''); // 'product', 'category'
@@ -105,6 +135,20 @@ const AdminPanel = ({ user, setUser }) => {
     image_url: ''
   });
   const [uploadingCategoryImage, setUploadingCategoryImage] = useState(false);
+
+  // --- لوح الأقسام (Contact Sheet) ---
+  // الفلتر النشط، والأقسام التي فشل تحميل صورتها فعلياً (نكتشفها من onError لا من التخمين)
+  const [categoryFilter, setCategoryFilter] = useState('all'); // all | needs | hidden
+  const [brokenCategoryImages, setBrokenCategoryImages] = useState(() => new Set());
+  // لوحة الصورة: القسم المفتوح، وحالة السحب والإفلات
+  const [imageSheetCategory, setImageSheetCategory] = useState(null);
+  const [sheetUrlDraft, setSheetUrlDraft] = useState('');
+  const [sheetBusy, setSheetBusy] = useState(false);
+  const [sheetPreview, setSheetPreview] = useState('');
+  const [dragOverCategoryId, setDragOverCategoryId] = useState(null);
+  const [fileDragActive, setFileDragActive] = useState(false);
+  // يُرفع عندما يحفظ الخادم الصورة على القرص المحلي بدل R2
+  const [localUploadWarning, setLocalUploadWarning] = useState(false);
 
   // Banner Modal States
   const emptyBannerForm = {
@@ -151,11 +195,15 @@ const AdminPanel = ({ user, setUser }) => {
       fetchOrders();
     } else if (activeTab === 'banners') {
       fetchBanners();
-    } else if (activeTab === 'notifications') {
-      fetchNotifications();
-      fetchUnreadCount();
     }
   }, [activeTab]);
+
+  // الشارة يجب أن تكون حيّة في كل التبويبات، لذا نجلب الطلبات مرة عند التحميل.
+  // silent إلزامي: حالة loading مشتركة بين التبويبات وستُفرِّغ شبكة المنتجات.
+  useEffect(() => {
+    fetchOrders({ silent: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const fetchBanners = async () => {
     setLoading(true);
@@ -224,11 +272,11 @@ const AdminPanel = ({ user, setUser }) => {
     });
     try {
       const url = await handleImageUpload(file);
-      if (url) {
-        setBannerForm((prev) => ({ ...prev, image_url: url }));
-      } else {
-        alert('تعذّر رفع الصورة. حاول مرة أخرى.');
-      }
+      setBannerForm((prev) => ({ ...prev, image_url: url }));
+    } catch (error) {
+      alert(error.message);
+      // نُزيل المعاينة المحلية حتى لا يظن المستخدم أن الصورة حُفظت فعلاً
+      handleBannerRemoveImage();
     } finally {
       setBannerUploading(false);
     }
@@ -320,19 +368,71 @@ const AdminPanel = ({ user, setUser }) => {
     }
   };
 
-  const fetchOrders = async () => {
-    setLoading(true);
+  // silent = تحديث بالخلفية دون لمس حالة loading المشتركة بين التبويبات
+  const fetchOrders = async ({ silent = false } = {}) => {
+    if (!silent) setLoading(true);
     try {
       const response = await api.get('/orders/');
-      // الاستجابة قد تكون مصفوفة مباشرة أو مقسّمة صفحات ({results}) — نطبّعها لمصفوفة دائماً
+      // الاستجابة قد تكون مصفوفة مباشرة أو مقسّمة صفحات ({results}) — نطبّعها دائماً
       const data = response.data;
-      setOrders(Array.isArray(data) ? data : (data?.results || []));
+      const list = Array.isArray(data) ? data : (data?.results || []);
+      setOrders(list);
+      setOrdersTotal(Array.isArray(data) ? list.length : (data?.count ?? list.length));
+      setOrdersNext(Array.isArray(data) ? null : (data?.next || null));
+
+      // أول تشغيل على هذا الجهاز: نعتبر الطلبات المعالَجة فقط مقروءة.
+      // الطلبات المعلّقة لم تُعالَج بعد، فمن الصحيح أن تظهر "جديد" على جهاز جديد.
+      if (readSeenOrders() === null) {
+        const seeded = new Set(
+          [...list].reverse().filter((o) => o.status && o.status !== 'pending').map((o) => o.id)
+        );
+        setSeenOrders(seeded);
+        writeSeenOrders(seeded);
+      }
     } catch (error) {
       console.error('Error fetching orders:', error);
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   };
+
+  // تحميل الصفحة التالية وإلحاقها (الطلبات مقسّمة ٢٠ لكل صفحة)
+  const loadMoreOrders = async () => {
+    if (!ordersNext) return;
+    setOrdersLoadingMore(true);
+    try {
+      const response = await api.get(ordersNext);
+      const data = response.data;
+      const list = Array.isArray(data) ? data : (data?.results || []);
+      setOrders((prev) => [...prev, ...list]);
+      setOrdersNext(Array.isArray(data) ? null : (data?.next || null));
+    } catch (error) {
+      console.error('Error loading more orders:', error);
+    } finally {
+      setOrdersLoadingMore(false);
+    }
+  };
+
+  const refreshOrders = async () => {
+    setOrdersRefreshing(true);
+    try { await fetchOrders({ silent: true }); }
+    finally { setOrdersRefreshing(false); }
+  };
+
+  const markOrderSeen = (id) => setSeenOrders((prev) => {
+    if (prev.has(id)) return prev;
+    const next = new Set(prev).add(id);
+    writeSeenOrders(next);
+    return next;
+  });
+
+  // الأقدم أولاً حتى يبقى الأحدث في نهاية المجموعة ولا يحذفه التقليم
+  const markAllOrdersSeen = () => setSeenOrders((prev) => {
+    const next = new Set(prev);
+    [...orders].reverse().forEach((o) => next.add(o.id));
+    writeSeenOrders(next);
+    return next;
+  });
 
   // تحديث حالة الطلب — تحديث تفاؤلي فوري مع تراجع تلقائي إن فشل الطلب
   const updateOrderStatus = async (orderId, newStatus) => {
@@ -360,67 +460,6 @@ const AdminPanel = ({ user, setUser }) => {
     }
   };
 
-  // silent = تحديث بدون إخفاء القائمة (يُستخدم لزر التحديث)
-  const fetchNotifications = async ({ silent = false } = {}) => {
-    if (!silent) setLoading(true);
-    try {
-      const response = await api.get('/notifications/notifications/?all=true');
-      // الاستجابة قد تكون مصفوفة أو مقسّمة صفحات ({results}) — نطبّعها لمصفوفة دائماً
-      const data = response.data;
-      const list = Array.isArray(data) ? data : (data?.results || []);
-      setNotifications(list);
-      setNotifTotal(Array.isArray(data) ? list.length : (data?.count ?? list.length));
-      setNotifNext(Array.isArray(data) ? null : (data?.next || null));
-    } catch (error) {
-      console.error('Error fetching notifications:', error);
-      if (!silent) setNotifications([]);
-    } finally {
-      if (!silent) setLoading(false);
-    }
-  };
-
-  // تحميل الصفحة التالية وإلحاقها بالقائمة (الإشعارات مقسّمة ٢٠ لكل صفحة)
-  const loadMoreNotifications = async () => {
-    if (!notifNext) return;
-    setNotifLoadingMore(true);
-    try {
-      const response = await api.get(notifNext);
-      const data = response.data;
-      const list = Array.isArray(data) ? data : (data?.results || []);
-      setNotifications((prev) => [...prev, ...list]);
-      setNotifNext(Array.isArray(data) ? null : (data?.next || null));
-    } catch (error) {
-      console.error('Error loading more notifications:', error);
-    } finally {
-      setNotifLoadingMore(false);
-    }
-  };
-
-  const refreshNotifications = async () => {
-    setNotifRefreshing(true);
-    try {
-      await Promise.all([fetchNotifications({ silent: true }), fetchUnreadCount()]);
-    } finally {
-      setNotifRefreshing(false);
-    }
-  };
-
-  const fetchUnreadCount = async () => {
-    try {
-      console.log('Fetching unread count...');
-      const response = await api.get('/notifications/notifications/unread_count/?all=true');
-      console.log('Unread count response:', response.data);
-      setUnreadCount(response.data.unread_count);
-    } catch (error) {
-      console.error('Error fetching unread count:', error);
-      if (error.response) {
-        console.error('Error response:', error.response);
-        console.error('Error status:', error.response.status);
-        console.error('Error data:', error.response.data);
-      }
-    }
-  };
-
   const copyToClipboard = (text, label) => {
     navigator.clipboard.writeText(text).then(() => {
       alert(`تم نسخ ${label} بنجاح: ${text}`);
@@ -429,65 +468,43 @@ const AdminPanel = ({ user, setUser }) => {
     });
   };
 
-  const markAsRead = async (id) => {
-    try {
-      await api.post(`/notifications/notifications/${id}/mark_as_read/`);
-      // Update the notification in the state
-      setNotifications(notifications.map(notification => 
-        notification.id === id ? { ...notification, is_read: true } : notification
-      ));
-      // Update unread count
-      setUnreadCount(prev => Math.max(0, prev - 1));
-    } catch (error) {
-      console.error('Error marking notification as read:', error);
-    }
-  };
-
+  /**
+   * يرفع صورة من جهاز المشرف إلى تخزين المشروع نفسه (Cloudflare R2 عبر الباكند).
+   *
+   * سابقاً كان الرفع يذهب إلى ImgBB بمفتاح مكتوب داخل كود الواجهة. المشكلة أن
+   * ImgBB يعرض الصور من نطاق i.ibb.co، وهذا النطاق محجوب على مستوى DNS عند
+   * مزوّد الإنترنت هنا (بينما api.imgbb.com يعمل) — فكانت الصورة "تُرفع بنجاح"
+   * ثم لا تظهر للزبون إطلاقاً. الآن تُخزَّن على media.voroiq.com، وهو النطاق
+   * الذي تعمل عليه صور المنتجات أصلاً.
+   *
+   * يرمي استثناءً بسبب واضح عند الفشل — لا يبتلع الخطأ ولا يُرجع null صامتاً.
+   */
   const handleImageUpload = async (file) => {
-    // Upload image to ImgBB by converting to Base64
-    const toBase64 = (f) =>
-      new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => {
-          const result = reader.result || '';
-          // remove data URL prefix
-          const base64 = String(result).includes(',') ? String(result).split(',')[1] : String(result);
-          resolve(base64);
-        };
-        reader.onerror = reject;
-        reader.readAsDataURL(f);
-      });
+    const formData = new FormData();
+    formData.append('image', file);
 
     try {
-      console.log('🖼️ بدء رفع الصورة...', file.name);
-      const base64 = await toBase64(file);
-      const formData = new FormData();
-      // استخدام مفتاح API المقدم مباشرة
-      formData.append('key', 'a2cebbc3daff0b042082a5d5d7a3b80d');
-      formData.append('image', base64);
-
-      const response = await fetch('https://api.imgbb.com/1/upload', {
-        method: 'POST',
-        body: formData,
+      // axios يحذف Content-Type تلقائياً مع FormData ليضع المتصفح الـboundary الصحيح
+      const { data } = await api.post('/products/upload-image/', formData, {
+        timeout: 60000, // رفع الصور أبطأ بكثير من طلبات JSON العادية
       });
-      
-      if (!response.ok) {
-        console.error('❌ ImgBB API Error:', response.status, response.statusText);
-        throw new Error(`ImgBB API returned ${response.status}`);
-      }
-      
-      const data = await response.json();
-      console.log('✅ نجح رفع الصورة:', data?.data?.url);
-      
-      if (data?.success === false) {
-        console.error('❌ ImgBB Error Response:', data?.error);
-        throw new Error(data?.error?.message || 'فشل رفع الصورة');
-      }
-      
-      return data?.data?.url || null;
+      if (!data?.url) throw new Error('لم يُرجع الخادم رابط الصورة');
+      // تخزين محلي = رابط 127.0.0.1 يعمل على هذا الجهاز وحده. الرفع "نجح"
+      // لكن لن يرى الزبون شيئاً — نُظهر التحذير بدل أن نتركه يكتشفه لاحقاً.
+      if (data.storage === 'local') setLocalUploadWarning(true);
+      return data.url;
     } catch (error) {
-      console.error('❌ خطأ في رفع الصورة لـ ImgBB:', error);
-      return null;
+      console.error('❌ فشل رفع الصورة:', error);
+      // نُظهر السبب الحقيقي (صيغة/حجم/صلاحية) بدل رسالة عامة لا تدل على شيء
+      const status = error?.response?.status;
+      throw new Error(
+        error?.response?.data?.error ||
+        (status === 401 || status === 403
+          ? 'ليست لديك صلاحية رفع الصور. سجّل الدخول بحساب مشرف.'
+          : null) ||
+        error?.message ||
+        'تعذّر رفع الصورة'
+      );
     }
   };
 
@@ -496,7 +513,7 @@ const AdminPanel = ({ user, setUser }) => {
     setLoading(true);
 
     try {
-      // رفع الصور إلى ImgBB
+      // رفع الصور إلى تخزين المشروع (R2) عبر /products/upload-image/
       let mainImageUrl = productForm.main_image_url;
       let secondImageUrl = productForm.second_image_url;
       let thirdImageUrl = productForm.third_image_url;
@@ -509,14 +526,9 @@ const AdminPanel = ({ user, setUser }) => {
         fourthImage: !!productForm.fourth_image
       });
 
+      // فشل رفع أي صورة يوقف الحفظ ويُظهر السبب — أفضل من حفظ منتج بلا صورة بصمت
       if (productForm.main_image && typeof productForm.main_image !== 'string') {
         mainImageUrl = await handleImageUpload(productForm.main_image);
-        console.log('✅ الصورة الرئيسية:', mainImageUrl);
-        if (!mainImageUrl) {
-          console.warn('⚠️ فشل في رفع الصورة الرئيسية، سيتم المتابعة بدونها');
-          // نسمح بـ null أو استخدام placeholder - لا نرفض العملية كلياً
-          mainImageUrl = null;
-        }
       }
 
       if (productForm.second_image && typeof productForm.second_image !== 'string') {
@@ -588,7 +600,7 @@ const AdminPanel = ({ user, setUser }) => {
       });
     } catch (error) {
       console.error('Error saving product:', error);
-      alert('حدث خطأ في حفظ المنتج');
+      alert(error?.message ? `تعذّر حفظ المنتج: ${error.message}` : 'حدث خطأ في حفظ المنتج');
     } finally {
       setLoading(false);
     }
@@ -620,6 +632,120 @@ const AdminPanel = ({ user, setUser }) => {
       setLoading(false);
     }
   };
+
+  // --- لوح الأقسام: إدارة صورة القسم ---------------------------------------
+
+  // نكتب image_url فقط، بـPATCH جزئي حتى لا نلمس بقية حقول القسم
+  const saveCategoryImage = async (categoryId, imageUrl) => {
+    await api.patch(`/products/categories/${categoryId}/`, { image_url: imageUrl });
+    // الرابط الجديد يستحق محاولة تحميل جديدة حتى لو كان القديم معطوباً
+    setBrokenCategoryImages((prev) => {
+      const next = new Set(prev);
+      next.delete(categoryId);
+      return next;
+    });
+    await fetchCategories();
+  };
+
+  // يُستدعى من الإفلات على البطاقة ومن زر الاختيار داخل اللوحة
+  const uploadCategoryImage = async (categoryId, file) => {
+    if (!file) return;
+    if (!file.type?.startsWith('image/')) {
+      alert('الملف المُفلَت ليس صورة.');
+      return;
+    }
+    setUploadingCategoryImage(true);
+    const localPreview = URL.createObjectURL(file);
+    setSheetPreview(localPreview);
+    try {
+      const url = await handleImageUpload(file);
+      await saveCategoryImage(categoryId, url);
+      setImageSheetCategory((current) => (current?.id === categoryId ? null : current));
+    } catch (error) {
+      alert(error.message);
+    } finally {
+      URL.revokeObjectURL(localPreview);
+      setSheetPreview('');
+      setUploadingCategoryImage(false);
+      setDragOverCategoryId(null);
+      setFileDragActive(false);
+    }
+  };
+
+  const openImageSheet = (category) => {
+    setImageSheetCategory(category);
+    // نملأ الحقل بالرابط الحالي ليستبدله المستخدم مباشرة بدل أن يبحث عنه
+    setSheetUrlDraft(getCategoryImage(category));
+    setSheetPreview('');
+  };
+
+  const closeImageSheet = () => {
+    setImageSheetCategory(null);
+    setSheetUrlDraft('');
+    setSheetPreview('');
+  };
+
+  const submitSheetUrl = async () => {
+    if (!imageSheetCategory) return;
+    setSheetBusy(true);
+    try {
+      await saveCategoryImage(imageSheetCategory.id, sheetUrlDraft.trim());
+      closeImageSheet();
+    } catch (error) {
+      alert(error?.response?.data?.image_url?.[0] || 'تعذّر حفظ رابط الصورة.');
+    } finally {
+      setSheetBusy(false);
+    }
+  };
+
+  const clearCategoryImage = async () => {
+    if (!imageSheetCategory) return;
+    setSheetBusy(true);
+    try {
+      await saveCategoryImage(imageSheetCategory.id, '');
+      closeImageSheet();
+    } catch (error) {
+      alert('تعذّر إزالة الصورة.');
+    } finally {
+      setSheetBusy(false);
+    }
+  };
+
+  const markCategoryImageBroken = (categoryId) =>
+    setBrokenCategoryImages((prev) => {
+      if (prev.has(categoryId)) return prev; // لا نعيد الرسم بلا داعٍ
+      const next = new Set(prev);
+      next.add(categoryId);
+      return next;
+    });
+
+  // إفلات ملف خارج أي بطاقة يجب ألا يفتح الصورة في المتصفح ويضيّع حالة اللوحة
+  useEffect(() => {
+    if (activeTab !== 'categories') return undefined;
+    const swallow = (e) => {
+      if (!e.dataTransfer?.types?.includes('Files')) return;
+      e.preventDefault();
+    };
+    const onDragOver = (e) => { swallow(e); setFileDragActive(true); };
+    const onDrop = (e) => { swallow(e); setFileDragActive(false); setDragOverCategoryId(null); };
+    const onDragLeave = (e) => { if (e.relatedTarget === null) setFileDragActive(false); };
+    window.addEventListener('dragover', onDragOver);
+    window.addEventListener('drop', onDrop);
+    window.addEventListener('dragleave', onDragLeave);
+    return () => {
+      window.removeEventListener('dragover', onDragOver);
+      window.removeEventListener('drop', onDrop);
+      window.removeEventListener('dragleave', onDragLeave);
+    };
+  }, [activeTab]);
+
+  // إغلاق لوحة الصورة بـEscape
+  useEffect(() => {
+    if (!imageSheetCategory) return undefined;
+    const onKey = (e) => { if (e.key === 'Escape') closeImageSheet(); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [imageSheetCategory]);
 
   // Handle product selection
   const toggleProductSelection = (productId) => {
@@ -748,7 +874,10 @@ const AdminPanel = ({ user, setUser }) => {
         setCategoryForm({
           name: item.name,
           description: item.description || '',
-          image_url: item.image_url || item.image || ''
+          // من image_url فقط — لا نعيد كتابة حقل image القديم هنا. كان
+          // `item.image_url || item.image` ينسخ رابط ImageField المعطوب (404)
+          // إلى عمود image_url بمجرد فتح القسم وحفظه، فيصير العطب دائماً.
+          image_url: item.image_url || ''
         });
       } else {
         setCategoryForm({
@@ -776,6 +905,31 @@ const AdminPanel = ({ user, setUser }) => {
 
   const activeTabMeta = ADMIN_TABS.find((t) => t.id === activeTab) || ADMIN_TABS[0];
 
+  // --- بيانات لوح الأقسام ---------------------------------------------------
+  // كل قسم مع حالة صورته: موجودة / غائبة / رابط معطوب (اكتُشف من onError فعلياً).
+  const categorySheet = flattenCategories(categories).map((category) => {
+    const src = getCategoryImage(category);
+    const isBroken = Boolean(src) && brokenCategoryImages.has(category.id);
+    const isLocalOnly = isLocalOnlyImage(src);
+    // الرابط المحلي يُحتسب "يحتاج صورة" لأن الزبون لا يراه — حتى لو ظهر هنا سليماً
+    return { ...category, src, isBroken, isLocalOnly, isMissing: !src, needsImage: !src || isBroken || isLocalOnly };
+  });
+  const localOnlyCount = categorySheet.filter((c) => c.isLocalOnly).length;
+  const needsImageCount = categorySheet.filter((c) => c.needsImage).length;
+  const newOrdersCount = orders.reduce((n, o) => (seenOrders.has(o.id) ? n : n + 1), 0);
+  const brokenCount = categorySheet.filter((c) => c.isBroken).length;
+  const hiddenCount = categorySheet.filter((c) => !c.is_active).length;
+  const visibleCategories = categorySheet.filter((c) => {
+    if (categoryFilter === 'needs') return c.needsImage;
+    if (categoryFilter === 'hidden') return !c.is_active;
+    return true;
+  });
+  const CATEGORY_FILTERS = [
+    { id: 'all', label: 'الكل', count: categorySheet.length },
+    { id: 'needs', label: 'بلا صورة', count: needsImageCount },
+    { id: 'hidden', label: 'مخفي', count: hiddenCount },
+  ];
+
   return (
     <div className="min-h-screen bg-gray-50 flex overflow-x-hidden max-w-full" dir="rtl">
       {/* ===== Sidebar (سطح المكتب فقط) — عمود التنقّل الثابت يمينًا ===== */}
@@ -795,7 +949,7 @@ const AdminPanel = ({ user, setUser }) => {
         <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
           {ADMIN_TABS.map(({ id, name, Icon }) => {
             const active = activeTab === id;
-            const showBadge = id === 'notifications' && unreadCount > 0;
+            const showBadge = id === 'orders' && newOrdersCount > 0;
             return (
               <button
                 key={id}
@@ -809,7 +963,7 @@ const AdminPanel = ({ user, setUser }) => {
                 <span className="flex-1 text-right">{name}</span>
                 {showBadge && (
                   <span className={`min-w-[20px] h-5 px-1.5 rounded-full text-[11px] leading-none font-bold flex items-center justify-center ${active ? 'bg-white text-gray-900' : 'bg-red-500 text-white'}`}>
-                    {unreadCount}
+                    {newOrdersCount}
                   </span>
                 )}
               </button>
@@ -846,17 +1000,17 @@ const AdminPanel = ({ user, setUser }) => {
               </div>
             </div>
 
-            {/* يسار: تحديث الإشعارات (عند فتح تبويبها) + بيانات المستخدم */}
+            {/* يسار: تحديث الطلبات (عند فتح تبويبها) + بيانات المستخدم */}
             <div className="flex items-center gap-3 shrink-0">
-              {activeTab === 'notifications' && (
+              {activeTab === 'orders' && (
                 <button
-                  onClick={refreshNotifications}
-                  disabled={notifRefreshing}
+                  onClick={refreshOrders}
+                  disabled={ordersRefreshing}
                   title="تحديث"
-                  aria-label="تحديث الإشعارات"
+                  aria-label="تحديث الطلبات"
                   className="inline-flex items-center gap-2 h-9 px-3 rounded-lg text-sm font-medium border border-gray-200 text-gray-700 hover:bg-gray-100 disabled:opacity-60 disabled:cursor-not-allowed transition-colors cursor-pointer"
                 >
-                  <RefreshCw className={`h-4 w-4 ${notifRefreshing ? 'animate-spin' : ''}`} strokeWidth={1.75} />
+                  <RefreshCw className={`h-4 w-4 ${ordersRefreshing ? 'animate-spin' : ''}`} strokeWidth={1.75} />
                   <span className="hidden sm:inline">تحديث</span>
                 </button>
               )}
@@ -875,7 +1029,7 @@ const AdminPanel = ({ user, setUser }) => {
             <nav className="flex gap-1 overflow-x-auto scrollbar-hide px-4 py-2 w-full">
               {ADMIN_TABS.map(({ id, name, Icon }) => {
                 const active = activeTab === id;
-                const showBadge = id === 'notifications' && unreadCount > 0;
+                const showBadge = id === 'orders' && newOrdersCount > 0;
                 return (
                   <button
                     key={id}
@@ -889,7 +1043,7 @@ const AdminPanel = ({ user, setUser }) => {
                     {name}
                     {showBadge && (
                       <span className={`min-w-[18px] h-[18px] px-1 rounded-full text-[10px] leading-none font-bold flex items-center justify-center ${active ? 'bg-white text-gray-900' : 'bg-red-500 text-white'}`}>
-                        {unreadCount}
+                        {newOrdersCount}
                       </span>
                     )}
                   </button>
@@ -899,9 +1053,7 @@ const AdminPanel = ({ user, setUser }) => {
           </div>
         </header>
 
-        {/* تبويب الإشعارات يُعرض خارج هذه الحاوية، فنلغي حشوتها الرأسية عندها
-            حتى لا تترك فراغاً فارغاً فوق البطاقات */}
-        <div className={`w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 overflow-x-clip ${activeTab === 'notifications' ? '' : 'py-6 md:py-8'}`}>
+        <div className="w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 overflow-x-clip py-6 md:py-8">
 
         {/* Products Tab */}
         {activeTab === 'products' && (
@@ -1118,54 +1270,305 @@ const AdminPanel = ({ user, setUser }) => {
         )}
 
         {/* Categories Tab */}
+        {/* ===== لوح الأقسام — الصورة أولاً: القسم بلا صورة يظهر كفجوة في اللوح ===== */}
         {activeTab === 'categories' && (
-          <div>
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-gray-900">إدارة الأقسام</h2>
-              <button
-                onClick={() => openModal('category')}
-                className="btn-primary"
-              >
-                + إضافة قسم جديد
-              </button>
+          <div className="space-y-5">
+            {/* الترويسة: العنوان + إحصاء الصور + الفلتر + الإضافة */}
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+              <div className="min-w-0">
+                <h2 className="text-[22px] sm:text-[26px] font-bold text-gray-900">الأقسام</h2>
+                <p className="mt-1 text-[13px] text-gray-500">
+                  {categorySheet.length} قسم
+                  {needsImageCount > 0 ? (
+                    <>
+                      {' · '}
+                      {/* الرقم نفسه هو الفلتر: من التشخيص إلى العلاج بنقرة */}
+                      <button
+                        onClick={() => setCategoryFilter('needs')}
+                        className="font-semibold text-[#9C7A34] hover:underline cursor-pointer"
+                      >
+                        {needsImageCount} بلا صورة
+                      </button>
+                    </>
+                  ) : (
+                    categorySheet.length > 0 && ' · كل الأقسام لديها صورة'
+                  )}
+                </p>
+              </div>
+
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                <div className="flex items-center gap-1 rounded-full bg-white p-1 ring-1 ring-gray-200">
+                  {CATEGORY_FILTERS.map((f) => (
+                    <button
+                      key={f.id}
+                      onClick={() => setCategoryFilter(f.id)}
+                      className={`h-8 flex-1 whitespace-nowrap rounded-full px-3.5 text-[12.5px] font-semibold transition-colors cursor-pointer ${
+                        categoryFilter === f.id ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-50'
+                      }`}
+                    >
+                      {f.label}
+                      {f.count > 0 && (
+                        <span className={`mr-1.5 ${f.id === 'needs' && categoryFilter !== f.id ? 'text-[#9C7A34]' : ''}`}>
+                          {f.count}
+                        </span>
+                      )}
+                    </button>
+                  ))}
+                </div>
+                <button
+                  onClick={() => openModal('category')}
+                  className="inline-flex h-10 items-center justify-center gap-1.5 rounded-full bg-gray-900 px-5 text-[13px] font-semibold text-white transition-colors hover:bg-black cursor-pointer"
+                >
+                  <Plus className="h-4 w-4" strokeWidth={2} />
+                  قسم جديد
+                </button>
+              </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {categories.map((category) => (
-                <div key={category.id} className="bg-white rounded-lg shadow p-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                    {category.name}
-                  </h3>
-                  <p className="text-gray-600 mb-4">{category.description}</p>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-500">
-                      {category.products_count || 0} منتج
-                    </span>
-                    <div className="space-x-2 space-x-reverse">
-                      <button
-                        onClick={() => openModal('category', category)}
-                        className="text-primary-600 hover:text-primary-900 text-sm"
-                      >
-                        تعديل
-                      </button>
-                      <button
-                        onClick={() => handleDelete('categories', category.id)}
-                        className="text-red-600 hover:text-red-900 text-sm"
-                      >
-                        حذف
-                      </button>
+            {/* شريط الاتصال — صحة صور المتجر كلها في نظرة أفقية واحدة */}
+            {categorySheet.length > 0 && (
+              <div className="rounded-2xl bg-white p-3 ring-1 ring-gray-200">
+                <div className="hide-scrollbar -mx-1 flex gap-2 overflow-x-auto px-1">
+                  {categorySheet.map((c) => (
+                    <button
+                      key={c.id}
+                      onClick={() => openImageSheet(c)}
+                      title={`${c.name}${c.needsImage ? ' — بلا صورة' : ''}`}
+                      className="relative h-16 w-12 shrink-0 overflow-hidden rounded-md ring-1 ring-gray-200 transition-all hover:ring-gray-900 cursor-pointer"
+                    >
+                      {c.needsImage ? (
+                        <span className="flex h-full w-full items-center justify-center border-b-2 border-[#9C7A34] bg-[#F4EFE4]">
+                          <ImageOff className="h-3.5 w-3.5 text-[#9C7A34]" strokeWidth={2} />
+                        </span>
+                      ) : (
+                        <img
+                          src={c.src}
+                          alt=""
+                          loading="lazy"
+                          onError={() => markCategoryImageBroken(c.id)}
+                          className="h-full w-full object-cover"
+                        />
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* تنبيه التخزين المحلي — الحالة الأخطر: الصورة تظهر هنا ولا يراها أحد غيرك */}
+            {(localUploadWarning || localOnlyCount > 0) && (
+              <div className="rounded-2xl border-r-2 border-[#9C7A34] bg-[#F4EFE4] px-4 py-3.5">
+                <p className="text-[13px] font-semibold text-[#9C7A34]">
+                  الصور تُحفظ على جهازك فقط، ولن يراها الزبائن
+                </p>
+                <p className="mt-1.5 text-[12.5px] leading-6 text-gray-700">
+                  الخادم المحلي لا يملك مفاتيح التخزين السحابي (R2)، فيحفظ الصور على القرص ويعطيها روابط
+                  <span dir="ltr" className="mx-1 font-mono text-[11.5px]">127.0.0.1</span>
+                  تعمل على هذا الجهاز وحده. لرفع صور يراها الزبائن فعلاً: ارفعها من الموقع المنشور،
+                  أو ضع مفاتيح R2 الحقيقية في ملف
+                  <span dir="ltr" className="mx-1 font-mono text-[11.5px]">backend/.env</span>
+                  بدل القيم التجريبية.
+                </p>
+              </div>
+            )}
+
+            {/* تنبيه الروابط المعطوبة — يظهر فقط عند وجودها */}
+            {brokenCount > 0 && (
+              <div className="flex items-center justify-between gap-3 rounded-2xl border-r-2 border-[#9C7A34] bg-white px-4 py-3 ring-1 ring-gray-200">
+                <p className="text-[13px] text-gray-700">
+                  {brokenCount} {brokenCount === 1 ? 'قسم رابط صورته' : 'أقسام روابط صورها'} لا تفتح
+                </p>
+                <button
+                  onClick={() => setCategoryFilter('needs')}
+                  className="shrink-0 text-[13px] font-semibold text-[#9C7A34] hover:underline cursor-pointer"
+                >
+                  إصلاحها الآن
+                </button>
+              </div>
+            )}
+
+            {/* تلميح السحب والإفلات — يظهر أثناء سحب ملف فوق الصفحة فقط */}
+            {fileDragActive && (
+              <p className="rounded-2xl bg-[#F4EFE4] px-4 py-2.5 text-center text-[13px] font-semibold text-[#9C7A34]">
+                أفلت الصورة على القسم الذي تريده
+              </p>
+            )}
+
+            {visibleCategories.length === 0 ? (
+              <div className="rounded-2xl bg-white px-6 py-16 text-center ring-1 ring-gray-200">
+                <Image className="mx-auto h-10 w-10 text-gray-300" strokeWidth={1.5} />
+                <p className="mt-3 text-[14px] font-semibold text-gray-700">
+                  {categoryFilter === 'needs' ? 'كل الأقسام لديها صورة صالحة' : 'لا توجد أقسام هنا'}
+                </p>
+                {categoryFilter !== 'all' && (
+                  <button
+                    onClick={() => setCategoryFilter('all')}
+                    className="mt-3 text-[13px] font-semibold text-gray-900 hover:underline cursor-pointer"
+                  >
+                    عرض كل الأقسام
+                  </button>
+                )}
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:gap-5 xl:grid-cols-4">
+                {visibleCategories.map((category) => (
+                  <div
+                    key={category.id}
+                    onDragOver={(e) => {
+                      if (!e.dataTransfer?.types?.includes('Files')) return;
+                      e.preventDefault();
+                      setDragOverCategoryId(category.id);
+                    }}
+                    onDragLeave={() => setDragOverCategoryId((id) => (id === category.id ? null : id))}
+                    onDrop={(e) => {
+                      if (!e.dataTransfer?.types?.includes('Files')) return;
+                      e.preventDefault();
+                      e.stopPropagation();
+                      uploadCategoryImage(category.id, e.dataTransfer.files?.[0]);
+                    }}
+                    className={`group relative isolate overflow-hidden rounded-2xl bg-white transition duration-200 ${
+                      dragOverCategoryId === category.id
+                        ? 'scale-[1.02] ring-2 ring-[#9C7A34]'
+                        : 'ring-1 ring-gray-200 hover:ring-gray-300 hover:shadow-[0_8px_30px_-12px_rgba(0,0,0,0.18)]'
+                    } ${!category.is_active ? 'opacity-60' : ''}`}
+                  >
+                    {/* بئر الصورة كله هو زر تغيير الصورة — لا أيقونة صغيرة */}
+                    <button
+                      type="button"
+                      onClick={() => openImageSheet(category)}
+                      aria-label={`${category.needsImage ? 'إضافة' : 'تغيير'} صورة ${category.name}`}
+                      className="relative block aspect-square w-full overflow-hidden bg-gray-100 cursor-pointer"
+                    >
+                      {category.isLocalOnly && !category.isBroken ? (
+                        /* الصورة موجودة وتظهر — لكنها محفوظة على هذا الجهاز فقط */
+                        <>
+                          <img
+                            src={category.src}
+                            alt={category.name}
+                            loading="lazy"
+                            onError={() => markCategoryImageBroken(category.id)}
+                            className="h-full w-full object-cover opacity-70"
+                          />
+                          <span className="absolute inset-x-0 bottom-0 border-b-2 border-[#9C7A34] bg-[#F4EFE4]/95 px-2 py-1.5 text-center text-[11px] font-semibold leading-4 text-[#9C7A34]">
+                            محفوظة على جهازك فقط — الزبون لا يراها
+                          </span>
+                        </>
+                      ) : category.needsImage ? (
+                        <span
+                          className="absolute inset-0 flex flex-col items-center justify-center border-b-2 border-[#9C7A34] bg-white px-2 text-center"
+                          style={{ backgroundImage: 'repeating-linear-gradient(45deg, #EEEEF0 0 1px, transparent 1px 7px)' }}
+                        >
+                          {category.isBroken ? (
+                            <>
+                              <Unlink className="h-5 w-5 text-[#9C7A34]" strokeWidth={2} />
+                              <span className="mt-1.5 text-[12px] font-semibold text-[#9C7A34]">الصورة لا تفتح</span>
+                              <span dir="ltr" className="mt-0.5 w-full truncate text-[10.5px] text-gray-400">
+                                {category.src}
+                              </span>
+                            </>
+                          ) : (
+                            <span
+                              className="select-none font-bold text-gray-900/[0.07]"
+                              style={{ fontSize: 'clamp(48px, 9vw, 88px)', lineHeight: 1 }}
+                            >
+                              {category.name?.trim()?.[0] || '؟'}
+                            </span>
+                          )}
+                        </span>
+                      ) : (
+                        <img
+                          src={category.src}
+                          alt={category.name}
+                          loading="lazy"
+                          decoding="async"
+                          onError={() => markCategoryImageBroken(category.id)}
+                          className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03]"
+                        />
+                      )}
+
+                      <span className="absolute right-2 top-2 flex h-[22px] min-w-[22px] items-center justify-center rounded-full bg-white/85 px-1.5 text-[11px] font-semibold text-gray-700 backdrop-blur-[2px]">
+                        {category.display_order ?? 0}
+                      </span>
+                      {category.featured_on_homepage && (
+                        <span className="absolute left-2 top-2 flex h-[22px] w-[22px] items-center justify-center rounded-full bg-white/85 backdrop-blur-[2px]">
+                          <Star className="h-3 w-3 fill-gray-900 text-gray-900" strokeWidth={2} />
+                        </span>
+                      )}
+                      {category.needsImage && !category.isLocalOnly && (
+                        <span className="absolute bottom-2 right-2 inline-flex items-center gap-1 rounded-full bg-[#F4EFE4] px-2 py-0.5 text-[11px] font-semibold text-[#9C7A34]">
+                          <ImageOff className="h-3 w-3" strokeWidth={2} />
+                          {category.isBroken ? 'رابط معطوب' : 'بلا صورة'}
+                        </span>
+                      )}
+                      {!category.is_active && (
+                        <span className="absolute bottom-2 left-2 inline-flex items-center gap-1 rounded-full bg-white/90 px-2 py-0.5 text-[11px] font-medium text-gray-600 backdrop-blur-[2px]">
+                          <EyeOff className="h-3 w-3" strokeWidth={2} />
+                          مخفي
+                        </span>
+                      )}
+                      {/* طبقة الدعوة للتغيير — سطح المكتب فقط، اللمس يفتح بالنقر مباشرة */}
+                      <span className="absolute inset-0 hidden items-center justify-center bg-black/35 opacity-0 transition-opacity duration-200 group-hover:opacity-100 md:flex">
+                        <span className="inline-flex items-center gap-1.5 rounded-full bg-white/95 px-3 py-1.5 text-[12.5px] font-semibold text-gray-900">
+                          <Upload className="h-3.5 w-3.5" strokeWidth={2} />
+                          {category.needsImage ? 'أضف صورة' : 'تغيير الصورة'}
+                        </span>
+                      </span>
+                    </button>
+
+                    {/* شريط البطاقة: الاسم والعدّ + إجراءات ظاهرة دائماً (لا تعتمد على المرور) */}
+                    <div className="flex items-center justify-between gap-2 border-t border-gray-200 px-3 py-2.5">
+                      <div className="min-w-0 text-right">
+                        <h3 className="truncate text-[14px] font-bold text-gray-900 sm:text-[15px]">{category.name}</h3>
+                        <p className="mt-0.5 truncate text-[11.5px] text-gray-500">
+                          {category.products_count || 0} منتج
+                          {category.parentName ? ` · ضمن ${category.parentName}` : ''}
+                        </p>
+                      </div>
+                      <div className="flex shrink-0 items-center gap-1">
+                        <button
+                          onClick={() => openModal('category', category)}
+                          aria-label={`تعديل ${category.name}`}
+                          className="flex h-8 w-8 items-center justify-center rounded-full text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-900 cursor-pointer"
+                        >
+                          <Pencil className="h-3.5 w-3.5" strokeWidth={1.75} />
+                        </button>
+                        <button
+                          onClick={() => handleDelete('categories', category.id)}
+                          aria-label={`حذف ${category.name}`}
+                          className="flex h-8 w-8 items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-red-50 hover:text-red-600 cursor-pointer"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" strokeWidth={1.75} />
+                        </button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
 
         {/* Orders Tab */}
         {activeTab === 'orders' && (
           <div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">إدارة الطلبات</h2>
+            <div className="flex items-center justify-between gap-3 mb-6">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <h2 className="text-2xl font-bold text-gray-900">إدارة الطلبات</h2>
+                {newOrdersCount > 0 && (
+                  <span className="inline-flex items-center h-6 px-2 rounded-full bg-gray-900 text-white text-xs font-bold leading-none shrink-0">
+                    {newOrdersCount} جديد
+                  </span>
+                )}
+              </div>
+              {newOrdersCount > 0 && (
+                <button
+                  onClick={markAllOrdersSeen}
+                  className="shrink-0 text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors cursor-pointer"
+                >
+                  تحديد الكل كمقروء
+                </button>
+              )}
+            </div>
 
             {loading ? (
               <div className="flex justify-center py-12">
@@ -1202,10 +1605,24 @@ const AdminPanel = ({ user, setUser }) => {
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
-                      {orders.map((order) => (
-                        <tr key={order.id} className="hover:bg-gray-50">
-                          <td className="px-6 py-3 whitespace-nowrap text-sm font-medium text-gray-900">
-                            #{order.id?.toString().substring(0, 8)}
+                      {orders.map((order) => {
+                        const isNew = !seenOrders.has(order.id);
+                        return (
+                        <tr
+                          key={order.id}
+                          onClick={() => markOrderSeen(order.id)}
+                          className={`transition-colors ${isNew ? 'bg-gray-50 hover:bg-gray-100' : 'hover:bg-gray-50'}`}
+                        >
+                          <td className={`px-6 py-3 whitespace-nowrap text-sm font-medium text-gray-900 ${isNew ? 'border-r-2 border-gray-900' : ''}`}>
+                            <div className="flex items-center gap-2">
+                              <span dir="ltr">#{order.id?.toString().substring(0, 8)}</span>
+                              {isNew && (
+                                <span className="inline-flex items-center gap-1 h-5 px-1.5 rounded-full bg-gray-900 text-white text-[10px] font-bold leading-none shrink-0">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-white"></span>
+                                  جديد
+                                </span>
+                              )}
+                            </div>
                           </td>
                           <td className="px-6 py-3 whitespace-nowrap text-sm text-gray-900 font-medium">
                             <div className="flex items-center gap-2">
@@ -1255,8 +1672,11 @@ const AdminPanel = ({ user, setUser }) => {
                               ))}
                             </select>
                           </td>
-                          <td className="px-6 py-3 whitespace-nowrap text-sm text-gray-700 font-medium">
-                            {new Date(order.created_at).toLocaleDateString('ar-SA')}
+                          <td
+                            className="px-6 py-3 whitespace-nowrap text-sm text-gray-700 font-medium"
+                            title={new Date(order.created_at).toLocaleString('ar-IQ')}
+                          >
+                            {timeAgo(order.created_at)}
                           </td>
                           <td className="px-6 py-3 whitespace-nowrap text-sm">
                             <button 
@@ -1267,18 +1687,38 @@ const AdminPanel = ({ user, setUser }) => {
                             </button>
                           </td>
                         </tr>
-                      ))}
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>
 
                 {/* Mobile View */}
                 <div className="md:hidden divide-y divide-gray-200">
-                  {orders.map((order) => (
-                    <div key={order.id} className="p-4 flex flex-col space-y-3">
-                      <div className="flex justify-between items-center">
-                        <span className="text-xs font-bold text-gray-500">#{order.id?.toString().substring(0, 8)}</span>
-                        <span className="text-xs text-gray-400">{new Date(order.created_at).toLocaleDateString('ar-SA')}</span>
+                  {orders.map((order) => {
+                    const isNew = !seenOrders.has(order.id);
+                    return (
+                    <div
+                      key={order.id}
+                      onClick={() => markOrderSeen(order.id)}
+                      className={`p-4 flex flex-col space-y-3 transition-colors ${isNew ? 'bg-gray-50 border-r-2 border-gray-900' : ''}`}
+                    >
+                      <div className="flex justify-between items-center gap-2">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <span className="text-xs font-bold text-gray-500" dir="ltr">#{order.id?.toString().substring(0, 8)}</span>
+                          {isNew && (
+                            <span className="inline-flex items-center gap-1 h-[18px] px-1.5 rounded-full bg-gray-900 text-white text-[10px] font-bold leading-none shrink-0">
+                              <span className="w-1.5 h-1.5 rounded-full bg-white"></span>
+                              جديد
+                            </span>
+                          )}
+                        </div>
+                        <span
+                          className="text-xs text-gray-400 shrink-0"
+                          title={new Date(order.created_at).toLocaleString('ar-IQ')}
+                        >
+                          {timeAgo(order.created_at)}
+                        </span>
                       </div>
                       <div className="flex flex-col space-y-1">
                         <div className="text-sm font-bold text-gray-900">{order.customer_name || 'غير محدد'}</div>
@@ -1309,8 +1749,28 @@ const AdminPanel = ({ user, setUser }) => {
                         عرض التفاصيل
                       </button>
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
+
+                {ordersNext && (
+                  <div className="p-4 flex justify-center border-t border-gray-200">
+                    <button
+                      onClick={loadMoreOrders}
+                      disabled={ordersLoadingMore}
+                      className="inline-flex items-center gap-2 h-10 px-5 rounded-lg text-sm font-medium border border-gray-200 bg-white text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                    >
+                      {ordersLoadingMore ? (
+                        <>
+                          <RefreshCw className="h-4 w-4 animate-spin" strokeWidth={1.75} />
+                          جاري التحميل…
+                        </>
+                      ) : (
+                        <>عرض المزيد ({orders.length} من {ordersTotal})</>
+                      )}
+                    </button>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -1687,61 +2147,27 @@ const AdminPanel = ({ user, setUser }) => {
                   />
                 </div>
 
-                {/* صورة القسم — تظهر في بطاقة القسم بالمتجر */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    صورة القسم
-                  </label>
-                  <div className="flex items-center gap-4">
-                    {categoryForm.image_url ? (
-                      <div className="relative w-24 h-24 shrink-0 rounded-lg overflow-hidden border border-gray-200 bg-gray-50">
-                        <img src={categoryForm.image_url} alt="" className="w-full h-full object-cover" />
-                        <button
-                          type="button"
-                          onClick={() => setCategoryForm({ ...categoryForm, image_url: '' })}
-                          className="absolute top-1 left-1 w-6 h-6 rounded-full bg-black/60 text-white text-xs flex items-center justify-center hover:bg-black"
-                          aria-label="إزالة الصورة"
-                        >
-                          ✕
-                        </button>
-                      </div>
-                    ) : (
-                      <div className="w-24 h-24 shrink-0 rounded-lg border border-dashed border-gray-300 bg-gray-50 flex items-center justify-center text-gray-400 text-xs">
-                        لا صورة
-                      </div>
-                    )}
-                    <div className="flex-1">
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={async (e) => {
-                          const file = e.target.files?.[0];
-                          if (!file) return;
-                          setUploadingCategoryImage(true);
-                          const url = await handleImageUpload(file);
-                          setUploadingCategoryImage(false);
-                          if (url) {
-                            setCategoryForm((prev) => ({ ...prev, image_url: url }));
-                          } else {
-                            alert('فشل رفع الصورة، حاول مرة أخرى');
-                          }
-                          e.target.value = '';
-                        }}
-                        className="block w-full text-sm text-gray-600 file:ml-3 file:py-2 file:px-4 file:rounded-md file:border-0 file:bg-primary-900 file:text-white file:cursor-pointer hover:file:bg-black"
-                      />
-                      {uploadingCategoryImage && (
-                        <p className="text-xs text-gray-500 mt-1">جاري رفع الصورة...</p>
-                      )}
-                      <input
-                        type="url"
-                        placeholder="أو الصق رابط صورة مباشر"
-                        value={categoryForm.image_url}
-                        onChange={(e) => setCategoryForm({ ...categoryForm, image_url: e.target.value })}
-                        className="mt-2 w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-primary-500 focus:border-primary-500"
-                        dir="ltr"
+                {/* الصورة تُدار من بطاقة القسم في اللوح — مكان واحد لكل مهمة */}
+                <div className="flex items-start gap-3 rounded-xl bg-gray-50 p-3">
+                  {categoryForm.image_url ? (
+                    <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-white ring-1 ring-gray-200">
+                      <img
+                        src={categoryForm.image_url}
+                        alt=""
+                        onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.style.display = 'none'; }}
+                        className="h-full w-full object-cover"
                       />
                     </div>
-                  </div>
+                  ) : (
+                    <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-lg bg-white text-gray-300 ring-1 ring-gray-200">
+                      <ImageOff className="h-5 w-5" strokeWidth={1.5} />
+                    </div>
+                  )}
+                  <p className="text-[12.5px] leading-6 text-gray-600">
+                    {editingItem
+                      ? 'لتغيير صورة القسم، أغلق هذه النافذة واضغط على صورة القسم في اللوح — أو اسحب صورة وأفلتها على بطاقته مباشرة.'
+                      : 'بعد حفظ القسم ستظهر بطاقته في اللوح، واضغط عليها لإضافة صورته.'}
+                  </p>
                 </div>
 
                 <div className="flex justify-end space-x-4 space-x-reverse pt-4">
@@ -1903,6 +2329,132 @@ const AdminPanel = ({ user, setUser }) => {
         </div>
       )}
 
+      {/* ===== لوحة صورة القسم — رفع من الجهاز، أو لصق رابط ===== */}
+      {imageSheetCategory && (
+        <div
+          className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 backdrop-blur-sm sm:items-center sm:p-4"
+          onClick={closeImageSheet}
+        >
+          <div
+            className="max-h-[88vh] w-full overflow-y-auto rounded-t-3xl bg-white shadow-2xl ring-1 ring-gray-200 sm:max-w-[560px] sm:rounded-3xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4">
+              <div className="min-w-0">
+                <h3 className="truncate text-[16px] font-bold text-gray-900">صورة «{imageSheetCategory.name}»</h3>
+                <p className="mt-0.5 text-[12px] text-gray-500">تظهر في بطاقة القسم داخل المتجر</p>
+              </div>
+              <button
+                onClick={closeImageSheet}
+                aria-label="إغلاق"
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-900 cursor-pointer"
+              >
+                <X className="h-5 w-5" strokeWidth={2} />
+              </button>
+            </div>
+
+            <div className="space-y-4 p-5">
+              {/* مساحة المعاينة — وهي نفسها هدف الإفلات */}
+              <div
+                onDragOver={(e) => {
+                  if (!e.dataTransfer?.types?.includes('Files')) return;
+                  e.preventDefault();
+                  setDragOverCategoryId(imageSheetCategory.id);
+                }}
+                onDragLeave={() => setDragOverCategoryId(null)}
+                onDrop={(e) => {
+                  if (!e.dataTransfer?.types?.includes('Files')) return;
+                  e.preventDefault();
+                  e.stopPropagation();
+                  uploadCategoryImage(imageSheetCategory.id, e.dataTransfer.files?.[0]);
+                }}
+                className={`relative flex aspect-square max-h-[40vh] w-full items-center justify-center overflow-hidden rounded-2xl transition-colors ${
+                  dragOverCategoryId === imageSheetCategory.id
+                    ? 'bg-[#F4EFE4] ring-2 ring-[#9C7A34]'
+                    : 'bg-gray-50 ring-1 ring-gray-200'
+                }`}
+                style={
+                  sheetPreview || getCategoryImage(imageSheetCategory)
+                    ? undefined
+                    : { backgroundImage: 'repeating-linear-gradient(45deg, #EEEEF0 0 1px, transparent 1px 7px)' }
+                }
+              >
+                {sheetPreview || getCategoryImage(imageSheetCategory) ? (
+                  <img
+                    src={sheetPreview || getCategoryImage(imageSheetCategory)}
+                    alt=""
+                    onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <span className="flex flex-col items-center gap-2 text-gray-400">
+                    <ImageOff className="h-7 w-7" strokeWidth={1.5} />
+                    <span className="text-[13px] font-medium">لا توجد صورة بعد</span>
+                  </span>
+                )}
+                {uploadingCategoryImage && (
+                  <span className="absolute inset-0 flex items-center justify-center bg-white/80 text-[13px] font-semibold text-gray-900">
+                    جارٍ الرفع…
+                  </span>
+                )}
+              </div>
+
+              {/* الرفع من الجهاز — المسار الأساسي */}
+              <label className="flex h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-gray-900 text-[13.5px] font-semibold text-white transition-colors hover:bg-black">
+                <Upload className="h-4 w-4" strokeWidth={2} />
+                اختيار صورة من الجهاز
+                <input
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp,image/gif"
+                  className="sr-only"
+                  disabled={uploadingCategoryImage}
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    e.target.value = ''; // يسمح بإعادة اختيار الملف نفسه بعد فشل
+                    uploadCategoryImage(imageSheetCategory.id, file);
+                  }}
+                />
+              </label>
+              <p className="text-center text-[11.5px] text-gray-400">
+                أو اسحب الصورة وأفلتها فوق البطاقة · PNG، JPG، WEBP · حتى ٥ ميغابايت
+              </p>
+
+              {/* لصق رابط — للحالات التي تكون فيها الصورة مرفوعة مسبقاً */}
+              <div className="border-t border-gray-100 pt-4">
+                <label className="mb-1.5 block text-[12.5px] font-medium text-gray-600">أو الصق رابط صورة</label>
+                <div className="flex gap-2">
+                  <input
+                    type="url"
+                    dir="ltr"
+                    value={sheetUrlDraft}
+                    onChange={(e) => setSheetUrlDraft(e.target.value)}
+                    placeholder="https://…"
+                    className="h-10 min-w-0 flex-1 rounded-lg border border-gray-300 px-3 text-[16px] focus:border-gray-900 focus:ring-gray-900"
+                  />
+                  <button
+                    onClick={submitSheetUrl}
+                    disabled={sheetBusy || uploadingCategoryImage}
+                    className="h-10 shrink-0 rounded-lg bg-gray-900 px-4 text-[13px] font-semibold text-white transition-colors hover:bg-black disabled:opacity-50 cursor-pointer"
+                  >
+                    {sheetBusy ? 'جارٍ الحفظ…' : 'حفظ'}
+                  </button>
+                </div>
+              </div>
+
+              {getCategoryImage(imageSheetCategory) && (
+                <button
+                  onClick={clearCategoryImage}
+                  disabled={sheetBusy || uploadingCategoryImage}
+                  className="text-[12.5px] font-medium text-red-600 hover:underline disabled:opacity-50 cursor-pointer"
+                >
+                  إزالة الصورة الحالية
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Banner Modal */}
       {showBannerModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={closeBannerModal}>
@@ -2061,113 +2613,6 @@ const AdminPanel = ({ user, setUser }) => {
         </div>
       )}
 
-      {/* Notifications Tab */}
-      {activeTab === 'notifications' && (
-        <div className="w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-8">
-          {loading ? (
-            <div className="flex justify-center py-16">
-              <div className="animate-spin rounded-full h-10 w-10 border-2 border-gray-200 border-t-gray-900"></div>
-            </div>
-          ) : notifications.length === 0 ? (
-            <div className="bg-white rounded-2xl border border-gray-200 flex flex-col items-center justify-center text-center py-16 px-6">
-              <div className="w-14 h-14 rounded-2xl bg-gray-100 flex items-center justify-center text-gray-400 mb-4">
-                <Bell className="h-7 w-7" strokeWidth={1.5} />
-              </div>
-              <h3 className="text-base font-bold text-gray-900 mb-1">لا توجد إشعارات</h3>
-              <p className="text-sm text-gray-500">ستظهر هنا الطلبات الجديدة والتنبيهات عند وصولها</p>
-            </div>
-          ) : (
-            <div className="space-y-2.5">
-              {notifications.map((notification) => {
-                const meta = NOTIF_META[notification.type] || NOTIF_META.default;
-                const NotifIcon = meta.Icon;
-                return (
-                  <div
-                    key={notification.id}
-                    onClick={() => { if (!notification.is_read) markAsRead(notification.id); }}
-                    className={`relative bg-white rounded-2xl border transition-colors p-4 ${
-                      notification.is_read
-                        ? 'border-gray-200'
-                        : 'border-gray-300 bg-gray-50/60 cursor-pointer hover:bg-gray-50'
-                    }`}
-                  >
-                    {!notification.is_read && (
-                      <span className="absolute top-4 right-4 w-2 h-2 rounded-full bg-red-500" aria-label="غير مقروء"></span>
-                    )}
-                    <div className="flex items-start gap-3.5">
-                      {/* أيقونة النوع */}
-                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${meta.tint}`}>
-                        <NotifIcon className="h-5 w-5" strokeWidth={1.75} />
-                      </div>
-
-                      <div className="flex-1 min-w-0 pl-3">
-                        <div className="flex items-baseline justify-between gap-3">
-                          <h4 className={`text-sm truncate ${notification.is_read ? 'font-semibold text-gray-800' : 'font-bold text-gray-900'}`}>
-                            {notification.title}
-                          </h4>
-                          <span
-                            className="shrink-0 text-[11px] text-gray-400"
-                            title={new Date(notification.created_at).toLocaleString('ar-IQ')}
-                          >
-                            {timeAgo(notification.created_at)}
-                          </span>
-                        </div>
-                        <p className="mt-1 text-sm text-gray-600 leading-relaxed">{notification.message}</p>
-
-                        {notification.type === 'new_order' && notification.data && (
-                          <div className="mt-2.5 inline-flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs bg-gray-50 border border-gray-100 rounded-xl px-3 py-2">
-                            <span className="text-gray-500">العميل: <span className="text-gray-800 font-medium">{notification.data.customer_name || '—'}</span></span>
-                            <span className="text-gray-500">المبلغ: <span className="text-gray-900 font-bold tabular-nums">{Number(notification.data.total || 0).toLocaleString('en-US')} د.ع</span></span>
-                            {notification.data.order_id && (
-                              <span className="text-gray-400 font-mono" dir="ltr">#{String(notification.data.order_id).slice(0, 8)}</span>
-                            )}
-                          </div>
-                        )}
-
-                        {notification.type === 'new_order' && (
-                          <div className="mt-3">
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                if (!notification.is_read) markAsRead(notification.id);
-                                setActiveTab('orders');
-                              }}
-                              className="inline-flex items-center gap-1.5 text-xs font-semibold text-gray-900 hover:text-black transition-colors cursor-pointer"
-                            >
-                              عرض الطلبات
-                              <ArrowLeft className="h-3.5 w-3.5" strokeWidth={2} />
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-
-              {/* تحميل المزيد — الإشعارات تُجلب ٢٠ لكل صفحة */}
-              {notifNext && (
-                <div className="pt-2 flex justify-center">
-                  <button
-                    onClick={loadMoreNotifications}
-                    disabled={notifLoadingMore}
-                    className="inline-flex items-center gap-2 h-10 px-5 rounded-lg text-sm font-medium border border-gray-200 bg-white text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
-                  >
-                    {notifLoadingMore ? (
-                      <>
-                        <RefreshCw className="h-4 w-4 animate-spin" strokeWidth={1.75} />
-                        جاري التحميل…
-                      </>
-                    ) : (
-                      <>عرض المزيد ({notifications.length} من {notifTotal})</>
-                    )}
-                  </button>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-      )}
 
       {/* Order Details Modal */}
       {showOrderDetailsModal && selectedOrder && (
