@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, Eye, ShoppingCart, Clock } from 'lucide-react';
 import { formatCurrency } from '../utils/currency';
 import { getScrollKey, navigateWithScrollSave } from '../utils/scrollRestore';
+import { PRODUCT_IMAGE_FALLBACK } from '../utils/imageFallback';
 
 export const ProductCard = ({ product, onAddToCart, categoryId = null }) => {
   const navigate = useNavigate();
@@ -33,11 +34,11 @@ export const ProductCard = ({ product, onAddToCart, categoryId = null }) => {
       {/* صورة المنتج */}
       <div className={`relative h-44 sm:h-56 md:h-64 bg-white overflow-hidden shrink-0 border-b border-gray-50 transition-opacity duration-300 ${product.stock === 0 ? 'opacity-40' : 'opacity-100'}`}>
         <img
-          src={product.image || product.main_image_url || '/placeholder-product.png'}
+          src={product.image || product.main_image_url || PRODUCT_IMAGE_FALLBACK}
           alt={product.name}
           className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-700 p-3"
           loading="lazy"
-          onError={(e) => { e.target.onerror = null; e.target.src = 'https://media.voroiq.com/placeholder-product.png'; }}
+          onError={(e) => { e.target.onerror = null; e.target.src = PRODUCT_IMAGE_FALLBACK; }}
         />
 
         {(product.is_on_sale || discountPct > 0) && discountPct > 0 && (

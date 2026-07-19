@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { CreditCard, Phone } from 'lucide-react';
 import { formatCurrency, getFreeShippingThreshold } from '../utils/currency';
+import { PRODUCT_IMAGE_FALLBACK } from '../utils/imageFallback';
 import { api } from '../api';
 
 const Cart = ({ cart, onCartChange, onClose, handleCheckout }) => {
@@ -137,7 +138,12 @@ const Cart = ({ cart, onCartChange, onClose, handleCheckout }) => {
             cart.map(item => (
               <div key={item.id} className="flex items-center justify-between py-2 border-b">
                 <div className="flex items-center">
-                  <img src={item.image || '/placeholder-product-small.png'} alt={item.name} className="w-16 h-16 object-cover rounded-md mr-4" />
+                  <img
+                    src={item.image || PRODUCT_IMAGE_FALLBACK}
+                    alt={item.name}
+                    onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = PRODUCT_IMAGE_FALLBACK; }}
+                    className="w-16 h-16 object-cover rounded-md mr-4"
+                  />
                   <div>
                     <p className="font-semibold">{item.name}</p>
                     <p className="text-sm text-gray-600">{formatCurrency(item.price)}</p>
