@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 
 import { api } from '../api';
+import { formatCurrency } from '../utils/currency';
 import NotificationManager from '../components/NotificationManager';
 
 // وقت نسبي مقروء ("قبل ٥ دقائق") — أوضح من طابع زمني كامل في قائمة إشعارات
@@ -860,7 +861,9 @@ const AdminPanel = ({ user, setUser }) => {
           description: item.description,
           price: item.price.toString(),
           stock: item.stock.toString(),
-          category: item.category?.id || '',
+          // الـAPI يُرجع category كرقم لا ككائن، فـ item.category?.id تعطي undefined
+          // وتُفرَّغ القائمة عند كل تعديل — فيُحفظ المنتج بلا قسم دون أن ينتبه أحد
+          category: item.category?.id ?? item.category ?? '',
           discount: item.discount?.toString() || '',
           brand: item.brand || '',
           show_on_homepage: item.show_on_homepage !== undefined ? item.show_on_homepage : true,
@@ -1198,13 +1201,13 @@ const AdminPanel = ({ user, setUser }) => {
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            {product.category?.name || 'غير محدد'}
+                            {product.category_name || 'غير محدد'}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-bold">
                             {product.price} د.ع
                             {product.discount > 0 && (
                               <span className="text-red-500 text-xs mr-1">
-                                (-{product.discount}%)
+                                (-{formatCurrency(product.discount)})
                               </span>
                             )}
                           </td>
@@ -1262,7 +1265,7 @@ const AdminPanel = ({ user, setUser }) => {
                           />
                           <div className="flex-1 min-w-0">
                             <div className="text-sm font-bold text-gray-900 break-words">{product.name}</div>
-                            <div className="text-xs text-gray-500 truncate">{product.category?.name || 'غير محدد'}</div>
+                            <div className="text-xs text-gray-500 truncate">{product.category_name || 'غير محدد'}</div>
                           </div>
                         </div>
                         <div className="flex justify-between items-center text-sm">
@@ -2310,7 +2313,7 @@ const AdminPanel = ({ user, setUser }) => {
                                 </div>
                               )}
                               <span className="absolute top-2.5 left-2.5 inline-flex items-center rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-semibold text-gray-700 backdrop-blur-sm">
-                                {key === 'home' ? 'الرئيسية' : 'العروض'}
+                                {key === 'home' ? 'الرئيسية' : key === 'offers' ? 'العروض' : 'كل المنتجات'}
                               </span>
                               <span className={`absolute top-2.5 right-2.5 inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-1 rounded-full backdrop-blur-sm ${
                                 banner.is_active ? 'bg-white/90 text-emerald-600' : 'bg-gray-900/80 text-white'
