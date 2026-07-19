@@ -128,7 +128,8 @@ const CategoryProductsSection = ({ category, products, onAddToCart, onViewDetail
   const scrollByPage = (dir) => {
     const el = gridRef.current;
     if (!el) return;
-    el.scrollBy({ left: dir * el.clientWidth * 0.9, behavior: 'smooth' });
+    // صفحة كاملة بالضبط — مع scroll-snap يستقرّ العرض على بداية بطاقة دائماً
+    el.scrollBy({ left: dir * el.clientWidth, behavior: 'smooth' });
   };
 
   if (!products || products.length === 0) return null;
@@ -148,6 +149,12 @@ const CategoryProductsSection = ({ category, products, onAddToCart, onViewDetail
       }
       .voro-carousel > * { scroll-snap-align: start; }
       .voro-carousel::-webkit-scrollbar { display: none; }
+      /* الموبايل: بطاقتان بالضبط، ونقطة التقاط كل بطاقتين حتى ينتقل العرض
+         زوجاً زوجاً فلا يظهر جزء من بطاقة ثالثة */
+      @media (max-width: 767px) {
+        .voro-carousel > * { scroll-snap-align: none; }
+        .voro-carousel > *:nth-child(odd) { scroll-snap-align: start; }
+      }
     `}</style>
     <section className="py-6 bg-white border-b border-gray-100">
       <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8">
@@ -191,7 +198,7 @@ const CategoryProductsSection = ({ category, products, onAddToCart, onViewDetail
               <div
                 key={product.id}
                 data-product-id={product.id}
-                className="flex-shrink-0 w-[46.5%] sm:w-[calc((100%-12px)/2)] md:w-[calc((100%-24px)/3)] lg:w-[calc((100%-36px)/4)] xl:w-[calc((100%-48px)/5)] 2xl:w-[calc((100%-60px)/6)] transition-transform duration-300 active:scale-[0.98]"
+                className="flex-shrink-0 w-[calc((100%-12px)/2)] md:w-[calc((100%-24px)/3)] lg:w-[calc((100%-36px)/4)] xl:w-[calc((100%-48px)/5)] 2xl:w-[calc((100%-60px)/6)] transition-transform duration-300 active:scale-[0.98]"
               >
                 <ProductCard product={product} onAddToCart={onAddToCart} categoryId={category.id} />
               </div>
