@@ -124,7 +124,8 @@ def product_list(request):
     قائمة جميع المنتجات مرتبة حسب display_order
     """
     try:
-        products = Product.objects.all().order_by('display_order', '-created_at')
+        # المنتجات الموقوفة (is_active=False) يجب ألا تظهر للزبون ولا تُشترى
+        products = Product.objects.filter(is_active=True).order_by('display_order', '-created_at')
         print(f"📡 Product list requested. Found {products.count()} products.")
         serializer = ProductSerializer(products, many=True)
         data = serializer.data
@@ -217,7 +218,7 @@ def products_by_category(request, category_id):
     """
     try:
         category = Category.objects.get(id=category_id)
-        products = Product.objects.filter(category=category)
+        products = Product.objects.filter(category=category, is_active=True)
         print(f"Found {products.count()} products in category {category.name}")
         
         # Log products for debugging
@@ -237,7 +238,8 @@ def featured_products(request):
     """
     قائمة المنتجات المميزة
     """
-    products = Product.objects.filter(featured=True)
+    # الحقل اسمه is_featured لا featured — كانت النقطة ترجع 500 عند كل نداء
+    products = Product.objects.filter(is_featured=True, is_active=True)
     serializer = ProductSerializer(products, many=True)
     return Response(serializer.data)
 
@@ -248,7 +250,7 @@ def search_products(request):
     البحث عن المنتجات
     """
     query = request.GET.get('q', '')
-    products = Product.objects.filter(name__icontains=query)
+    products = Product.objects.filter(name__icontains=query, is_active=True)
     serializer = ProductSerializer(products, many=True)
     return Response(serializer.data)
 
