@@ -3,7 +3,7 @@ import { Link, useParams, useNavigate, useSearchParams } from 'react-router-dom'
 import { api, endpoints } from '../api';
 import Footer from '../components/Footer';
 import { ProductCard } from '../components/CategoryProductsSection';
-import { ArrowRight, Archive, Box, ChevronLeft, Package } from 'lucide-react';
+import { ArrowRight, Archive, Box, ChevronLeft, Package, LayoutGrid } from 'lucide-react';
 import BottomTabBar from '../components/BottomTabBar';
 import SiteHeader from '../components/SiteHeader';
 
@@ -32,6 +32,7 @@ const Categories = ({ user, setUser }) => {
   const { id: categoryIdParam } = useParams();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const [allProductsImage, setAllProductsImage] = useState('');
 
   // مصدر الحقيقة الوحيد للقسم المختار هو رابط الصفحة (URL). هكذا يبقى العرض
   // متطابقاً مع العنوان دائماً: /categories = شبكة الأقسام، /categories/:id = منتجات القسم.
@@ -46,8 +47,23 @@ const Categories = ({ user, setUser }) => {
   // تحميل الأقسام والسلة مرّة واحدة عند فتح الصفحة
   useEffect(() => {
     fetchCategories();
+    fetchAllProductsCardImage();
     loadCart();
   }, []);
+
+  // صورة بطاقة "كل المنتجات" — يديرها المشرف من قسم البنرات (placement=all_products)
+  const fetchAllProductsCardImage = async () => {
+    try {
+      const response = await api.get(endpoints.banners, { params: { placement: 'all_products' } });
+      const data = response.data;
+      const list = Array.isArray(data) ? data : (data?.results || []);
+      const first = list.find((b) => b.image_url || b.image);
+      setAllProductsImage(first ? (first.image_url || first.image) : '');
+    } catch (error) {
+      // غياب الصورة ليس خطأً — البطاقة لها شكل بديل أنيق
+      setAllProductsImage('');
+    }
+  };
 
   // جلب المنتجات حسب الوضع: قسم محدّد، أو كل المنتجات، أو لا شيء (شبكة الأقسام)
   useEffect(() => {
@@ -197,6 +213,34 @@ const Categories = ({ user, setUser }) => {
               </div>
             ) : (
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 2xl:grid-cols-6 gap-4 md:gap-6">
+                {/* بطاقة "كل المنتجات" — أول ما تقع عليه العين في RTL.
+                    صورتها تُدار من لوحة الإدارة (البنرات ← بطاقة كل المنتجات) */}
+                <button
+                  onClick={() => navigate('/categories?view=all')}
+                  className="group bg-white rounded-2xl overflow-hidden border border-gray-900/15 hover:border-gray-900/40 hover:shadow-[0_14px_34px_-14px_rgba(0,0,0,0.18)] transition-all duration-300 text-right flex flex-col"
+                >
+                  <div className="relative aspect-square bg-gray-900 overflow-hidden">
+                    {allProductsImage ? (
+                      <img
+                        src={allProductsImage}
+                        alt="كل المنتجات"
+                        loading="lazy"
+                        onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                        className="h-full w-full object-cover opacity-90 transition-transform duration-500 group-hover:scale-105"
+                      />
+                    ) : (
+                      /* بلا صورة: شكل مقصود لا فراغ — شبكة مربّعات تعني "كل شيء" */
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <LayoutGrid className="h-12 w-12 text-white/85" strokeWidth={1.25} />
+                      </div>
+                    )}
+                  </div>
+                  <div className="p-3.5 md:p-4 flex items-center justify-between gap-2">
+                    <h3 className="text-[14px] md:text-[15px] font-bold text-gray-900 line-clamp-1">كل المنتجات</h3>
+                    <ChevronLeft className="h-4 w-4 shrink-0 text-gray-400 transition-all duration-300 group-hover:text-black group-hover:-translate-x-0.5" strokeWidth={2.5} />
+                  </div>
+                </button>
+
                 {categories.map((category) => (
                   <button
                     key={category.id}

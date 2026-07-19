@@ -320,9 +320,14 @@ class Banner(models.Model):
     """Banner/Advertisement model for homepage & offers-page sliders"""
     PLACEMENT_HOME = 'home'
     PLACEMENT_OFFERS = 'offers'
+    # ليست بنراً في سلايدر، بل صورة بطاقة "كل المنتجات" في صفحة الأقسام.
+    # نعيد استخدام هذا النموذج بدل إنشاء نموذج جديد لصورة واحدة: الرفع والتعديل
+    # والحذف كلها جاهزة هنا، ويديرها المشرف من نفس المكان الذي يعرفه.
+    PLACEMENT_ALL_PRODUCTS = 'all_products'
     PLACEMENT_CHOICES = [
         (PLACEMENT_HOME, 'الصفحة الرئيسية'),
         (PLACEMENT_OFFERS, 'صفحة العروض'),
+        (PLACEMENT_ALL_PRODUCTS, 'بطاقة «كل المنتجات» في صفحة الأقسام'),
     ]
 
     title = models.CharField('عنوان الإعلان', max_length=200)

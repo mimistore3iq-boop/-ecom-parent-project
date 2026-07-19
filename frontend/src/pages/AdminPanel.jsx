@@ -2231,7 +2231,8 @@ const AdminPanel = ({ user, setUser }) => {
               {[
                 { key: 'home', label: 'بنرات الصفحة الرئيسية', GroupIcon: Home },
                 { key: 'offers', label: 'بنرات صفحة العروض', GroupIcon: Tag },
-              ].map(({ key, label, GroupIcon }) => {
+                { key: 'all_products', label: 'صورة بطاقة «كل المنتجات»', GroupIcon: LayoutGrid, hint: 'صورة واحدة تكفي — تظهر على بطاقة «كل المنتجات» في صفحة الأقسام.' },
+              ].map(({ key, label, GroupIcon, hint }) => {
                 const group = banners
                   .filter((b) => (b.placement || 'home') === key)
                   .sort((a, b) => (a.display_order ?? 0) - (b.display_order ?? 0));
@@ -2244,7 +2245,9 @@ const AdminPanel = ({ user, setUser }) => {
                         </div>
                         <div>
                           <h3 className="text-[15px] font-bold text-gray-900">{label}</h3>
-                          <p className="mt-0.5 text-xs text-gray-500">رتّب البنرات داخل هذا المكان، وراجِع الحالة والظهور بسرعة.</p>
+                          <p className="mt-0.5 text-xs text-gray-500">
+                            {hint || 'رتّب البنرات داخل هذا المكان، وراجِع الحالة والظهور بسرعة.'}
+                          </p>
                         </div>
                       </div>
                       <span className="self-start text-xs font-medium text-gray-500 bg-gray-100 rounded-full px-2.5 py-1">{group.length} بنر</span>
@@ -2522,6 +2525,7 @@ const AdminPanel = ({ user, setUser }) => {
                     >
                       <option value="home">الصفحة الرئيسية</option>
                       <option value="offers">صفحة العروض</option>
+                      <option value="all_products">بطاقة «كل المنتجات» — صفحة الأقسام</option>
                     </select>
                   </div>
                   {/* الترتيب */}
@@ -2561,7 +2565,11 @@ const AdminPanel = ({ user, setUser }) => {
                 <div className="flex items-center justify-between gap-3">
                   <h4 className="text-sm font-bold text-gray-900">معاينة سريعة</h4>
                   <span className="text-[11px] font-semibold px-2 py-1 rounded-full bg-white border border-gray-200 text-gray-600">
-                    {bannerForm.placement === 'home' ? 'الرئيسية' : 'العروض'}
+                    {bannerForm.placement === 'home'
+                      ? 'الرئيسية'
+                      : bannerForm.placement === 'offers'
+                        ? 'العروض'
+                        : 'كل المنتجات'}
                   </span>
                 </div>
 
