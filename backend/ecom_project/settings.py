@@ -16,7 +16,7 @@ SECRET_KEY = config('SECRET_KEY', default='django-insecure-change-me-in-producti
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=False, cast=bool)
 
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.0.0.0.0,ecom-parent-project.onrender.com').split(',')
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1,ecom-parent-project.onrender.com').split(',')
 
 # Application definition
 DJANGO_APPS = [
@@ -248,7 +248,18 @@ SIMPLE_JWT = {
 }
 
 # CORS Configuration
+#
+# ⚠️ النطاق الحقيقي للمتجر (voroiq.com) يجب أن يبقى هنا دائماً.
+# الـAPI على نطاق مختلف (onrender.com)، فكل نداء من المتجر هو طلب cross-origin.
+# إن غاب النطاق من هذه القائمة يردّ الخادم 200 بشكل طبيعي، لكن المتصفح يرمي
+# الاستجابة لغياب ترويسة Access-Control-Allow-Origin — فتظهر الصفحة سليمة
+# الشكل وفارغة تماماً من المنتجات، بلا أي رسالة خطأ. حدث هذا فعلاً.
 CORS_ALLOWED_ORIGINS = [
+    # نطاقات المتجر المنشور
+    'https://voroiq.com',
+    'https://www.voroiq.com',
+    'https://ecom-parent-project-1.onrender.com',  # Production frontend (Render)
+    # التطوير المحلي
     'http://localhost:3000',
     'http://127.0.0.1:3000',
     'http://localhost:3002',  # Frontend
@@ -259,13 +270,27 @@ CORS_ALLOWED_ORIGINS = [
     'http://127.0.0.1:8000',  # Backend API port
     'http://localhost:8080',  # Alternative port
     'http://127.0.0.1:8080',  # Alternative port
-    'https://ecom-parent-project-1.onrender.com',  # Production frontend
 ]
 
 # Render frontend URL
 RENDER_FRONTEND_URL = config('RENDER_FRONTEND_URL', default='https://ecom-parent-project-1.onrender.com')
 if RENDER_FRONTEND_URL and RENDER_FRONTEND_URL not in CORS_ALLOWED_ORIGINS:
     CORS_ALLOWED_ORIGINS.append(RENDER_FRONTEND_URL)
+
+# نطاقات إضافية دون تعديل كود — من متغيّرات البيئة، مفصولة بفواصل.
+#
+# ندعم الاسمين: CORS_ALLOWED_ORIGINS (وهو المستخدم في render.yaml أصلاً، لكن
+# الإعدادات لم تكن تقرأه إطلاقاً — ضبطه من لوحة Render كان بلا أي أثر) و
+# CORS_EXTRA_ORIGINS. القيم تُضاف إلى القائمة أعلاه ولا تستبدلها، حتى لا يؤدي
+# ضبط المتغيّر إلى إسقاط نطاق المتجر من القائمة عن غير قصد.
+for _env_key in ('CORS_ALLOWED_ORIGINS', 'CORS_EXTRA_ORIGINS'):
+    for _origin in config(_env_key, default='').split(','):
+        _origin = _origin.strip().rstrip('/')
+        if _origin and _origin not in CORS_ALLOWED_ORIGINS:
+            CORS_ALLOWED_ORIGINS.append(_origin)
+
+# طلبات POST/PUT من لوحة الإدارة على النطاق المنشور تحتاج هذه أيضاً
+CSRF_TRUSTED_ORIGINS = [o for o in CORS_ALLOWED_ORIGINS if o.startswith('https://')]
 
 # Allow file:// protocol for local HTML files
 if DEBUG:
